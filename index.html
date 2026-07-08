@@ -3870,7 +3870,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
       <div class="bm-head">
         <div>
           <div class="card-title" id="blast-modal-title">Create SMS Blast</div>
-          <div class="card-sub">Sends from your 10DLC numbers at carrier-safe pace.</div>
+          
         </div>
         <button class="bm-optbtn" type="button" id="bm-opt-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8z"/></svg>
@@ -3983,7 +3983,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
               <button type="button" class="on" role="tab" aria-selected="true" data-bmode="once">Send once</button>
               <button type="button" role="tab" aria-selected="false" data-bmode="drip">Sequence</button>
             </div>
-            <span class="bm-hint bm-drip-only">Steps go to everyone in the audience below — step 1 sends first, each later step waits the delay you set. Quiet hours &amp; opt-outs are always respected.</span>
+            <span class="bm-hint bm-drip-only">Steps go to everyone in the audience below — step 1 sends first, each later step waits the delay you set.</span>
           </div>
 
           <!-- 2. Message (one-time) -->
@@ -4154,7 +4154,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
                   <div style="font-size:12.5px;color:var(--muted)">Drop a CSV with a <b>phone</b> column here, or <span style="color:var(--accent);font-weight:600;text-decoration:underline">choose a file</span></div>
                 </div>
                 <div class="bm-csv-status" style="margin-top:8px;font-size:12.5px;color:var(--muted);display:none"></div>
-                <span class="bm-hint">We import the file into your contacts, then this blast sends to exactly those. Opt-outs are still skipped and your consent confirmation applies.</span>
+                <span class="bm-hint">We import the file into your contacts, then this blast sends to exactly those.</span>
               </div>
 
               <!-- Filter -->
@@ -4256,7 +4256,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
             </div>
             <label class="bm-smart" id="bm-smart">
               <span class="bm-switch"><input type="checkbox" id="bm-smart-cb"><span class="bm-switch-tr"></span></span>
-              <span class="bm-smart-txt"><b>Smart Scheduling</b><span>AI learns when each contact is most responsive and staggers delivery into their best window. Lifts reply rates by up to 40% on lists with enough history.</span></span>
+              <span class="bm-smart-txt"><b>Smart Scheduling</b><span>AI learns when each contact is most responsive and staggers delivery into their best window.</span></span>
             </label>
             <div class="bm-smart-note" id="bm-smart-note" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3z"/></svg>
@@ -4323,7 +4323,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
                   <button type="button" class="bm-day" data-day>Sat</button>
                   <button type="button" class="bm-day" data-day>Sun</button>
                 </div>
-                <span class="bm-hint">Anything queued outside the window waits for the next allowed slot. Quiet-hours &amp; per-contact timezone still apply on top.</span>
+                <span class="bm-hint">Anything queued outside the window waits for the next allowed slot.</span>
               </div>
 
               <label class="bm-check"><input type="checkbox" id="bm-rec-cb">Repeat <small>auto-resend on a cadence</small></label>
@@ -4392,7 +4392,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
               </div>
               <textarea class="blast-textarea bm-fu-tx" id="bm-fu-msg" spellcheck="false" placeholder="Your follow-up message…"></textarea>
               <div class="bm-fu-foot">
-                <span class="bm-hint">Only sends to contacts who haven't replied. Opt-outs are excluded automatically.</span>
+                <span class="bm-hint">Only sends to contacts who haven't replied.</span>
                 <a class="bm-fu-link" href="#" onclick="var b=document.querySelector('#blast-modal .bm-modetabs button[data-bmode=drip]');if(b)b.click();return false;">Need multiple steps? Build a sequence →</a>
               </div>
             </div>
@@ -4419,7 +4419,7 @@ table:has(tr.tbl-empty-hero) thead{display:none!important}
               </select>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
-            <span class="bm-hint" id="bm-from-hint">Picks a sending number whose area code matches each contact — local numbers get the highest answer &amp; reply rates.</span>
+            <span class="bm-hint" id="bm-from-hint">Picks a sending number whose area code matches each contact.</span>
           </div>
 
           </div><!-- /#bm-more -->
@@ -12243,7 +12243,7 @@ makeFB({
   var sel=document.getElementById('bm-from'), hint=document.getElementById('bm-from-hint');
   if(!sel||!hint) return;
   var FROM={
-    local:"Picks a sending number whose area code matches each contact — local numbers get the highest answer &amp; reply rates.",
+    local:"Picks a sending number whose area code matches each contact.",
     deliverability:"Rotates across your number pool and paces volume per number to protect reputation and dodge carrier spam flags.",
     even:"Spreads the blast evenly so every number in the pool sends roughly the same volume — keeps all numbers warm.",
     random:"Assigns a pool number at random to each contact — simple distribution, no area-code matching.",
