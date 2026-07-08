@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New SMS Blast — ReadySMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===================================================================
+   REAL ReadySMS design tokens + component styles, extracted verbatim
+   from the live app (pages-preview/index.html): :root vars, .card,
+   .card-head, .seg, .blast-* atoms, .set-toggle/.set-track, .bm-*,
+   .rds fallback selects, phone preview. Light mode only. Only small
+   additions live under "PROTO additions".
+   =================================================================== */
+:root{
+  --bg:#FCFCFD;
+  --bg-soft:#F7F8FA;
+  --card:#FFFFFF;
+  --hairline:#EAEBEF;
+  --hairline-strong:#E2E4E9;
+  --ink:#1A1A2E;
+  --ink-2:#3F4150;
+  --muted:#6F7287;
+  --faint:#6F7287;
+  --accent:#2563EB;
+  --accent-deep:#1D4ED8;
+  --accent-tint:#EFF4FF;
+  --green:#1F7A4D;
+  --green-tint:#EBF6F0;
+  --amber:#9A6700;
+  --amber-tint:#FBF3E4;
+  --red:#B3403E;
+  --red-tint:#FBEFEE;
+  --blue-tint:#EDF2FB;
+  --shadow:0 1px 2px rgba(26,26,46,.04), 0 4px 16px rgba(26,26,46,.04);
+  --shadow-sm:0 1px 2px rgba(26,26,46,.05);
+  --r:10px;
+  --r-sm:8px;
+  --r-md:12px;
+  --ai-grad:linear-gradient(135deg,#2563eb,#0ea5e9);
+  --ai-strip:linear-gradient(90deg,#2563eb,#0ea5e9,#06b6d4);
+  --ai-grad-soft:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));
+  --ai-grad-shadow:0 2px 6px rgba(37,99,235,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:rgba(120,130,150,.32) transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(120,130,150,.32);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(120,130,150,.55);background-clip:padding-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:'cv05','cv11','ss01';
+}
+svg{display:block}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit;transition:background-color .11s ease,border-color .11s ease,color .11s ease,box-shadow .12s ease}
+[hidden]{display:none!important}
+
+/* ===== Cards / headers ===== */
+.card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px 0}
+.card-title{font-size:14.5px;font-weight:600;letter-spacing:-.012em}
+.card-sub{font-size:12px;color:var(--faint);font-weight:450;margin-top:1px}
+.ch-spacer{flex:1}
+
+/* ===== Segmented control ===== */
+.seg{display:inline-flex;background:var(--bg-soft);border:1px solid var(--hairline);border-radius:8px;padding:2px;gap:1px}
+.seg button{padding:5px 13px;border-radius:6px;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:-.004em;transition:background .12s ease,color .12s ease,box-shadow .12s ease;border:1px solid transparent}
+.seg button.on{background:#fff;color:var(--ink);font-weight:550;box-shadow:var(--shadow-sm);border:1px solid var(--hairline)}
+@media(max-width:1023px){
+  .seg{max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex:0 0 auto;white-space:nowrap}
+}
+
+/* ===== Blast form atoms ===== */
+.blast-label{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:-.01em;margin-bottom:6px;display:block}
+.bm-req{color:var(--accent);font-weight:700}
+.bm-input{width:100%;height:36px;padding:0 12px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);box-sizing:border-box;outline:none;transition:border-color .15s,box-shadow .15s}
+.bm-input::placeholder{color:var(--faint)}
+.bm-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-select-wrap{position:relative;min-width:0}
+.blast-select-wrap > svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--faint)}
+.blast-select{appearance:none;-webkit-appearance:none;width:100%;height:36px;padding:0 32px 0 12px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;outline:none}
+.blast-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-count-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;background:var(--blue-tint);color:var(--accent-deep);border-radius:999px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.blast-count-chip svg{color:var(--accent)}
+
+/* Message toolbar + counter */
+.blast-msg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.blast-msg-head .blast-label{margin-bottom:0}
+.blast-tools{display:flex;align-items:center;gap:4px}
+.blast-tool{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--hairline);border-radius:6px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+.blast-tool:hover{background:var(--bg-soft);color:var(--ink-2);border-color:var(--hairline-strong)}
+.blast-tool .blast-merge-glyph{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--accent);line-height:1}
+.blast-tool svg{width:13px;height:13px}
+.blast-tool-ai{color:#fff;border:0;background:var(--ai-grad);box-shadow:0 2px 7px rgba(37,99,235,.26)}
+.blast-tool-ai svg{color:#fff;stroke:#fff}
+.blast-tool-ai:hover{color:#fff;background:var(--ai-grad);box-shadow:0 3px 10px rgba(37,99,235,.34)}
+.blast-textarea{width:100%;min-height:108px;resize:vertical;padding:10px 12px;font:inherit;font-size:13.5px;line-height:1.55;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);outline:none;box-sizing:border-box}
+.blast-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-counter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.blast-counter b{color:var(--muted);font-weight:600}
+
+/* AI compose card */
+.bm-ai{border:1px solid var(--hairline-strong);background:var(--card);border-radius:var(--r);overflow:hidden}
+.bm-ai-head{display:flex;align-items:center;gap:9px;padding:12px 14px 10px;font-size:13px;font-weight:650;color:var(--ink)}
+.bm-ai-mark{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--ai-grad);flex:none;box-shadow:var(--ai-grad-shadow)}
+.bm-ai-mark svg{width:13px;height:13px;stroke:#fff}
+.bm-ai-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.bm-ai-prompt{width:100%;box-sizing:border-box;min-height:54px;resize:vertical;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--card);padding:9px 11px;font:inherit;font-size:13px;line-height:1.5;color:var(--ink);outline:none}
+.bm-ai-prompt::placeholder{color:var(--faint)}
+.bm-ai-prompt:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.bm-ai-genrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bm-ai-gen{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:#fff;background:var(--ai-grad);border:1px solid var(--accent-deep);border-radius:var(--r-sm);cursor:pointer;box-shadow:var(--shadow-sm)}
+.bm-ai-gen:hover{background:var(--accent-deep)}
+.bm-ai-gen svg{width:13px;height:13px;stroke:currentColor}
+.bm-ai-quick{font-size:11px;color:var(--faint)}
+
+/* Recipients */
+.bm-rtop{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bm-rtop .blast-label{margin-bottom:0}
+.bm-rtop .ch-spacer{flex:1}
+.bm-rtabs{flex-wrap:wrap}
+.bm-rpanes{margin-top:10px}
+.bm-rpane{display:flex;flex-direction:column;gap:8px}
+.bm-hint{font-size:12px;color:var(--faint);line-height:1.5}
+.bm-pick-list{display:flex;flex-direction:column;border:1px solid var(--hairline);border-radius:var(--r-sm);overflow:hidden;background:var(--card)}
+.bm-pick-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--hairline);cursor:pointer;font-size:13px;color:var(--ink-2)}
+.bm-pick-row:last-child{border-bottom:none}
+.bm-pick-row:hover{background:var(--bg-soft)}
+.bm-pick-row input{accent-color:var(--accent);width:14px;height:14px;flex:none;margin:0;cursor:pointer}
+.bm-pick-name{font-weight:600;color:var(--ink);letter-spacing:-.005em}
+.bm-pick-meta{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.bm-pick-meta b{font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.bm-filter-row{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
+.bm-filter-count{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--blue-tint);border:1px solid #DDE7FA;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;color:var(--accent-deep);font-variant-numeric:tabular-nums}
+.bm-filter-count svg{color:var(--accent);flex:none}
+.bm-csv{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 16px;border:1.5px dashed var(--hairline-strong);border-radius:var(--r-sm);background:var(--bg-soft);color:var(--muted);font-size:12.5px;cursor:pointer}
+.bm-csv:hover{border-color:var(--accent);color:var(--ink-2)}
+.bm-csv svg{width:22px;height:22px;stroke:var(--faint)}
+
+/* set-toggle switch (real) */
+.set-toggle{position:relative;width:42px;height:25px;flex:none;display:inline-block}
+.set-toggle input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.set-track{position:absolute;inset:0;border-radius:999px;background:var(--hairline-strong);transition:background .18s ease;pointer-events:none}
+.set-track::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(26,26,46,.22),0 0 0 .5px rgba(26,26,46,.05);transition:transform .18s ease}
+.set-toggle input:checked + .set-track{background:var(--green)}
+.set-toggle input:checked + .set-track::after{transform:translateX(17px)}
+.set-toggle input:focus-visible + .set-track{box-shadow:0 0 0 3px var(--accent-tint)}
+
+/* setting rows */
+.set-rows{display:flex;flex-direction:column}
+.set-row{display:flex;align-items:center;gap:16px;padding:16px 18px}
+.set-row + .set-row{border-top:1px solid var(--hairline)}
+.set-row-main{min-width:0;flex:1}
+.set-row-title{font-size:14px;font-weight:600;color:var(--ink)}
+.set-row-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+
+/* days pills / inline input (advanced) */
+.bm-day{height:30px;padding:0 11px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--hairline-strong);border-radius:999px;cursor:pointer;transition:all .12s}
+.bm-day:hover{border-color:var(--accent)}
+.bm-day.on{color:#fff;background:var(--accent);border-color:var(--accent-deep)}
+.bm-days{display:flex;gap:6px;flex-wrap:wrap}
+.bm-input-inline{height:32px;width:auto;max-width:170px}
+
+/* compliance note */
+.blast-compliance{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--bg-soft);border:1px solid var(--hairline);border-radius:var(--r-sm);font-size:12.5px;line-height:1.5;color:var(--muted)}
+.blast-compliance svg{flex:none;margin-top:1px;color:var(--green);width:15px;height:15px}
+
+/* A/B tile */
+.bm-ab-badge{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;font-size:11px;font-weight:700;color:#fff;flex:none}
+.bm-ab-a{background:#2563EB}.bm-ab-b{background:#475569}
+.bm-ab-vhead{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+textarea.bm-ab-tx{resize:vertical;width:100%;display:block;min-height:70px;font:inherit;font-size:13px;line-height:1.5;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);padding:9px 11px;box-sizing:border-box}
+textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+
+/* phone preview */
+.blast-phone-screen{background:var(--bg-soft);border:1px solid var(--hairline);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;min-height:220px}
+.blast-phone-top{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 12px 10px;background:var(--card);border-bottom:1px solid var(--hairline)}
+.blast-phone-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-tint);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.blast-phone-num{font-size:11.5px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.blast-phone-body{padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.blast-bubble{align-self:flex-end;max-width:92%;background:var(--accent);border-radius:14px;border-bottom-right-radius:4px;padding:9px 11px;font-size:12px;line-height:1.55;color:#fff;box-shadow:var(--shadow-sm);white-space:pre-wrap;word-break:break-word}
+.blast-bubble .blast-mf{background:rgba(255,255,255,.24);color:#fff;font-weight:600;border-radius:4px;padding:0 3px}
+.blast-bubble .blast-stop{display:block;margin-top:6px;color:rgba(255,255,255,.72);font-size:11px}
+.blast-bubble-time{align-self:flex-end;font-size:10px;color:var(--faint);padding-right:4px;font-variant-numeric:tabular-nums}
+
+/* buttons */
+.blast-btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;font:inherit;font-size:13.5px;font-weight:600;letter-spacing:-.01em;border-radius:var(--r-sm);cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s}
+.blast-btn-ghost{color:var(--ink-2);background:var(--card);border:1px solid var(--hairline-strong);box-shadow:var(--shadow-sm)}
+.blast-btn-ghost:hover{background:var(--bg-soft)}
+.blast-btn-primary{color:#fff;background:var(--accent);border:1px solid var(--accent-deep);box-shadow:var(--shadow-sm)}
+.blast-btn-primary:hover{background:var(--accent-deep)}
+
+/* =======================  PROTO additions (minimal)  ======================= */
+/* Full-page single column, centered ~640px. */
+.fc-wrap{max-width:672px;margin:0 auto;padding:26px 16px 120px}
+.fc-head{margin-bottom:18px}
+.fc-title{font-size:20px;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
+.fc-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.fc-sect{padding:16px 18px;margin-bottom:14px}
+.fc-sect-head{display:flex;align-items:center;gap:10px;padding:0 0 12px}
+.fc-field{margin-bottom:14px}
+.fc-field:last-child{margin-bottom:0}
+.fc-row{display:flex;align-items:center;gap:12px}
+/* collapsible section (Delivery / Advanced) */
+.fc-disclose > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 18px}
+.fc-disclose > summary::-webkit-details-marker{display:none}
+.fc-disclose-cv{width:15px;height:15px;stroke:var(--faint);transition:transform .16s ease;margin-left:auto;flex:none}
+.fc-disclose[open] > summary .fc-disclose-cv{transform:rotate(180deg)}
+.fc-disclose-body{padding:2px 18px 18px}
+.fc-disclose-title{font-size:14.5px;font-weight:600;letter-spacing:-.012em;color:var(--ink)}
+.fc-disclose-sub{font-size:12px;color:var(--faint);font-weight:450;margin-top:1px}
+/* expandable toggle row (advanced items) */
+.fc-trow{display:flex;align-items:flex-start;gap:14px;padding:14px 0}
+.fc-trow + .fc-trow{border-top:1px solid var(--hairline)}
+.fc-trow-main{flex:1;min-width:0}
+.fc-trow-title{font-size:13.5px;font-weight:600;color:var(--ink)}
+.fc-trow-sub{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+.fc-trow-body{margin-top:11px;padding-top:12px;border-top:1px dashed var(--hairline-strong);display:flex;flex-direction:column;gap:11px}
+.fc-mini-label{font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:6px}
+/* radios */
+.fc-radios{display:flex;gap:8px;flex-wrap:wrap}
+.fc-radio{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);font-size:13px;font-weight:550;color:var(--ink-2);cursor:pointer;background:var(--card);transition:border-color .12s,background .12s}
+.fc-radio:hover{background:var(--bg-soft)}
+.fc-radio input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.fc-radio.on{border-color:var(--accent);background:var(--accent-tint);color:var(--accent-deep)}
+/* slider */
+.fc-slider{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:999px;background:var(--hairline-strong);outline:none;margin:6px 0}
+.fc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 3px rgba(26,26,46,.3);cursor:pointer}
+.fc-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 3px rgba(26,26,46,.3);cursor:pointer}
+.fc-slider-val{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.fc-slider-val b{color:var(--ink);font-weight:650}
+/* drip builder */
+.fc-drip{display:flex;flex-direction:column;gap:10px}
+.fc-drip-step{border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--bg-soft);padding:12px}
+.fc-drip-step-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.fc-drip-badge{width:22px;height:22px;border-radius:6px;background:var(--accent-tint);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none}
+.fc-drip-delay{font-size:12px;color:var(--muted)}
+.fc-drip-del{margin-left:auto;color:var(--faint);border:0;background:none;padding:4px;border-radius:6px;cursor:pointer}
+.fc-drip-del:hover{background:var(--red-tint);color:var(--red)}
+.fc-drip-del svg{width:15px;height:15px}
+.fc-drip-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
+.fc-drip-add:hover{border-color:var(--accent);background:var(--accent-tint)}
+/* sticky footer */
+.fc-foot{position:sticky;bottom:0;left:0;right:0;z-index:20;margin-top:6px;background:rgba(252,252,253,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--hairline);padding:12px 16px}
+.fc-foot-inner{max-width:672px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.fc-foot .ch-spacer{flex:1}
+.fc-send{min-width:206px;justify-content:center}
+.fc-send.is-sent{background:var(--green);border-color:var(--green);pointer-events:none}
+.fc-send .fc-send-check{display:none;align-items:center;gap:7px}
+.fc-send.is-sent .fc-send-label{display:none}
+.fc-send.is-sent .fc-send-check{display:inline-flex;animation:fcPop .28s cubic-bezier(.16,1,.3,1)}
+.fc-send-check svg{width:16px;height:16px;stroke:#fff}
+@keyframes fcPop{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:520px){
+  .fc-foot-inner{flex-wrap:wrap}
+  .fc-send{flex:1 1 100%;order:-1}
+  .blast-btn{flex:1}
+  .bm-filter-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="fc-wrap">
+
+  <div class="fc-head">
+    <div class="fc-title">New SMS Blast</div>
+    <div class="fc-sub">Write once, send to your whole list — with built-in compliance.</div>
+  </div>
+
+  <!-- 1. Build with AI -->
+  <div class="card bm-ai" style="margin-bottom:14px">
+    <div class="bm-ai-head">
+      <span class="bm-ai-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg></span>
+      Build with AI
+      <span class="ch-spacer"></span>
+    </div>
+    <div class="bm-ai-body">
+      <textarea class="bm-ai-prompt" id="aiPrompt" placeholder="Describe what you want to say — e.g. &ldquo;invite my list to an open house Saturday 2pm and ask them to reply YES for a private slot.&rdquo;"></textarea>
+      <div class="bm-ai-genrow">
+        <button class="bm-ai-gen" id="aiGen" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>
+          Generate message
+        </button>
+        <span class="bm-ai-quick" id="aiNote">Drafts into the message box below — tweak before sending.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Mode tabs -->
+  <div class="card fc-sect">
+    <div class="fc-field">
+      <span class="blast-label">Type</span>
+      <div class="seg" id="modeSeg" role="tablist" aria-label="Blast type">
+        <button type="button" class="on" data-mode="once">Send once</button>
+        <button type="button" data-mode="seq">Sequence</button>
+      </div>
+    </div>
+
+    <!-- drip builder (sequence only) -->
+    <div class="fc-field" id="dripWrap" hidden>
+      <span class="blast-label">Sequence steps</span>
+      <div class="fc-drip" id="dripSteps">
+        <div class="fc-drip-step">
+          <div class="fc-drip-step-top">
+            <span class="fc-drip-badge">1</span>
+            <span class="fc-drip-delay">Sends immediately</span>
+          </div>
+          <textarea class="blast-textarea" style="min-height:64px" placeholder="First message…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+        </div>
+      </div>
+      <button type="button" class="fc-drip-add" id="dripAdd" style="margin-top:10px">＋ Add step</button>
+    </div>
+  </div>
+
+  <!-- 3. Message -->
+  <div class="card fc-sect" id="msgSect">
+    <div class="blast-msg-head">
+      <label class="blast-label" for="msg">Message <span class="bm-req">*</span></label>
+      <div class="blast-tools">
+        <button class="blast-tool" type="button" id="tMerge" title="Insert merge field"><span class="blast-merge-glyph">{··}</span>Merge</button>
+        <button class="blast-tool" type="button" id="tTpl" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Templates
+        </button>
+        <button class="blast-tool blast-tool-ai" type="button" id="tVariety" title="Add variety — AI rewrites your message into {a|b|c} variants so every send differs (better deliverability)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M4 10a8 8 0 0 1 14-3M20 14a8 8 0 0 1-14 3"/></svg>Add variety
+        </button>
+      </div>
+    </div>
+    <textarea class="blast-textarea" id="msg" spellcheck="false" placeholder="Write your text message here… tap {··} to add merge fields like the recipient's first name.">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+    <div class="blast-counter">
+      <span><b id="charCount">0</b> characters</span>
+      <span><b id="segCount">1</b> segment · 160 chars/segment</span>
+    </div>
+
+    <!-- live phone preview -->
+    <div style="margin-top:14px">
+      <span class="blast-label">Preview</span>
+      <div class="blast-phone-screen" style="max-width:280px">
+        <div class="blast-phone-top">
+          <span class="blast-phone-avatar">SC</span>
+          <span class="blast-phone-num">+1 (415) 555‑0182</span>
+        </div>
+        <div class="blast-phone-body">
+          <div class="blast-bubble"><span class="blast-body" id="pvBody"></span><span class="blast-stop">Reply STOP to opt out</span></div>
+          <span class="blast-bubble-time">now</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Recipients -->
+  <div class="card fc-sect">
+    <div class="bm-rtop">
+      <span class="blast-label">Recipients</span>
+      <span class="ch-spacer"></span>
+      <span class="blast-count-chip" id="recipChip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="recipCount">1,240</span> recipients
+      </span>
+    </div>
+    <div class="seg bm-rtabs" id="recipSeg" role="tablist" aria-label="Recipient source">
+      <button type="button" class="on" data-rp="everyone">Everyone · 1,240</button>
+      <button type="button" data-rp="segments">Segments</button>
+      <button type="button" data-rp="recent">Recent blasts</button>
+      <button type="button" data-rp="filter">Filter</button>
+      <button type="button" data-rp="csv">CSV</button>
+    </div>
+    <div class="bm-rpanes">
+      <div class="bm-rpane" data-rpane="everyone">
+        <div class="bm-hint">Sends to all <b>1,240</b> contacts who haven't opted out.</div>
+      </div>
+      <div class="bm-rpane" data-rpane="segments" hidden>
+        <div class="bm-pick-list" id="segList">
+          <label class="bm-pick-row"><input type="checkbox" data-seg="88"><span class="bm-pick-name">VIP customers</span><span class="bm-pick-meta"><b>88</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-seg="210"><span class="bm-pick-name">New leads this week</span><span class="bm-pick-meta"><b>210</b> contacts</span></label>
+        </div>
+      </div>
+      <div class="bm-rpane" data-rpane="recent" hidden>
+        <div class="bm-pick-list" id="recentList">
+          <label class="bm-pick-row"><input type="radio" name="recent" data-rc="340"><span class="bm-pick-name">Oct Promo</span><span class="bm-pick-meta"><b>340</b> recipients</span></label>
+          <label class="bm-pick-row"><input type="radio" name="recent" data-rc="88"><span class="bm-pick-name">Expired listings</span><span class="bm-pick-meta"><b>88</b> recipients</span></label>
+        </div>
+        <div class="bm-hint">Re-send to everyone who received a past blast.</div>
+      </div>
+      <div class="bm-rpane" data-rpane="filter" hidden>
+        <div class="bm-filter-row">
+          <div class="blast-select-wrap"><select class="blast-select"><option>Tag</option><option>City</option><option>Last reply</option><option>Source</option></select></div>
+          <div class="blast-select-wrap"><select class="blast-select"><option>is</option><option>is not</option><option>contains</option></select></div>
+          <input class="bm-input" placeholder="e.g. Buyer">
+        </div>
+        <div class="bm-filter-count">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          Matches <span id="filterMatch">642</span> contacts
+        </div>
+      </div>
+      <div class="bm-rpane" data-rpane="csv" hidden>
+        <label class="bm-csv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span><b style="color:var(--ink-2)">Upload a CSV</b><br>Drop a file or click to choose — we map phone + merge columns.</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Delivery -->
+  <div class="card fc-sect">
+    <div class="fc-sect-head">
+      <div><div class="card-title">Delivery</div><div class="card-sub">When and how fast this goes out.</div></div>
+    </div>
+
+    <div class="fc-field">
+      <span class="fc-mini-label">When to send</span>
+      <div class="fc-radios" id="whenRadios">
+        <label class="fc-radio on"><input type="radio" name="when" value="now" checked>Send now</label>
+        <label class="fc-radio"><input type="radio" name="when" value="sched">Schedule</label>
+      </div>
+      <div id="schedWrap" hidden style="margin-top:10px">
+        <input class="bm-input" id="schedAt" placeholder="e.g. Sat 2:00 PM — Nov 9" style="max-width:260px">
+      </div>
+    </div>
+
+    <div class="set-rows" style="border:1px solid var(--hairline);border-radius:var(--r-sm)">
+      <div class="set-row">
+        <div class="set-row-main">
+          <div class="set-row-title">Smart Scheduling</div>
+          <div class="set-row-sub">Send each contact at their best-response hour instead of all at once.</div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" id="smartSched" aria-label="Smart Scheduling"><span class="set-track"></span></span>
+      </div>
+      <div class="set-row">
+        <div class="set-row-main">
+          <div class="set-row-title">Send evenly</div>
+          <div class="set-row-sub">Spread the batch across the delivery window so replies don't spike all at once.</div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" id="sendEvenly" checked aria-label="Send evenly"><span class="set-track"></span></span>
+      </div>
+    </div>
+
+    <div class="fc-field" style="margin-top:16px">
+      <div class="fc-row" style="justify-content:space-between">
+        <span class="fc-mini-label" style="margin:0">Sending speed · Throttle</span>
+        <span class="fc-slider-val"><b id="speedVal">300</b> msgs/min</span>
+      </div>
+      <input type="range" class="fc-slider" id="speed" min="30" max="600" step="30" value="300">
+      <div class="fc-slider-val">Higher = faster delivery. Lower = gentler on carriers &amp; your team.</div>
+    </div>
+  </div>
+
+  <!-- 6. Advanced (merged: A/B + Follow-up + scheduling trio) -->
+  <details class="card fc-disclose">
+    <summary>
+      <div><div class="fc-disclose-title">Advanced</div><div class="fc-disclose-sub">A/B test, follow-up, delivery window, repeat &amp; auto-stop.</div></div>
+      <svg class="fc-disclose-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="fc-disclose-body">
+
+      <!-- A/B test -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">A/B test</div>
+          <div class="fc-trow-sub">Send two versions to a small sample, then auto-send the winner to the rest.</div>
+          <div class="fc-trow-body" data-adv="ab" hidden>
+            <div>
+              <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-a">A</span> Variant A</div>
+              <textarea class="bm-ab-tx" id="abA">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+            </div>
+            <div>
+              <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-b">B</span> Variant B</div>
+              <textarea class="bm-ab-tx" id="abB" placeholder="Second version…">{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm — reply YES and I'll hold a slot.</textarea>
+            </div>
+            <div>
+              <span class="fc-mini-label">Sample size per variant</span>
+              <div class="blast-select-wrap" style="max-width:200px"><select class="blast-select"><option>10% each</option><option>15% each</option><option>20% each</option></select></div>
+            </div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="ab" aria-label="A/B test"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Follow-up -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Follow-up non-responders</div>
+          <div class="fc-trow-sub">Auto-send a second message to anyone who doesn't reply.</div>
+          <div class="fc-trow-body" data-adv="fu" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <span style="font-size:12.5px;color:var(--ink-2)">If no reply within</span>
+              <div class="blast-select-wrap" style="min-width:120px"><select class="blast-select"><option>1 day</option><option selected>2 days</option><option>3 days</option><option>1 week</option></select></div>
+            </div>
+            <textarea class="bm-ab-tx" placeholder="Follow-up message…">Just circling back {{first_name}} — still happy to hold a private slot Saturday if you're interested. Reply YES.</textarea>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="fu" aria-label="Follow-up"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Delivery window -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Delivery window</div>
+          <div class="fc-trow-sub">Only send during these hours (quiet hours are always enforced regardless).</div>
+          <div class="fc-trow-body" data-adv="win" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <div class="blast-select-wrap" style="min-width:120px"><select class="blast-select"><option>8:00 AM</option><option selected>9:00 AM</option><option>10:00 AM</option></select></div>
+              <span style="font-size:12.5px;color:var(--muted)">to</span>
+              <div class="blast-select-wrap" style="min-width:120px"><select class="blast-select"><option>6:00 PM</option><option selected>7:00 PM</option><option>8:00 PM</option></select></div>
+            </div>
+            <div>
+              <span class="fc-mini-label">Days</span>
+              <div class="bm-days" id="advDays">
+                <button type="button" class="bm-day on">Mon</button>
+                <button type="button" class="bm-day on">Tue</button>
+                <button type="button" class="bm-day on">Wed</button>
+                <button type="button" class="bm-day on">Thu</button>
+                <button type="button" class="bm-day on">Fri</button>
+                <button type="button" class="bm-day">Sat</button>
+                <button type="button" class="bm-day">Sun</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="win" aria-label="Delivery window"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Repeat -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Repeat</div>
+          <div class="fc-trow-sub">Re-send this blast on a schedule to new contacts that match.</div>
+          <div class="fc-trow-body" data-adv="rep" hidden>
+            <div class="blast-select-wrap" style="max-width:200px"><select class="blast-select"><option>Daily</option><option selected>Weekly</option><option>Every 2 weeks</option><option>Monthly</option></select></div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="rep" aria-label="Repeat"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Auto-stop -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Auto-stop</div>
+          <div class="fc-trow-sub">Halt the blast if a condition is met — protects your sender reputation.</div>
+          <div class="fc-trow-body" data-adv="stop" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <span style="font-size:12.5px;color:var(--ink-2)">Stop if opt-out rate exceeds</span>
+              <input class="bm-input bm-input-inline" value="3" style="width:56px;text-align:center">
+              <span style="font-size:12.5px;color:var(--ink-2)">%</span>
+            </div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="stop" aria-label="Auto-stop"><span class="set-track"></span></span>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- 7. Send from -->
+  <div class="card fc-sect">
+    <div class="fc-field">
+      <span class="blast-label">Send from</span>
+      <div class="blast-select-wrap">
+        <select class="blast-select" id="sendFrom">
+          <optgroup label="Smart">
+            <option value="local">Local presence — match area code</option>
+            <option value="rotate">Rotate pool</option>
+          </optgroup>
+          <optgroup label="Your numbers">
+            <option value="+14155550182">+1 (415) 555‑0182 · San Francisco</option>
+            <option value="+16465550147">+1 (646) 555‑0147 · New York</option>
+            <option value="+13105550193">+1 (310) 555‑0193 · Los Angeles</option>
+          </optgroup>
+        </select>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="bm-hint" style="margin-top:6px" id="sendFromHint">Auto-matches each contact's area code from your pool — local numbers get ~3× more replies.</div>
+    </div>
+    <div class="blast-compliance" style="margin-top:4px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Every message auto-appends opt-out language and honors STOP. Quiet hours are always enforced.
+    </div>
+  </div>
+
+</div>
+
+<!-- 8. Sticky footer -->
+<div class="fc-foot">
+  <div class="fc-foot-inner">
+    <button type="button" class="blast-btn blast-btn-ghost" id="cancelBtn">Cancel</button>
+    <button type="button" class="blast-btn blast-btn-ghost" id="draftBtn">Save draft</button>
+    <span class="ch-spacer"></span>
+    <button type="button" class="blast-btn blast-btn-primary fc-send" id="sendBtn">
+      <span class="fc-send-label">Send to <span id="footCount">1,240</span> · ~$<span id="footCost">24.80</span></span>
+      <span class="fc-send-check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Sent</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var RATE = 0.02, SAMPLE_FIRST = 'Sarah', SAMPLE_LAST = 'Chen';
+  var $ = function(id){ return document.getElementById(id); };
+  var msg = $('msg');
+
+  function fmt(n){ return n.toLocaleString('en-US'); }
+
+  // ---- live message: char/segment count + phone preview ----
+  function segs(len){ if(len<=160) return 1; return Math.ceil(len/153); }
+  function renderPreview(){
+    var raw = msg.value || '';
+    var filled = raw
+      .replace(/\{\{\s*first_name\s*\}\}/gi, SAMPLE_FIRST)
+      .replace(/\{\{\s*last_name\s*\}\}/gi, SAMPLE_LAST);
+    // escape then re-mark tokens for the bubble highlight
+    var esc = function(s){ return s.replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); };
+    var html = esc(raw)
+      .replace(/\{\{\s*first_name\s*\}\}/gi, '<span class="blast-mf">'+SAMPLE_FIRST+'</span>')
+      .replace(/\{\{\s*last_name\s*\}\}/gi, '<span class="blast-mf">'+SAMPLE_LAST+'</span>');
+    $('pvBody').innerHTML = html || '<span style="opacity:.6">Your message preview…</span>';
+    // counter uses the resolved-length (what a real recipient receives)
+    var len = filled.length;
+    $('charCount').textContent = len;
+    $('segCount').textContent = segs(len);
+  }
+  msg.addEventListener('input', renderPreview);
+  renderPreview();
+
+  // ---- mode tabs (once / sequence) ----
+  $('modeSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var seq = b.dataset.mode === 'seq';
+    $('dripWrap').hidden = !seq;
+    // in sequence mode the single Message box is the step editor; keep it visible for once mode
+    $('msgSect').hidden = seq;
+  });
+
+  // ---- drip: add step ----
+  $('dripAdd').addEventListener('click', function(){
+    var steps = $('dripSteps'), n = steps.children.length + 1;
+    var div = document.createElement('div');
+    div.className = 'fc-drip-step';
+    div.innerHTML =
+      '<div class="fc-drip-step-top">'+
+        '<span class="fc-drip-badge">'+n+'</span>'+
+        '<span class="fc-drip-delay">Sends 2 days after step '+(n-1)+'</span>'+
+        '<button type="button" class="fc-drip-del" aria-label="Remove step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>'+
+      '</div>'+
+      '<textarea class="blast-textarea" style="min-height:64px" placeholder="Follow-up message…"></textarea>';
+    steps.appendChild(div);
+  });
+  $('dripSteps').addEventListener('click', function(e){
+    var del = e.target.closest('.fc-drip-del'); if(!del) return;
+    del.closest('.fc-drip-step').remove();
+    // renumber
+    [].forEach.call($('dripSteps').children, function(step, i){
+      step.querySelector('.fc-drip-badge').textContent = i+1;
+    });
+  });
+
+  // ---- message tools ----
+  function insertAtCursor(text){
+    var s = msg.selectionStart||msg.value.length, e = msg.selectionEnd||msg.value.length;
+    msg.value = msg.value.slice(0,s) + text + msg.value.slice(e);
+    msg.focus(); msg.selectionStart = msg.selectionEnd = s + text.length;
+    renderPreview();
+  }
+  $('tMerge').addEventListener('click', function(){ insertAtCursor('{{first_name}}'); });
+  $('tTpl').addEventListener('click', function(){
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    renderPreview();
+  });
+  $('tVariety').addEventListener('click', function(){
+    var t = msg.value.trim();
+    if(!t) return;
+    msg.value = '{Hi|Hey|Hello} {{first_name}}, {open house|private showing} Sat 2pm at 1427 Birchwood — reply YES {for a private slot|to reserve a time}.';
+    renderPreview();
+  });
+
+  // ---- AI generate ----
+  $('aiGen').addEventListener('click', function(){
+    var p = $('aiPrompt').value.trim();
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    $('aiNote').textContent = p ? 'Drafted from your prompt — edit below before sending.' : 'Drafted a sample — edit below before sending.';
+    renderPreview();
+    msg.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  // ---- recipients ----
+  var recipCount = 1240;
+  function setRecip(n){
+    recipCount = n;
+    $('recipCount').textContent = fmt(n);
+    $('footCount').textContent = fmt(n);
+    $('footCost').textContent = (n*RATE).toFixed(2);
+  }
+  setRecip(1240);
+
+  $('recipSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var rp = b.dataset.rp;
+    [].forEach.call(document.querySelectorAll('.bm-rpane'), function(p){
+      p.hidden = p.dataset.rpane !== rp;
+    });
+    if(rp==='everyone') setRecip(1240);
+    else if(rp==='filter') setRecip(642);
+    else if(rp==='csv') setRecip(0);
+    else recompute();
+  });
+  function recompute(){
+    var active = document.querySelector('#recipSeg button.on').dataset.rp, total = 0;
+    if(active==='segments'){
+      [].forEach.call(document.querySelectorAll('#segList input:checked'), function(i){ total += +i.dataset.seg; });
+    } else if(active==='recent'){
+      var r = document.querySelector('#recentList input:checked');
+      total = r ? +r.dataset.rc : 0;
+    }
+    setRecip(total);
+  }
+  $('segList').addEventListener('change', recompute);
+  $('recentList').addEventListener('change', recompute);
+
+  // ---- delivery: when radios ----
+  $('whenRadios').addEventListener('change', function(e){
+    [].forEach.call(this.querySelectorAll('.fc-radio'), function(l){ l.classList.remove('on'); });
+    e.target.closest('.fc-radio').classList.add('on');
+    $('schedWrap').hidden = e.target.value !== 'sched';
+  });
+
+  // ---- speed slider ----
+  $('speed').addEventListener('input', function(){ $('speedVal').textContent = this.value; });
+
+  // ---- advanced toggles reveal their body ----
+  [].forEach.call(document.querySelectorAll('.advToggle'), function(t){
+    t.addEventListener('change', function(){
+      var body = this.closest('.fc-trow').querySelector('.fc-trow-body');
+      if(body) body.hidden = !this.checked;
+    });
+  });
+  // delivery-window day pills
+  $('advDays').addEventListener('click', function(e){
+    var d = e.target.closest('.bm-day'); if(d) d.classList.toggle('on');
+  });
+
+  // ---- send from hint ----
+  $('sendFrom').addEventListener('change', function(){
+    var hints = {
+      local: "Auto-matches each contact's area code from your pool — local numbers get ~3× more replies.",
+      rotate: "Cycles through every number in your pool to spread volume and protect reputation."
+    };
+    $('sendFromHint').textContent = hints[this.value] || 'All messages send from this single number.';
+  });
+
+  // ---- footer actions ----
+  $('draftBtn').addEventListener('click', function(){
+    var old = this.textContent; this.textContent = 'Saved ✓';
+    var self = this; setTimeout(function(){ self.textContent = old; }, 1400);
+  });
+  $('cancelBtn').addEventListener('click', function(){
+    if(confirm('Discard this blast?')) location.reload();
+  });
+  $('sendBtn').addEventListener('click', function(){
+    if(recipCount < 1){ alert('Pick some recipients first.'); return; }
+    this.classList.add('is-sent');
+  });
+})();
+</script>
+</body>
+</html>
