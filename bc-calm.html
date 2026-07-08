@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New blast · ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-hover:#1d4ed8;
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --border-soft:#eef0f4;
+    --page:#eef1f5; --card:#fff;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{
+    max-width:680px; margin:0 auto; padding:40px 20px 140px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:9px;
+    color:var(--muted); font-size:14px; font-weight:600;
+    margin-bottom:22px; letter-spacing:.01em;
+  }
+  .brand .dot{
+    width:22px;height:22px;border-radius:7px;
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand svg{width:13px;height:13px;color:#fff}
+
+  .card{
+    background:var(--card); border-radius:16px;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .card-head{
+    padding:26px 32px 4px;
+  }
+  .card-head h1{
+    font-size:20px; font-weight:700; letter-spacing:-.01em;
+  }
+  .card-head p{
+    color:var(--muted); font-size:13.5px; margin-top:3px;
+  }
+
+  /* each question block */
+  .q{
+    padding:26px 32px;
+    border-top:1px solid var(--border-soft);
+  }
+  .q:first-of-type{border-top:none}
+  .q-label{
+    display:flex; align-items:baseline; gap:10px;
+    margin-bottom:16px;
+  }
+  .q-num{
+    color:var(--faint); font-size:13px; font-weight:700;
+    font-variant-numeric:tabular-nums; min-width:14px;
+  }
+  .q-title{
+    font-size:16.5px; font-weight:650; letter-spacing:-.005em;
+  }
+
+  /* Q1 — message + preview */
+  .compose{
+    display:grid; grid-template-columns:1fr 232px; gap:22px;
+    align-items:start;
+  }
+  @media(max-width:600px){
+    .compose{grid-template-columns:1fr}
+  }
+  .msg-col{min-width:0}
+  textarea#msg{
+    width:100%; min-height:150px; resize:vertical;
+    border:1px solid var(--border); border-radius:11px;
+    padding:14px 15px; font:inherit; font-size:15px; line-height:1.55;
+    color:var(--ink); background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  textarea#msg:focus{
+    outline:none; border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+  }
+  textarea#msg::placeholder{color:var(--faint)}
+  .msg-foot{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:11px; gap:12px; flex-wrap:wrap;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--border); background:#fff;
+    color:var(--ink); font:inherit; font-size:13px; font-weight:550;
+    padding:6px 12px; border-radius:99px; cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .chip:hover{background:#f7f9fc; border-color:#d8dde8}
+  .chip svg{width:13px;height:13px;color:var(--muted)}
+  .count{
+    color:var(--muted); font-size:12.5px;
+    font-variant-numeric:tabular-nums;
+  }
+  .count b{color:var(--ink); font-weight:650}
+
+  .merge-menu{
+    position:relative; display:inline-block;
+  }
+  .merge-pop{
+    position:absolute; bottom:calc(100% + 8px); left:0;
+    background:#fff; border:1px solid var(--border);
+    border-radius:11px; box-shadow:var(--shadow);
+    padding:5px; min-width:180px; z-index:20;
+    display:none;
+  }
+  .merge-pop.open{display:block}
+  .merge-pop button{
+    display:block; width:100%; text-align:left;
+    border:none; background:none; font:inherit; font-size:13.5px;
+    color:var(--ink); padding:8px 11px; border-radius:8px; cursor:pointer;
+  }
+  .merge-pop button:hover{background:#f2f6fd; color:var(--primary)}
+  .merge-pop code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12.5px; color:var(--muted);
+  }
+
+  /* phone preview */
+  .phone{
+    background:#f6f8fb; border:1px solid var(--border);
+    border-radius:22px; padding:16px 14px 20px;
+  }
+  .phone-top{
+    text-align:center; color:var(--faint); font-size:11px;
+    font-weight:600; margin-bottom:12px; letter-spacing:.02em;
+  }
+  .bubble{
+    background:#fff; border:1px solid var(--border-soft);
+    border-radius:16px 16px 16px 4px;
+    padding:11px 13px; font-size:13.5px; line-height:1.5;
+    color:var(--ink); max-width:100%;
+    box-shadow:0 1px 2px rgba(20,20,50,.05);
+    word-wrap:break-word; white-space:pre-wrap;
+  }
+  .bubble .mf{color:var(--primary); font-weight:600}
+  .phone-time{
+    text-align:left; color:var(--faint); font-size:10.5px;
+    margin-top:6px; padding-left:4px;
+  }
+
+  /* Q2 — recipient control */
+  .recip-btn{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--border); background:#fff;
+    border-radius:11px; padding:14px 16px; cursor:pointer;
+    font:inherit; text-align:left; transition:border-color .15s, box-shadow .15s;
+  }
+  .recip-btn:hover{border-color:#d8dde8}
+  .recip-btn.open{border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .recip-main{display:flex; align-items:center; gap:12px; min-width:0}
+  .recip-ic{
+    width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    background:#eff4ff; display:flex;align-items:center;justify-content:center;
+  }
+  .recip-ic svg{width:17px;height:17px;color:var(--primary)}
+  .recip-name{font-size:15px; font-weight:600; letter-spacing:-.005em}
+  .recip-sub{font-size:12.5px; color:var(--muted); margin-top:1px}
+  .recip-caret{color:var(--faint); transition:transform .18s}
+  .recip-btn.open .recip-caret{transform:rotate(180deg)}
+
+  .recip-list{
+    border:1px solid var(--border); border-radius:11px; margin-top:8px;
+    overflow:hidden; display:none; background:#fff;
+  }
+  .recip-list.open{display:block}
+  .recip-group{
+    font-size:11px; font-weight:700; color:var(--faint);
+    letter-spacing:.04em; text-transform:uppercase;
+    padding:12px 16px 6px;
+  }
+  .opt{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 16px; cursor:pointer; border:none; background:none;
+    width:100%; font:inherit; text-align:left;
+    transition:background .1s;
+  }
+  .opt:hover{background:#f7f9fc}
+  .opt.sel{background:#f2f6fd}
+  .opt-left{display:flex; align-items:center; gap:11px; min-width:0}
+  .opt-left svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+  .opt.sel .opt-left svg{color:var(--primary)}
+  .opt-name{font-size:14px; font-weight:550; color:var(--ink)}
+  .opt-count{
+    font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;
+    flex-shrink:0; padding-left:10px;
+  }
+  .opt .check{width:15px;height:15px;color:var(--primary);opacity:0;flex-shrink:0}
+  .opt.sel .check{opacity:1}
+  .recip-div{height:1px;background:var(--border-soft);margin:5px 0}
+
+  /* Q3 — more options */
+  .opts-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:15px 16px; border:1px solid var(--border);
+    border-radius:11px; cursor:pointer;
+    transition:border-color .15s;
+  }
+  .opts-row:hover{border-color:#d8dde8}
+  .opts-summary{font-size:13.5px; color:var(--muted)}
+  .opts-summary b{color:var(--ink); font-weight:600}
+  .opts-toggle{
+    font-size:13px; color:var(--primary); font-weight:600;
+    display:flex; align-items:center; gap:5px;
+  }
+  .opts-toggle svg{width:13px;height:13px; transition:transform .18s}
+  .opts-row.open .opts-toggle svg{transform:rotate(180deg)}
+  .opts-detail{
+    display:none; margin-top:10px;
+    border:1px solid var(--border-soft); border-radius:11px;
+    padding:6px 4px;
+  }
+  .opts-detail.open{display:block}
+  .setting{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 14px;
+  }
+  .setting + .setting{border-top:1px solid var(--border-soft)}
+  .setting-txt{font-size:13.5px}
+  .setting-txt .st-desc{font-size:12px;color:var(--muted);margin-top:1px}
+  /* toggle */
+  .sw{position:relative;width:38px;height:22px;flex-shrink:0}
+  .sw input{opacity:0;width:0;height:0}
+  .sw span{
+    position:absolute;inset:0;border-radius:99px;background:#d7dce6;
+    cursor:pointer;transition:background .18s;
+  }
+  .sw span::after{
+    content:"";position:absolute;width:16px;height:16px;border-radius:50%;
+    background:#fff;top:3px;left:3px;transition:transform .18s;
+    box-shadow:0 1px 2px rgba(0,0,0,.2);
+  }
+  .sw input:checked + span{background:var(--primary)}
+  .sw input:checked + span::after{transform:translateX(16px)}
+
+  .compliance{
+    text-align:center; font-size:12px; color:var(--faint);
+    margin-top:18px; display:flex; align-items:center;
+    justify-content:center; gap:6px;
+  }
+  .compliance svg{width:13px;height:13px}
+
+  /* sticky send bar */
+  .sendbar{
+    position:fixed; left:0; right:0; bottom:0;
+    background:rgba(255,255,255,.86); backdrop-filter:blur(12px);
+    border-top:1px solid var(--border);
+    padding:14px 20px;
+  }
+  .sendbar-in{
+    max-width:680px; margin:0 auto;
+    display:flex; align-items:center; gap:16px;
+  }
+  .cost{font-size:13px; color:var(--muted); flex-shrink:0}
+  .cost b{color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums}
+  .send-btn{
+    margin-left:auto; flex-shrink:0;
+    background:var(--primary); color:#fff; border:none;
+    font:inherit; font-size:15px; font-weight:650;
+    padding:13px 26px; border-radius:11px; cursor:pointer;
+    display:flex; align-items:center; gap:9px;
+    transition:background .15s, transform .06s;
+    font-variant-numeric:tabular-nums;
+  }
+  .send-btn:hover{background:var(--primary-hover)}
+  .send-btn:active{transform:translateY(1px)}
+  .send-btn:disabled{background:#c3cbdb; cursor:not-allowed}
+  .send-btn svg{width:17px;height:17px}
+
+  /* sent state */
+  .sent-view{
+    display:none; text-align:center; padding:56px 32px 60px;
+  }
+  .sent-view.show{display:block}
+  .sent-badge{
+    width:64px;height:64px;border-radius:50%;
+    background:#e8f7ee; margin:0 auto 20px;
+    display:flex;align-items:center;justify-content:center;
+    animation:pop .4s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .sent-badge svg{width:32px;height:32px;color:#16a34a}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+  .sent-view h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .sent-view p{color:var(--muted);font-size:14px;margin-top:6px}
+  .sent-again{
+    margin-top:24px; background:#fff; border:1px solid var(--border);
+    color:var(--ink); font:inherit; font-size:14px; font-weight:600;
+    padding:11px 22px; border-radius:11px; cursor:pointer;
+  }
+  .sent-again:hover{background:#f7f9fc}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <span class="dot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      ReadySMS
+    </div>
+
+    <div class="card" id="card">
+      <div class="card-head">
+        <h1>New blast</h1>
+        <p>Three quick questions. Nothing hidden.</p>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q">
+        <div class="q-label"><span class="q-num">1</span><span class="q-title">What do you want to say?</span></div>
+        <div class="compose">
+          <div class="msg-col">
+            <textarea id="msg" placeholder="Type your message…" spellcheck="true">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+            <div class="msg-foot">
+              <div class="merge-menu">
+                <button class="chip" id="mergeBtn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add a name
+                </button>
+                <div class="merge-pop" id="mergePop">
+                  <button type="button" data-mf="{{first_name}}">First name <code>{{first_name}}</code></button>
+                  <button type="button" data-mf="{{last_name}}">Last name <code>{{last_name}}</code></button>
+                </div>
+              </div>
+              <span class="count"><b id="chars">0</b> chars · <b id="segs">1</b> text each</span>
+            </div>
+          </div>
+          <div class="phone">
+            <div class="phone-top">Preview</div>
+            <div class="bubble" id="bubble"></div>
+            <div class="phone-time">Delivered now</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q">
+        <div class="q-label"><span class="q-num">2</span><span class="q-title">Who gets it?</span></div>
+        <button class="recip-btn" id="recipBtn" type="button">
+          <span class="recip-main">
+            <span class="recip-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <span>
+              <div class="recip-name" id="recipName">Everyone</div>
+              <div class="recip-sub" id="recipSub">1,240 contacts</div>
+            </span>
+          </span>
+          <svg class="recip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <div class="recip-list" id="recipList">
+          <button class="opt sel" data-name="Everyone" data-sub="1,240 contacts" data-count="1240">
+            <span class="opt-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span class="opt-name">Everyone</span>
+            </span>
+            <span class="opt-right"><span class="opt-count">1,240</span></span>
+          </button>
+
+          <div class="recip-group">Saved segments</div>
+          <button class="opt" data-name="VIP customers" data-sub="88 contacts" data-count="88">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span class="opt-name">VIP customers</span></span>
+            <span class="opt-count">88</span>
+          </button>
+          <button class="opt" data-name="New leads this week" data-sub="210 contacts" data-count="210">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="opt-name">New leads this week</span></span>
+            <span class="opt-count">210</span>
+          </button>
+
+          <div class="recip-group">Recent blasts</div>
+          <button class="opt" data-name="Oct Promo" data-sub="340 contacts" data-count="340">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg><span class="opt-name">Oct Promo</span></span>
+            <span class="opt-count">340</span>
+          </button>
+          <button class="opt" data-name="Expired listings" data-sub="88 contacts" data-count="88">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg><span class="opt-name">Expired listings</span></span>
+            <span class="opt-count">88</span>
+          </button>
+
+          <div class="recip-div"></div>
+          <button class="opt" data-name="Filtered contacts" data-sub="Build a filter" data-count="1240">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span class="opt-name">Filter contacts…</span></span>
+            <span class="opt-count"></span>
+          </button>
+          <button class="opt" data-name="CSV upload" data-sub="From a file" data-count="0">
+            <span class="opt-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="opt-name">Upload a CSV…</span></span>
+            <span class="opt-count"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q">
+        <div class="q-label"><span class="q-num">3</span><span class="q-title">Anything else?</span></div>
+        <div class="opts-row" id="optsRow">
+          <span class="opts-summary"><b>Sends now</b> · full carrier speed · local-presence numbers · no follow-up</span>
+          <span class="opts-toggle">More options
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="opts-detail" id="optsDetail">
+          <div class="setting">
+            <div class="setting-txt">Send now
+              <div class="st-desc">Off = schedule for later</div>
+            </div>
+            <label class="sw"><input type="checkbox" checked><span></span></label>
+          </div>
+          <div class="setting">
+            <div class="setting-txt">Full carrier speed
+              <div class="st-desc">Off = drip slowly over the day</div>
+            </div>
+            <label class="sw"><input type="checkbox" checked><span></span></label>
+          </div>
+          <div class="setting">
+            <div class="setting-txt">Local-presence numbers
+              <div class="st-desc">Match each contact's area code</div>
+            </div>
+            <label class="sw"><input type="checkbox" checked><span></span></label>
+          </div>
+          <div class="setting">
+            <div class="setting-txt">Follow up with non-responders
+              <div class="st-desc">Auto-resend after 2 days</div>
+            </div>
+            <label class="sw"><input type="checkbox"><span></span></label>
+          </div>
+        </div>
+
+        <div class="compliance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Opt-outs skipped automatically · STOP added when needed
+        </div>
+      </div>
+
+      <!-- sent state replaces card body -->
+      <div class="sent-view" id="sentView">
+        <div class="sent-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Sent <span id="sentCount">1,240</span> messages</h2>
+        <p>On their way now. You'll see replies in your inbox.</p>
+        <button class="sent-again" id="againBtn" type="button">Create another blast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- sticky send bar -->
+  <div class="sendbar" id="sendbar">
+    <div class="sendbar-in">
+      <span class="cost">Est. cost <b id="cost">$12.40</b></span>
+      <button class="send-btn" id="sendBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send to <span id="sendN">1,240</span>&nbsp;people
+      </button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var msg=document.getElementById('msg');
+  var bubble=document.getElementById('bubble');
+  var charsEl=document.getElementById('chars');
+  var segsEl=document.getElementById('segs');
+  var recipBtn=document.getElementById('recipBtn');
+  var recipList=document.getElementById('recipList');
+  var recipName=document.getElementById('recipName');
+  var recipSub=document.getElementById('recipSub');
+  var sendN=document.getElementById('sendN');
+  var costEl=document.getElementById('cost');
+  var sendBtn=document.getElementById('sendBtn');
+
+  var RATE=0.01; // registered per-message rate
+  var count=1240;
+
+  // ---- Q1: message → count + preview ----
+  function render(){
+    var t=msg.value;
+    charsEl.textContent=t.length;
+    // 160 = 1 segment (GSM single-part); 153 per part after
+    var seg = t.length<=160 ? 1 : Math.ceil(t.length/153);
+    segsEl.textContent=seg;
+    // preview: highlight merge fields, fill a demo name
+    var esc=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var html=esc
+      .replace(/\{\{first_name\}\}/g,'<span class="mf">Sarah</span>')
+      .replace(/\{\{last_name\}\}/g,'<span class="mf">Chen</span>');
+    bubble.innerHTML = html || '<span style="color:#9aa1af">Your message appears here…</span>';
+    updateSend(seg);
+  }
+  function updateSend(seg){
+    seg=seg||parseInt(segsEl.textContent,10)||1;
+    sendN.textContent=fmt(count);
+    document.getElementById('sentCount').textContent=fmt(count);
+    var cost=count*seg*RATE;
+    costEl.textContent='$'+cost.toFixed(2);
+    sendBtn.disabled = count===0 || msg.value.trim()==='';
+  }
+  function fmt(n){return n.toLocaleString('en-US');}
+
+  msg.addEventListener('input',render);
+
+  // ---- merge field menu ----
+  var mergeBtn=document.getElementById('mergeBtn');
+  var mergePop=document.getElementById('mergePop');
+  mergeBtn.addEventListener('click',function(e){
+    e.stopPropagation(); mergePop.classList.toggle('open');
+  });
+  mergePop.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var mf=b.getAttribute('data-mf');
+      var s=msg.selectionStart, en=msg.selectionEnd;
+      msg.value=msg.value.slice(0,s)+mf+msg.value.slice(en);
+      msg.focus();
+      msg.selectionStart=msg.selectionEnd=s+mf.length;
+      mergePop.classList.remove('open');
+      render();
+    });
+  });
+
+  // ---- Q2: recipient control ----
+  recipBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=recipList.classList.toggle('open');
+    recipBtn.classList.toggle('open',open);
+  });
+  recipList.querySelectorAll('.opt').forEach(function(opt){
+    // add check mark holder
+    var right=opt.querySelector('.opt-count');
+    opt.addEventListener('click',function(){
+      recipList.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel');});
+      opt.classList.add('sel');
+      recipName.textContent=opt.getAttribute('data-name');
+      recipSub.textContent=opt.getAttribute('data-sub');
+      count=parseInt(opt.getAttribute('data-count'),10)||0;
+      recipList.classList.remove('open');
+      recipBtn.classList.remove('open');
+      updateSend();
+    });
+  });
+
+  // ---- Q3: more options expand ----
+  var optsRow=document.getElementById('optsRow');
+  var optsDetail=document.getElementById('optsDetail');
+  optsRow.addEventListener('click',function(){
+    var open=optsDetail.classList.toggle('open');
+    optsRow.classList.toggle('open',open);
+  });
+
+  // close popovers on outside click
+  document.addEventListener('click',function(){
+    mergePop.classList.remove('open');
+  });
+  mergePop.addEventListener('click',function(e){e.stopPropagation();});
+
+  // ---- send → sent ✓ ----
+  sendBtn.addEventListener('click',function(){
+    if(sendBtn.disabled)return;
+    document.querySelectorAll('.card-head, .q').forEach(function(el){el.style.display='none';});
+    document.getElementById('sentView').classList.add('show');
+    document.getElementById('sendbar').style.display='none';
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  document.getElementById('againBtn').addEventListener('click',function(){
+    location.reload();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

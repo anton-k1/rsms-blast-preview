@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadySMS — New Blast</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-hover:#1d4ed8;
+    --ink:#0f172a; --text:#111; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --border-2:#eef0f4;
+    --page:#eef1f5; --card:#fff;
+    --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--text);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:28px 20px 80px}
+
+  /* Header */
+  .topbar{display:flex; align-items:center; gap:10px; margin-bottom:26px}
+  .logo{display:flex; align-items:center; gap:9px; font-weight:700; color:var(--ink); font-size:16px}
+  .logo .mark{
+    width:30px; height:30px; border-radius:9px; background:var(--ai);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .topbar .credits{margin-left:auto; font-size:13px; color:var(--muted); display:flex; align-items:center; gap:6px}
+  .topbar .credits b{color:var(--ink)}
+
+  /* Card */
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:16px; box-shadow:var(--shadow); padding:24px;
+  }
+
+  /* Intro / prompt stage */
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12.5px; font-weight:600; color:var(--primary);
+    background:#eef4ff; border:1px solid #dbe6ff; padding:5px 11px; border-radius:99px;
+    margin-bottom:16px;
+  }
+  h1{font-size:25px; line-height:1.25; margin:0 0 6px; color:var(--ink); letter-spacing:-.4px}
+  .sub{color:var(--muted); font-size:15px; margin:0 0 20px}
+
+  .prompt-box{
+    border:1.5px solid var(--border); border-radius:14px; background:#fff;
+    transition:border-color .15s, box-shadow .15s; overflow:hidden;
+  }
+  .prompt-box:focus-within{border-color:var(--primary); box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+  textarea#prompt{
+    width:100%; border:0; outline:0; resize:none; padding:16px 16px 8px;
+    font-family:inherit; font-size:16px; color:var(--text); background:transparent;
+    line-height:1.5; display:block;
+  }
+  textarea#prompt::placeholder{color:var(--faint)}
+  .prompt-foot{
+    display:flex; align-items:center; gap:10px; padding:10px 12px 12px;
+  }
+  .prompt-foot .hint{font-size:12.5px; color:var(--faint); display:flex; align-items:center; gap:6px}
+  .prompt-foot .spacer{margin-left:auto}
+
+  .chips{display:flex; flex-wrap:wrap; gap:9px; margin-top:16px}
+  .chip{
+    font-size:13.5px; color:var(--ink); background:#fff; border:1px solid var(--border);
+    padding:9px 13px; border-radius:99px; cursor:pointer; transition:.14s;
+    display:inline-flex; align-items:center; gap:7px; text-align:left;
+  }
+  .chip:hover{border-color:var(--primary); background:#f5f8ff; color:var(--primary)}
+  .chip svg{opacity:.55; flex:none}
+  .chip:hover svg{opacity:1}
+
+  /* Buttons */
+  .btn{
+    font-family:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+    border-radius:11px; padding:11px 18px; border:1px solid transparent;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:.14s; white-space:nowrap;
+  }
+  .btn-primary{background:var(--primary); color:#fff}
+  .btn-primary:hover{background:var(--primary-hover)}
+  .btn-primary:disabled{background:#b9c6e6; cursor:default}
+  .btn-ghost{background:#fff; color:var(--ink); border-color:var(--border)}
+  .btn-ghost:hover{border-color:#cfd6e4; background:#fafbfe}
+  .btn-ai{background:var(--ai); color:#fff}
+  .btn-ai:hover{filter:brightness(.96)}
+  .btn-block{width:100%}
+
+  .escape{margin-top:18px; text-align:center}
+  .escape a{color:var(--muted); font-size:13px; text-decoration:none; border-bottom:1px dashed #cbd2e0; padding-bottom:1px}
+  .escape a:hover{color:var(--primary); border-color:var(--primary)}
+
+  /* Thinking */
+  #thinking{display:none; padding:8px 4px}
+  .think-row{display:flex; align-items:flex-start; gap:13px; margin-bottom:16px}
+  .think-avatar{
+    width:34px; height:34px; border-radius:10px; background:var(--ai); flex:none;
+    display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .think-lines{flex:1; padding-top:3px}
+  .think-step{
+    font-size:14.5px; color:var(--muted); opacity:.35; margin:0 0 11px;
+    display:flex; align-items:center; gap:9px; transition:opacity .3s, color .3s;
+  }
+  .think-step.active{opacity:1; color:var(--ink)}
+  .think-step.done{opacity:1; color:var(--ink)}
+  .think-dot{
+    width:15px; height:15px; flex:none; border-radius:99px; border:2px solid #d7dbe4;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .think-step.active .think-dot{border-color:var(--primary); animation:pulse 1s infinite}
+  .think-step.done .think-dot{border-color:var(--primary); background:var(--primary)}
+  .think-step.done .think-dot svg{display:block}
+  .think-dot svg{display:none}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.3)}50%{box-shadow:0 0 0 5px rgba(37,99,235,0)}}
+
+  /* Draft card */
+  #draft{display:none}
+  .ai-note{
+    display:flex; gap:12px; align-items:flex-start; background:#f5f9ff;
+    border:1px solid #dbe6ff; border-radius:12px; padding:13px 15px; margin-bottom:20px;
+  }
+  .ai-note .think-avatar{width:30px; height:30px; border-radius:9px}
+  .ai-note p{margin:0; font-size:13.5px; color:#33415c; line-height:1.5}
+  .ai-note p b{color:var(--ink)}
+
+  .field{margin-bottom:18px}
+  .field-label{
+    display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.5px; color:var(--faint); margin-bottom:8px;
+  }
+  .field-label .ai-tag{
+    text-transform:none; letter-spacing:0; font-weight:600; font-size:11px; color:var(--primary);
+    background:#eef4ff; border-radius:99px; padding:2px 8px; display:inline-flex; align-items:center; gap:4px;
+  }
+
+  /* Audience selector */
+  .aud{
+    display:flex; align-items:center; gap:13px; border:1px solid var(--border);
+    border-radius:12px; padding:13px 15px; cursor:pointer; transition:.14s; background:#fff;
+  }
+  .aud:hover{border-color:#cfd6e4}
+  .aud .aud-icon{
+    width:38px; height:38px; border-radius:10px; background:#eef4ff; color:var(--primary);
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .aud .aud-main{flex:1; min-width:0}
+  .aud .aud-name{font-weight:600; font-size:15px; color:var(--ink)}
+  .aud .aud-count{font-size:13px; color:var(--muted); margin-top:1px}
+  .aud .aud-caret{color:var(--faint); flex:none}
+  .aud-menu{
+    display:none; margin-top:8px; border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; box-shadow:0 8px 24px rgba(20,20,50,.08);
+  }
+  .aud-menu.open{display:block}
+  .aud-opt{
+    display:flex; align-items:center; gap:12px; padding:11px 15px; cursor:pointer;
+    border-bottom:1px solid var(--border-2); transition:background .12s;
+  }
+  .aud-opt:last-child{border-bottom:0}
+  .aud-opt:hover{background:#f5f8ff}
+  .aud-opt .o-main{flex:1}
+  .aud-opt .o-name{font-size:14.5px; font-weight:600; color:var(--ink)}
+  .aud-opt .o-count{font-size:12.5px; color:var(--muted)}
+  .aud-opt .o-check{color:var(--primary); opacity:0}
+  .aud-opt.sel .o-check{opacity:1}
+  .aud-opt.sel{background:#f5f8ff}
+  .aud-opt-head{
+    font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--faint); padding:9px 15px 5px; background:#fafbfe;
+  }
+
+  /* Message editor */
+  .msg-editor{
+    border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:.15s;
+  }
+  .msg-editor:focus-within{border-color:var(--primary); box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+  textarea#msg{
+    width:100%; border:0; outline:0; resize:vertical; min-height:96px; padding:14px 15px;
+    font-family:inherit; font-size:15px; line-height:1.55; color:var(--text); display:block;
+  }
+  .msg-bar{
+    display:flex; align-items:center; gap:8px; padding:9px 12px; border-top:1px solid var(--border-2);
+    background:#fafbfe; font-size:12.5px; color:var(--muted);
+  }
+  .token{
+    font-size:12px; font-weight:600; color:var(--primary); background:#eef4ff; border:1px solid #dbe6ff;
+    border-radius:99px; padding:4px 10px; cursor:pointer; transition:.12s;
+  }
+  .token:hover{background:#dbe6ff}
+  .msg-bar .spacer{margin-left:auto}
+  .seg-count b{color:var(--ink)}
+
+  /* Timing row */
+  .row2{display:flex; gap:12px}
+  .row2 .field{flex:1; margin-bottom:0}
+  .timing{
+    display:flex; align-items:center; gap:11px; border:1px solid var(--border);
+    border-radius:12px; padding:13px 15px; background:#fff;
+  }
+  .timing .t-icon{color:var(--primary); flex:none; display:flex}
+  .timing .t-main{flex:1}
+  .timing .t-title{font-size:14.5px; font-weight:600; color:var(--ink)}
+  .timing .t-sub{font-size:12.5px; color:var(--muted); margin-top:1px}
+
+  .defaults{
+    display:flex; flex-wrap:wrap; gap:7px; margin:2px 0 22px;
+  }
+  .def-pill{
+    font-size:12.5px; color:#3a4256; background:#f3f5fa; border:1px solid var(--border-2);
+    border-radius:99px; padding:5px 11px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .def-pill svg{color:#22a06b; flex:none}
+
+  .send-row{display:flex; gap:11px; align-items:center; margin-top:6px}
+  .send-row .btn-primary{flex:1; font-size:15.5px; padding:14px}
+  .send-summary{font-size:12.5px; color:var(--muted); text-align:center; margin-top:12px}
+  .send-summary b{color:var(--ink)}
+
+  .compliance{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    font-size:12px; color:var(--faint); margin-top:16px;
+  }
+
+  /* Sent screen */
+  #sent{display:none; text-align:center; padding:22px 10px 12px}
+  .sent-check{
+    width:76px; height:76px; border-radius:99px; margin:0 auto 20px;
+    background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 30px rgba(34,197,94,.35); animation:pop .4s cubic-bezier(.2,1.3,.5,1);
+  }
+  @keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+  #sent h2{font-size:24px; color:var(--ink); margin:0 0 8px; letter-spacing:-.3px}
+  #sent .sent-sub{color:var(--muted); font-size:15px; margin:0 auto 24px; max-width:400px}
+  .sent-stats{
+    display:flex; gap:12px; justify-content:center; margin-bottom:26px;
+  }
+  .sent-stat{
+    background:#f7f9fc; border:1px solid var(--border-2); border-radius:12px;
+    padding:14px 20px; min-width:110px;
+  }
+  .sent-stat .n{font-size:22px; font-weight:700; color:var(--ink)}
+  .sent-stat .l{font-size:12px; color:var(--muted); margin-top:2px}
+  .sent-actions{display:flex; gap:11px; justify-content:center}
+
+  .fade{animation:fadeIn .35s ease}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo">
+      <span class="mark">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.38 8.38 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      ReadySMS
+    </div>
+    <div class="credits">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>
+      <span><b>1,240</b> contacts</span>
+    </div>
+  </div>
+
+  <!-- STAGE 1: PROMPT -->
+  <div class="card" id="stage-prompt">
+    <span class="hero-eyebrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+      AI blast composer
+    </span>
+    <h1>What do you want to text, and to who?</h1>
+    <p class="sub">Describe it in plain English. The AI writes the message, picks the audience, and gets everything ready — you just approve.</p>
+
+    <div class="prompt-box">
+      <textarea id="prompt" rows="2" placeholder="e.g. Tell my new leads about Saturday's open house at 123 Oak St, 1–3pm…"></textarea>
+      <div class="prompt-foot">
+        <span class="hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          The AI picks a real audience from your contacts
+        </span>
+        <div class="spacer"></div>
+        <button class="btn btn-ai" id="draftBtn" onclick="draftIt()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+          Draft it
+        </button>
+      </div>
+    </div>
+
+    <div class="chips">
+      <button class="chip" onclick="useChip(this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Tell my new leads about Saturday's open house
+      </button>
+      <button class="chip" onclick="useChip(this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Follow up with everyone who didn't reply to my last blast
+      </button>
+      <button class="chip" onclick="useChip(this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Send my VIPs an exclusive pre-market listing
+      </button>
+    </div>
+
+    <div class="escape">
+      <a href="#" onclick="escapeHatch(event)">Prefer to fill it in myself?</a>
+    </div>
+  </div>
+
+  <!-- STAGE 2: THINKING -->
+  <div class="card fade" id="thinking">
+    <div class="think-row">
+      <div class="think-avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+      </div>
+      <div class="think-lines" id="thinkLines">
+        <p class="think-step" data-step="0"><span class="think-dot"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Reading your request…</p>
+        <p class="think-step" data-step="1"><span class="think-dot"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Finding the right audience in your contacts…</p>
+        <p class="think-step" data-step="2"><span class="think-dot"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Writing your message…</p>
+        <p class="think-step" data-step="3"><span class="think-dot"><svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Setting timing &amp; compliance…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 3: DRAFT -->
+  <div class="card fade" id="draft">
+    <div class="ai-note">
+      <div class="think-avatar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+      </div>
+      <p id="aiExplain">Here's your draft — review and tweak anything, then hit send.</p>
+    </div>
+
+    <!-- Audience -->
+    <div class="field">
+      <div class="field-label">To <span class="ai-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+        AI picked</span></div>
+      <div class="aud" id="audToggle" onclick="toggleAud()">
+        <div class="aud-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="aud-main">
+          <div class="aud-name" id="audName">New leads this week</div>
+          <div class="aud-count" id="audCount">210 people · opt-outs auto-skipped</div>
+        </div>
+        <span class="aud-caret">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+      <div class="aud-menu" id="audMenu">
+        <div class="aud-opt-head">Saved segments</div>
+        <div class="aud-opt" onclick="pickAud(this,'New leads this week',210)">
+          <div class="o-main"><div class="o-name">New leads this week</div><div class="o-count">210 people</div></div>
+          <span class="o-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="aud-opt" onclick="pickAud(this,'VIP customers',88)">
+          <div class="o-main"><div class="o-name">VIP customers</div><div class="o-count">88 people</div></div>
+          <span class="o-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="aud-opt-head">Recent blasts</div>
+        <div class="aud-opt" onclick="pickAud(this,'Oct Promo — non-responders',340)">
+          <div class="o-main"><div class="o-name">Oct Promo — non-responders</div><div class="o-count">340 people</div></div>
+          <span class="o-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="aud-opt" onclick="pickAud(this,'Expired listings',88)">
+          <div class="o-main"><div class="o-name">Expired listings</div><div class="o-count">88 people</div></div>
+          <span class="o-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="aud-opt-head">Everyone</div>
+        <div class="aud-opt" onclick="pickAud(this,'All contacts',1240)">
+          <div class="o-main"><div class="o-name">All contacts</div><div class="o-count">1,240 people</div></div>
+          <span class="o-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="field">
+      <div class="field-label">Message <span class="ai-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+        AI wrote</span></div>
+      <div class="msg-editor">
+        <textarea id="msg" oninput="updateSeg()"></textarea>
+        <div class="msg-bar">
+          <span>Insert:</span>
+          <span class="token" onclick="insertToken('{{first_name}}')">{{first_name}}</span>
+          <span class="token" onclick="insertToken('{{last_name}}')">{{last_name}}</span>
+          <span class="spacer"></span>
+          <span class="seg-count"><b id="charCount">0</b> chars · <b id="segCount">1</b> segment</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timing -->
+    <div class="field">
+      <div class="field-label">When <span class="ai-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.8L20 9.7l-4.9 3.6L17 20l-5-3.6L7 20l1.9-6.7L4 9.7l6.1-1.9L12 2z" fill="currentColor"/></svg>
+        AI set</span></div>
+      <div class="timing">
+        <span class="t-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        <div class="t-main">
+          <div class="t-title">Send now</div>
+          <div class="t-sub">Delivered at a carrier-safe speed to protect your numbers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Defaults -->
+    <div class="defaults">
+      <span class="def-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Carrier-safe speed</span>
+      <span class="def-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Local-presence numbers</span>
+      <span class="def-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Opt-outs auto-skipped</span>
+    </div>
+
+    <!-- Send -->
+    <div class="send-row">
+      <button class="btn btn-ghost" onclick="backToPrompt()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Redo
+      </button>
+      <button class="btn btn-primary" onclick="sendIt()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Send to <span id="sendCount">210</span> people
+      </button>
+    </div>
+    <div class="send-summary">Sending <b id="sumCount">210</b> texts · <b id="sumSeg">1</b> segment each · <b id="sumCost">$2.10</b> est.</div>
+
+    <div class="compliance">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Compliance (opt-out language + quiet hours) handled automatically
+    </div>
+  </div>
+
+  <!-- STAGE 4: SENT -->
+  <div class="card" id="sent">
+    <div class="sent-check">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2>Sent ✓</h2>
+    <p class="sent-sub">Your blast is on its way to <b id="sentAud">New leads this week</b>, sending at a carrier-safe speed right now.</p>
+    <div class="sent-stats">
+      <div class="sent-stat"><div class="n" id="sentPeople">210</div><div class="l">recipients</div></div>
+      <div class="sent-stat"><div class="n" id="sentSegs">210</div><div class="l">segments</div></div>
+      <div class="sent-stat"><div class="n">~2 min</div><div class="l">to finish</div></div>
+    </div>
+    <div class="sent-actions">
+      <button class="btn btn-ghost" onclick="viewReport()">View live report</button>
+      <button class="btn btn-primary" onclick="resetAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        New blast
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- state ----
+var state = { audience:'New leads this week', count:210 };
+
+// ---- canned AI "brain": pick audience + message from keywords ----
+function ai(input){
+  var t = (input||'').toLowerCase();
+  // open house / listing invite -> new leads
+  if(/(no\s?(t|n't)\s?reply|didn.?t reply|non.?respond|follow.?up|follow up)/.test(t)){
+    return {
+      aud:'Oct Promo — non-responders', count:340,
+      msg:"Hi {{first_name}}, just circling back — I don't want you to miss this. Still happy to answer any questions or set up a quick showing. Reply YES and I'll send details!",
+      why:"picked <b>Oct Promo — non-responders (340)</b> — the folks from your last blast who haven't replied yet — and wrote a warm, low-pressure nudge."
+    };
+  }
+  if(/(vip|exclusive|pre.?market|pre market|best client|top client)/.test(t)){
+    return {
+      aud:'VIP customers', count:88,
+      msg:"Hi {{first_name}} — before this hits the market, I wanted you to see it first. Beautiful new listing, and I'd love to get you in early. Want the address & photos? Reply YES.",
+      why:"picked <b>VIP customers (88)</b> for an exclusive first look, and wrote an early-access invite that makes them feel prioritized."
+    };
+  }
+  if(/(open house|open-house|showing|tour|saturday|sunday|this weekend|oak)/.test(t) || /new lead/.test(t)){
+    return {
+      aud:'New leads this week', count:210,
+      msg:"Hi {{first_name}}! Hosting an open house this Saturday, 1–3pm at 123 Oak St — modern 3BR you'll love. Swing by, no appointment needed. Reply YES and I'll text you the details!",
+      why:"picked <b>New leads this week (210)</b> — freshest prospects, most likely to attend — and wrote a friendly, specific invite with the date, time and address."
+    };
+  }
+  // generic fallback
+  return {
+    aud:'New leads this week', count:210,
+    msg:"Hi {{first_name}}! Quick note from me — I've got something I think you'll be interested in. Reply YES and I'll send you all the details. Talk soon!",
+    why:"picked <b>New leads this week (210)</b> as the best-fit audience and drafted a friendly opener you can tweak to match your offer."
+  };
+}
+
+// ---- stage 1 ----
+function useChip(el){
+  document.getElementById('prompt').value = el.textContent.trim();
+  draftIt();
+}
+function escapeHatch(e){
+  e.preventDefault();
+  // ponytail: escape hatch just seeds the draft as a blank editable form (no separate wizard needed)
+  document.getElementById('prompt').value='';
+  var r = { aud:'New leads this week', count:210, msg:'', why:"Blank canvas — fill in the message and pick your audience yourself." };
+  renderDraft(r, true);
+}
+
+var thinkTimers=[];
+function draftIt(){
+  var val = document.getElementById('prompt').value.trim();
+  if(!val){ document.getElementById('prompt').focus(); return; }
+  var result = ai(val);
+
+  document.getElementById('stage-prompt').style.display='none';
+  var think = document.getElementById('thinking');
+  think.style.display='block';
+  document.getElementById('draft').style.display='none';
+
+  // reset steps
+  var steps = document.querySelectorAll('#thinkLines .think-step');
+  steps.forEach(function(s){ s.className='think-step'; });
+  thinkTimers.forEach(clearTimeout); thinkTimers=[];
+
+  var delays=[120, 700, 1500, 2300];
+  steps.forEach(function(s,i){
+    thinkTimers.push(setTimeout(function(){
+      // finish previous
+      if(i>0) steps[i-1].className='think-step done';
+      s.className='think-step active';
+    }, delays[i]));
+  });
+  thinkTimers.push(setTimeout(function(){
+    steps[steps.length-1].className='think-step done';
+  }, 3050));
+  thinkTimers.push(setTimeout(function(){
+    think.style.display='none';
+    renderDraft(result, false);
+  }, 3350));
+}
+
+// ---- stage 3 ----
+function renderDraft(r, isManual){
+  var draft = document.getElementById('draft');
+  draft.style.display='block';
+  draft.classList.remove('fade'); void draft.offsetWidth; draft.classList.add('fade');
+
+  document.getElementById('msg').value = r.msg;
+  setAudience(r.aud, r.count);
+  document.getElementById('aiExplain').innerHTML = isManual
+    ? "Fill it in yourself — I've left the message blank and picked a starter audience you can change."
+    : "I " + r.why;
+  updateSeg();
+  closeAudMenu();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function setAudience(name,count){
+  state.audience=name; state.count=count;
+  document.getElementById('audName').textContent=name;
+  document.getElementById('audCount').textContent=count.toLocaleString()+' people · opt-outs auto-skipped';
+  document.getElementById('sendCount').textContent=count.toLocaleString();
+  document.getElementById('sumCount').textContent=count.toLocaleString();
+  // mark selected in menu
+  document.querySelectorAll('.aud-opt').forEach(function(o){
+    o.classList.toggle('sel', o.querySelector('.o-name').textContent===name);
+  });
+  updateCost();
+}
+
+function toggleAud(){ document.getElementById('audMenu').classList.toggle('open'); }
+function closeAudMenu(){ document.getElementById('audMenu').classList.remove('open'); }
+function pickAud(el,name,count){
+  setAudience(name,count);
+  closeAudMenu();
+}
+
+function insertToken(tok){
+  var ta=document.getElementById('msg');
+  var s=ta.selectionStart, e=ta.selectionEnd, v=ta.value;
+  ta.value = v.slice(0,s)+tok+v.slice(e);
+  ta.focus(); ta.selectionStart=ta.selectionEnd=s+tok.length;
+  updateSeg();
+}
+
+function updateSeg(){
+  var v=document.getElementById('msg').value;
+  // count merge tokens as ~9 chars each (personalized expansion) for a believable estimate
+  var approx = v.replace(/\{\{first_name\}\}/g,'123456789').replace(/\{\{last_name\}\}/g,'12345678').length;
+  var segs = Math.max(1, Math.ceil(approx/160));
+  document.getElementById('charCount').textContent=v.length;
+  document.getElementById('segCount').textContent=segs;
+  document.getElementById('sumSeg').textContent=segs;
+  updateCost(segs);
+}
+
+function updateCost(segsArg){
+  var segs = segsArg || parseInt(document.getElementById('segCount').textContent,10) || 1;
+  var cost = state.count * segs * 0.01; // $0.01/segment (registered rate)
+  document.getElementById('sumCost').textContent='$'+cost.toFixed(2);
+}
+
+function backToPrompt(){
+  document.getElementById('draft').style.display='none';
+  document.getElementById('stage-prompt').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('prompt').focus();
+}
+
+// ---- stage 4 ----
+function sendIt(){
+  var segs=parseInt(document.getElementById('segCount').textContent,10)||1;
+  document.getElementById('draft').style.display='none';
+  var sent=document.getElementById('sent');
+  sent.style.display='block';
+  sent.classList.add('fade');
+  document.getElementById('sentAud').textContent=state.audience;
+  document.getElementById('sentPeople').textContent=state.count.toLocaleString();
+  document.getElementById('sentSegs').textContent=(state.count*segs).toLocaleString();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function viewReport(){ resetAll(); }
+
+function resetAll(){
+  document.getElementById('sent').style.display='none';
+  document.getElementById('stage-prompt').style.display='block';
+  document.getElementById('prompt').value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('prompt').focus();
+}
+
+// Enter to draft (Shift+Enter = newline)
+document.getElementById('prompt').addEventListener('keydown',function(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); draftIt(); }
+});
+// close audience menu on outside click
+document.addEventListener('click',function(e){
+  var t=document.getElementById('audToggle'), m=document.getElementById('audMenu');
+  if(m && m.classList.contains('open') && !t.contains(e.target) && !m.contains(e.target)) closeAudMenu();
+});
+</script>
+</body>
+</html>

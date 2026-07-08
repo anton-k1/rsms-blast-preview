@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadySMS — Fast Blast</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-h:#1d4ed8;
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --page:#eef1f5; --card:#fff;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:24px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:680px}
+
+  /* top bar */
+  .topbar{
+    display:flex; align-items:center; gap:10px; margin:0 4px 14px;
+    color:var(--muted); font-size:13px;
+  }
+  .logo{display:flex;align-items:center;gap:7px;font-weight:650;color:var(--ink);font-size:14px}
+  .logo svg{color:var(--primary)}
+  .topbar .spacer{flex:1}
+  .topbar .hint{display:flex;align-items:center;gap:6px}
+
+  kbd{
+    font-family:inherit; font-size:11px; font-weight:600; color:#4b5563;
+    background:#f3f4f7; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:6px; padding:1px 6px; min-width:18px; text-align:center;
+    display:inline-block; line-height:16px;
+  }
+
+  /* the one surface */
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    box-shadow:var(--shadow); overflow:visible; position:relative;
+  }
+
+  /* recipient header row */
+  .rowhead{
+    display:flex; align-items:center; gap:8px; padding:14px 16px 12px;
+    border-bottom:1px solid var(--border); flex-wrap:wrap;
+  }
+  .rowhead .lbl{font-size:13px;color:var(--faint);font-weight:600;margin-right:2px}
+
+  /* hero message input */
+  .heroWrap{padding:6px 16px 0}
+  #msg{
+    width:100%; border:none; outline:none; resize:none;
+    font-family:inherit; font-size:20px; line-height:1.5; color:var(--ink);
+    padding:16px 2px 6px; min-height:132px; letter-spacing:-.1px;
+  }
+  #msg::placeholder{color:var(--faint)}
+
+  /* footer row: chips + counts + send */
+  .foot{
+    display:flex; align-items:center; gap:8px; padding:12px 16px 14px;
+    border-top:1px solid var(--border); flex-wrap:wrap;
+  }
+  .foot .spacer{flex:1}
+
+  /* chips */
+  .chip{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:13px; font-weight:600; color:var(--ink);
+    background:#f7f8fb; border:1px solid var(--border); border-radius:99px;
+    padding:6px 12px; cursor:pointer; user-select:none; white-space:nowrap;
+    transition:background .12s, border-color .12s, box-shadow .12s;
+  }
+  .chip:hover{background:#eef1f7; border-color:#d5d9e4}
+  .chip:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(37,99,235,.22); border-color:var(--primary)}
+  .chip svg{color:var(--muted); flex:none}
+  .chip .cnt{color:var(--muted); font-weight:600}
+  .chip .car{color:var(--faint); font-size:11px; margin-left:-2px}
+
+  .readout{
+    font-size:13px; color:var(--muted); font-weight:600; white-space:nowrap;
+    display:flex; align-items:center; gap:8px;
+  }
+  .readout b{color:var(--ink); font-weight:700}
+  .readout .dot{width:3px;height:3px;border-radius:50%;background:var(--faint)}
+
+  /* send button */
+  .send{
+    display:inline-flex; align-items:center; gap:9px;
+    background:var(--primary); color:#fff; border:none; border-radius:99px;
+    font-family:inherit; font-size:14px; font-weight:650; cursor:pointer;
+    padding:9px 16px; transition:background .12s, transform .06s;
+  }
+  .send:hover{background:var(--primary-h)}
+  .send:active{transform:translateY(1px)}
+  .send kbd{background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.28); color:#eaf1ff}
+  .send.confirm{background:#0f172a}
+  .send.confirm:hover{background:#1e293b}
+  .send:disabled{background:#c9cfda;cursor:default}
+  .send svg{flex:none}
+
+  /* meta strip under card */
+  .meta{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    margin:12px 6px 0; font-size:12px; color:var(--faint);
+  }
+  .meta .pill{
+    display:inline-flex;align-items:center;gap:5px;
+    background:#f3f4f7;border:1px solid var(--border);border-radius:99px;padding:3px 9px;
+    color:var(--muted); font-weight:500;
+  }
+  .meta .pill svg{color:var(--faint)}
+  .meta .compliance{margin-left:auto;display:inline-flex;align-items:center;gap:5px;color:var(--faint)}
+  .meta .compliance svg{color:#22c55e}
+
+  /* popper */
+  .pop{
+    position:absolute; z-index:40; background:#fff; border:1px solid var(--border);
+    border-radius:12px; box-shadow:var(--shadow); min-width:280px; padding:6px;
+    display:none;
+  }
+  .pop.open{display:block; animation:pin .1s ease}
+  @keyframes pin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .pop .search{
+    display:flex;align-items:center;gap:8px;padding:8px 10px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;
+  }
+  .pop .search svg{color:var(--faint)}
+  .pop .search input{
+    border:none;outline:none;font-family:inherit;font-size:14px;color:var(--ink);width:100%;background:transparent;
+  }
+  .pop .grp{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px 4px}
+  .opt{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px;
+  }
+  .opt:hover,.opt.active{background:#f0f4ff}
+  .opt .oi{width:26px;height:26px;border-radius:7px;background:#eef2ff;color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none}
+  .opt .otxt{flex:1;font-weight:600;color:var(--ink)}
+  .opt .ocnt{color:var(--muted);font-size:12px;font-weight:600}
+  .opt.check .oi{background:#e7f8ee;color:#16a34a}
+
+  /* schedule popper */
+  .pop.when{min-width:240px;padding:6px}
+  .pop.when .whd{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px 4px}
+
+  /* preview bubble */
+  .preview{
+    margin:14px 6px 0; display:flex; align-items:flex-start; gap:9px;
+  }
+  .preview .plabel{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;padding-top:9px;flex:none}
+  .bubble{
+    background:#0f172a; color:#fff; border-radius:18px 18px 18px 5px;
+    padding:9px 13px; font-size:14px; line-height:1.45; max-width:400px;
+    box-shadow:0 4px 14px rgba(15,23,42,.14);
+  }
+  .bubble .mf{color:#93c5fd; font-weight:600}
+
+  /* sent state */
+  .sent{
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:52px 20px 54px;
+  }
+  .sent.show{display:flex; animation:pin .18s ease}
+  .sent .ok{
+    width:56px;height:56px;border-radius:50%;background:#e7f8ee;color:#16a34a;
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+    animation:pop .28s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+  .sent h2{font-size:20px;font-weight:700;letter-spacing:-.2px;margin-bottom:6px}
+  .sent p{color:var(--muted);font-size:14px;margin-bottom:20px}
+  .sent .again{
+    display:inline-flex;align-items:center;gap:7px;background:#f7f8fb;border:1px solid var(--border);
+    border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;
+  }
+  .sent .again:hover{background:#eef1f7}
+
+  .composer.hide{display:none}
+  .overlimit{color:#dc2626 !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="logo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      ReadySMS
+    </span>
+    <span class="spacer"></span>
+    <span class="hint"><kbd>⌘</kbd><kbd>K</kbd> recipients</span>
+    <span class="hint"><kbd>⌘</kbd><kbd>↵</kbd> send</span>
+  </div>
+
+  <div class="card" id="card">
+
+    <div class="composer" id="composer">
+      <!-- recipient header -->
+      <div class="rowhead">
+        <span class="lbl">To</span>
+        <button class="chip" id="toChip" aria-haspopup="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span id="toName">Everyone</span> <span class="cnt" id="toCount">· 1,240</span>
+        </button>
+        <span class="lbl" style="margin-left:4px">·</span>
+        <button class="chip" id="whenChip" aria-haspopup="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span id="whenName">Now</span>
+        </button>
+      </div>
+
+      <!-- hero message -->
+      <div class="heroWrap">
+        <textarea id="msg" placeholder="Write your message…  Try {{first_name}} to personalize." spellcheck="false">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+      </div>
+
+      <!-- footer -->
+      <div class="foot">
+        <button class="chip" id="mergeChip" title="Insert merge field">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+          Insert field
+        </button>
+        <span class="readout" id="readout">
+          <span id="chars">0 chars</span><span class="dot"></span><span id="segs"><b>1</b> segment</span><span class="dot"></span><b id="cost">$12.40</b>
+        </span>
+        <span class="spacer"></span>
+        <button class="send" id="sendBtn">
+          <span id="sendLabel">Send</span>
+          <svg id="sendArrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          <kbd id="sendKbd" style="display:none">⌘↵</kbd>
+        </button>
+      </div>
+
+      <!-- popper: recipients -->
+      <div class="pop" id="toPop" style="top:8px;left:44px">
+        <div class="search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="toSearch" placeholder="Search segments or blasts…" autocomplete="off">
+        </div>
+        <div id="toList"></div>
+      </div>
+
+      <!-- popper: schedule -->
+      <div class="pop when" id="whenPop" style="top:8px;left:170px">
+        <div class="whd">Send</div>
+        <div id="whenList"></div>
+      </div>
+
+      <!-- popper: merge -->
+      <div class="pop" id="mergePop" style="bottom:56px;left:16px;min-width:220px">
+        <div class="grp">Insert merge field</div>
+        <div id="mergeList"></div>
+      </div>
+    </div>
+
+    <!-- sent -->
+    <div class="sent" id="sent">
+      <div class="ok">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h2>Sent ✓</h2>
+      <p id="sentSub">1,240 texts queued</p>
+      <button class="again" id="againBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3 8a9 9 0 1 1-2 5"/></svg>
+        New blast
+      </button>
+    </div>
+  </div>
+
+  <!-- meta strip -->
+  <div class="meta" id="metaStrip">
+    <span class="pill" id="metaSpeed"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Carrier speed</span>
+    <span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Local presence</span>
+    <span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><path d="M12 2v10"/></svg>Opt-outs skipped</span>
+    <span class="compliance" title="STOP/HELP + quiet hours added automatically"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Compliance automatic</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOTAL = 1240;
+  var RATE = 0.01; // $ per segment per recipient (1240 * 1 seg * $0.01 = $12.40)
+
+  var recipients = [
+    {id:'all',   name:'Everyone',              count:1240, kind:'all'},
+    {id:'vip',   name:'VIP customers',         count:88,   kind:'seg'},
+    {id:'leads', name:'New leads this week',   count:210,  kind:'seg'},
+    {id:'oct',   name:'Oct Promo',             count:340,  kind:'blast'},
+    {id:'exp',   name:'Expired listings',      count:88,   kind:'blast'}
+  ];
+  var current = recipients[0];
+  var whenLabel = 'Now';
+
+  var $ = function(s){return document.getElementById(s);};
+  var fmt = function(n){return n.toLocaleString('en-US');};
+
+  // ---------- count / cost / preview ----------
+  function segCount(text){
+    var len = text.length;
+    if(len === 0) return 1;
+    return Math.max(1, Math.ceil(len/160));
+  }
+  function update(){
+    var text = $('msg').value;
+    var len = text.length;
+    var segs = segCount(text);
+    var cost = (current.count * segs * RATE);
+
+    var charsEl = $('chars');
+    charsEl.textContent = len + ' char' + (len===1?'':'s');
+    charsEl.classList.toggle('overlimit', segs > 1 && len%160 !== 0 && len>160);
+
+    $('segs').innerHTML = '<b>'+segs+'</b> segment'+(segs===1?'':'s');
+    $('cost').textContent = '$'+cost.toFixed(2);
+
+    // preview with merge highlight + resolved sample name
+    var safe = text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\{\{\s*first_name\s*\}\}/g,'<span class="mf">Jordan</span>')
+      .replace(/\{\{\s*last_name\s*\}\}/g,'<span class="mf">Reeves</span>')
+      .replace(/\{\{\s*([^}]+?)\s*\}\}/g,'<span class="mf">{{$1}}</span>');
+    $('bubbleText').innerHTML = safe || '<span style="opacity:.5">Your message preview…</span>';
+
+    // send button reflects recipient count
+    if(!confirming){ $('sendLabel').textContent = 'Send'; }
+    $('metaSpeed'); // no-op keep
+  }
+
+  // ---------- recipient popper ----------
+  function renderToList(filter){
+    filter = (filter||'').toLowerCase();
+    var segs = recipients.filter(function(r){return r.kind!=='blast' && r.name.toLowerCase().indexOf(filter)>=0;});
+    var blasts = recipients.filter(function(r){return r.kind==='blast' && r.name.toLowerCase().indexOf(filter)>=0;});
+    var html = '';
+    function row(r){
+      var icon = r.kind==='all'
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18"/></svg>'
+        : (r.kind==='seg'
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.2"/><path d="M2 20a7 7 0 0 1 14 0"/><path d="M17 8h5"/><path d="M19.5 5.5v5"/></svg>'
+          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>');
+      var checked = r.id===current.id ? ' check active' : '';
+      return '<div class="opt'+checked+'" data-id="'+r.id+'">'+
+        '<span class="oi">'+icon+'</span>'+
+        '<span class="otxt">'+r.name+'</span>'+
+        '<span class="ocnt">'+fmt(r.count)+'</span></div>';
+    }
+    if(segs.length){ html += '<div class="grp">Segments</div>'; segs.forEach(function(r){html+=row(r);}); }
+    if(blasts.length){ html += '<div class="grp">Recent blasts</div>'; blasts.forEach(function(r){html+=row(r);}); }
+    if(!segs.length && !blasts.length){ html = '<div class="opt" style="color:var(--faint);cursor:default">No matches</div>'; }
+    $('toList').innerHTML = html;
+    Array.prototype.forEach.call($('toList').querySelectorAll('.opt[data-id]'), function(el){
+      el.addEventListener('click', function(){ pickRecipient(el.getAttribute('data-id')); });
+    });
+  }
+  function pickRecipient(id){
+    var r = recipients.filter(function(x){return x.id===id;})[0];
+    if(!r) return;
+    current = r;
+    $('toName').textContent = r.name;
+    $('toCount').textContent = '· '+fmt(r.count);
+    closePops();
+    update();
+    $('msg').focus();
+  }
+
+  // ---------- schedule popper ----------
+  var whenOpts = [
+    {id:'now', label:'Now', sub:'as fast as carriers allow'},
+    {id:'2h',  label:'In 2 hours', sub:'stagger the send'},
+    {id:'tom', label:'Tomorrow 9:00 AM', sub:'local time per contact'},
+    {id:'mon', label:'Monday 10:00 AM', sub:'best open rate'}
+  ];
+  function renderWhen(){
+    var html='';
+    whenOpts.forEach(function(o){
+      var ic = o.id==='now'
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>'
+        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+      var act = o.label===whenLabel?' active':'';
+      html += '<div class="opt'+act+'" data-when="'+o.id+'"><span class="oi">'+ic+'</span>'+
+        '<span class="otxt">'+o.label+'<div style="font-weight:500;color:var(--muted);font-size:12px">'+o.sub+'</div></span></div>';
+    });
+    $('whenList').innerHTML = html;
+    Array.prototype.forEach.call($('whenList').querySelectorAll('.opt[data-when]'), function(el){
+      el.addEventListener('click', function(){
+        var o = whenOpts.filter(function(x){return x.id===el.getAttribute('data-when');})[0];
+        whenLabel = o.label;
+        $('whenName').textContent = o.id==='now' ? 'Now' : o.label;
+        closePops(); $('msg').focus();
+      });
+    });
+  }
+
+  // ---------- merge popper ----------
+  var mergeFields = [
+    {tok:'{{first_name}}', lbl:'First name'},
+    {tok:'{{last_name}}',  lbl:'Last name'}
+  ];
+  function renderMerge(){
+    var html='';
+    mergeFields.forEach(function(f){
+      html += '<div class="opt" data-tok="'+f.tok+'"><span class="oi"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>'+
+        '<span class="otxt">'+f.lbl+'</span><span class="ocnt" style="font-family:ui-monospace,monospace">'+f.tok+'</span></div>';
+    });
+    $('mergeList').innerHTML = html;
+    Array.prototype.forEach.call($('mergeList').querySelectorAll('.opt[data-tok]'), function(el){
+      el.addEventListener('click', function(){ insertToken(el.getAttribute('data-tok')); });
+    });
+  }
+  function insertToken(tok){
+    var ta = $('msg');
+    var s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0,s) + tok + ta.value.slice(e);
+    var pos = s + tok.length;
+    closePops();
+    ta.focus();
+    ta.setSelectionRange(pos,pos);
+    update();
+  }
+
+  // ---------- popper plumbing ----------
+  var openPop = null;
+  function closePops(){
+    ['toPop','whenPop','mergePop'].forEach(function(id){$(id).classList.remove('open');});
+    openPop = null;
+  }
+  function toggle(popId, prep){
+    if(openPop===popId){ closePops(); return; }
+    closePops();
+    if(prep) prep();
+    $(popId).classList.add('open');
+    openPop = popId;
+  }
+  $('toChip').addEventListener('click', function(e){ e.stopPropagation();
+    toggle('toPop', function(){ $('toSearch').value=''; renderToList(''); });
+    if(openPop==='toPop') setTimeout(function(){$('toSearch').focus();},0);
+  });
+  $('whenChip').addEventListener('click', function(e){ e.stopPropagation(); toggle('whenPop', renderWhen); });
+  $('mergeChip').addEventListener('click', function(e){ e.stopPropagation(); toggle('mergePop', renderMerge); });
+  $('toSearch').addEventListener('input', function(){ renderToList(this.value); });
+  document.addEventListener('click', function(){ if(openPop) closePops(); });
+  document.querySelectorAll('.pop').forEach(function(p){ p.addEventListener('click', function(e){e.stopPropagation();}); });
+
+  // ---------- send flow ----------
+  var confirming = false;
+  var confirmTimer = null;
+  function primeConfirm(){
+    if(confirming) { doSend(); return; }
+    confirming = true;
+    var btn = $('sendBtn');
+    btn.classList.add('confirm');
+    $('sendLabel').textContent = 'Send to '+fmt(current.count)+'?';
+    $('sendArrow').style.display='none';
+    $('sendKbd').style.display='inline-block';
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(resetConfirm, 3200);
+  }
+  function resetConfirm(){
+    confirming = false;
+    $('sendBtn').classList.remove('confirm');
+    $('sendLabel').textContent = 'Send';
+    $('sendArrow').style.display='';
+    $('sendKbd').style.display='none';
+  }
+  function doSend(){
+    clearTimeout(confirmTimer);
+    confirming = false;
+    closePops();
+    $('composer').classList.add('hide');
+    $('metaStrip').style.display='none';
+    document.querySelector('.preview').style.display='none';
+    var when = ($('whenName').textContent==='Now') ? 'queued' : 'scheduled';
+    $('sentSub').textContent = fmt(current.count)+' texts '+when +
+      ($('whenName').textContent==='Now' ? '' : ' · '+whenLabel);
+    $('sent').classList.add('show');
+  }
+  $('sendBtn').addEventListener('click', function(e){ e.stopPropagation(); primeConfirm(); });
+  $('againBtn').addEventListener('click', function(){
+    $('sent').classList.remove('show');
+    $('composer').classList.remove('hide');
+    $('metaStrip').style.display='';
+    document.querySelector('.preview').style.display='';
+    resetConfirm();
+    $('msg').focus();
+  });
+
+  // ---------- keyboard ----------
+  document.addEventListener('keydown', function(e){
+    var meta = e.metaKey || e.ctrlKey;
+    // ⌘K → recipients
+    if(meta && (e.key==='k'||e.key==='K')){
+      e.preventDefault();
+      toggle('toPop', function(){ $('toSearch').value=''; renderToList(''); });
+      if(openPop==='toPop') setTimeout(function(){$('toSearch').focus();},0);
+      return;
+    }
+    // ⌘↵ → send / confirm
+    if(meta && e.key==='Enter'){
+      e.preventDefault();
+      if($('sent').classList.contains('show')) return;
+      primeConfirm();
+      return;
+    }
+    // plain Enter in the search box picks first result
+    if(openPop==='toPop' && e.key==='Enter' && document.activeElement===$('toSearch')){
+      e.preventDefault();
+      var first = $('toList').querySelector('.opt[data-id]');
+      if(first) pickRecipient(first.getAttribute('data-id'));
+      return;
+    }
+    if(e.key==='Escape'){ if(openPop){closePops();} else if(confirming){resetConfirm();} }
+  });
+
+  $('msg').addEventListener('input', update);
+
+  // preview node (built here to keep DOM tidy)
+  var pv = document.createElement('div');
+  pv.className='preview';
+  pv.innerHTML = '<span class="plabel">Preview</span><div class="bubble"><span id="bubbleText"></span></div>';
+  $('card').insertAdjacentElement('afterend', pv);
+
+  update();
+  $('msg').focus();
+  $('msg').setSelectionRange($('msg').value.length,$('msg').value.length);
+})();
+</script>
+</body>
+</html>

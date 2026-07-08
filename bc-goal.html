@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadySMS · New Blast</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-h:#1d4ed8;
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --border-2:#eef0f4;
+    --page:#eef1f5; --card:#fff;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:28px 22px 80px}
+
+  /* Top bar */
+  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px}
+  .logo .mark{width:26px;height:26px;border-radius:8px;background:var(--primary);
+    display:grid;place-items:center;color:#fff}
+  .logo .mark svg{width:15px;height:15px}
+  .crumb{margin-left:6px;color:var(--faint);font-size:13.5px}
+  .crumb b{color:var(--muted);font-weight:600}
+  .steps{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--faint)}
+  .steps .dot{width:7px;height:7px;border-radius:99px;background:#d7dbe4}
+  .steps .dot.on{background:var(--primary)}
+
+  /* Screens */
+  .screen{display:none;animation:slideIn .34s cubic-bezier(.2,.7,.25,1)}
+  .screen.active{display:block}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  h1{font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 24px}
+
+  /* Goal grid */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .goal{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:20px;cursor:pointer;text-align:left;
+    transition:transform .16s,box-shadow .16s,border-color .16s;
+    display:flex;gap:15px;align-items:flex-start;
+  }
+  .goal:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#dfe3ee}
+  .goal:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+  .goal .ic{flex:0 0 auto;width:46px;height:46px;border-radius:12px;
+    display:grid;place-items:center}
+  .goal .ic svg{width:23px;height:23px}
+  .goal h3{margin:1px 0 5px;font-size:16.5px;letter-spacing:-.2px}
+  .goal p{margin:0 0 11px;color:var(--muted);font-size:13.5px}
+  .aud-hint{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;
+    color:var(--ink);background:#f3f5f9;border:1px solid var(--border-2);
+    padding:4px 10px;border-radius:99px;font-weight:500}
+  .aud-hint svg{width:13px;height:13px;color:var(--primary)}
+  /* tinted icons */
+  .t-blue{background:#e8effe;color:#2563eb}
+  .t-amber{background:#fef3e2;color:#d97706}
+  .t-green{background:#e7f6ee;color:#16a34a}
+  .t-violet{background:#efe9fe;color:#7c3aed}
+  .t-rose{background:#fdeaf0;color:#e11d48}
+  .t-cyan{background:#e2f4f8;color:#0891b2}
+
+  .helprow{margin-top:22px;color:var(--faint);font-size:12.5px;text-align:center}
+
+  /* Composer layout */
+  .composer{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+  @media(max-width:820px){.composer{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+  .pad{padding:22px}
+
+  .back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;
+    color:var(--muted);font-size:13.5px;cursor:pointer;padding:6px 0;margin-bottom:12px}
+  .back svg{width:15px;height:15px}
+  .back:hover{color:var(--ink)}
+
+  .goal-tag{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
+    color:var(--primary);background:#eef3fe;border:1px solid #dbe6fd;
+    padding:5px 11px;border-radius:99px;margin-bottom:14px}
+  .goal-tag svg{width:14px;height:14px}
+
+  .lbl{display:flex;align-items:center;justify-content:space-between;
+    font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 8px;
+    text-transform:uppercase;letter-spacing:.4px}
+  .editnote{font-size:12px;color:var(--faint);font-weight:500;text-transform:none;letter-spacing:0}
+
+  /* Audience row */
+  .aud-box{display:flex;align-items:center;gap:12px;border:1px solid var(--border);
+    border-radius:11px;padding:12px 14px;background:#fbfcfe}
+  .aud-box .a-ic{width:38px;height:38px;border-radius:10px;background:#e8effe;color:#2563eb;
+    display:grid;place-items:center;flex:0 0 auto}
+  .aud-box .a-ic svg{width:19px;height:19px}
+  .aud-box .a-name{font-weight:600;font-size:14.5px}
+  .aud-box .a-meta{font-size:12.5px;color:var(--muted)}
+  .aud-box .change{margin-left:auto;background:none;border:none;color:var(--primary);
+    font-weight:600;font-size:13px;cursor:pointer;padding:6px 8px;border-radius:8px}
+  .aud-box .change:hover{background:#eef3fe}
+
+  /* Audience picker (inline expand) */
+  .aud-picker{margin-top:10px;border:1px solid var(--border);border-radius:11px;overflow:hidden;display:none}
+  .aud-picker.open{display:block;animation:slideIn .2s}
+  .aud-opt{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;
+    border-bottom:1px solid var(--border-2)}
+  .aud-opt:last-child{border-bottom:none}
+  .aud-opt:hover{background:#f7f9fc}
+  .aud-opt .radio{width:18px;height:18px;border-radius:99px;border:2px solid #cbd2e0;flex:0 0 auto;position:relative}
+  .aud-opt.sel .radio{border-color:var(--primary)}
+  .aud-opt.sel .radio::after{content:"";position:absolute;inset:3px;border-radius:99px;background:var(--primary)}
+  .aud-opt .o-name{font-weight:600;font-size:14px}
+  .aud-opt .o-count{margin-left:auto;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .aud-opt .o-sub{font-size:12px;color:var(--faint)}
+
+  /* Message editor */
+  .msgwrap{margin-top:22px}
+  .editor{width:100%;min-height:132px;border:1px solid var(--border);border-radius:11px;
+    padding:14px;font-family:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    resize:vertical;background:#fff}
+  .editor:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .toolrow{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;
+    border:1px solid var(--border);background:#fff;color:var(--ink);
+    padding:6px 11px;border-radius:99px;cursor:pointer;font-weight:500}
+  .chip:hover{border-color:var(--primary);color:var(--primary);background:#f7faff}
+  .chip svg{width:12px;height:12px}
+  .counter{margin-left:auto;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .counter b{color:var(--muted);font-weight:600}
+
+  /* Send footer */
+  .sendrow{display:flex;align-items:center;gap:14px;margin-top:22px}
+  .btn{border:none;border-radius:11px;font-family:inherit;font-weight:600;cursor:pointer;
+    font-size:15px;padding:13px 22px;transition:background .15s,transform .1s}
+  .btn-primary{background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:9px}
+  .btn-primary:hover{background:var(--primary-h)}
+  .btn-primary:active{transform:translateY(1px)}
+  .btn-primary svg{width:17px;height:17px}
+  .sendmeta{font-size:12.5px;color:var(--muted);line-height:1.4}
+  .sendmeta b{color:var(--ink);font-weight:600}
+
+  /* Defaults strip */
+  .defaults{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+  .def{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);
+    background:#f4f6fa;border:1px solid var(--border-2);padding:4px 9px;border-radius:99px}
+  .def svg{width:12px;height:12px;color:#16a34a}
+
+  .compliance{margin-top:14px;font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px}
+  .compliance svg{width:13px;height:13px}
+
+  /* Phone preview */
+  .phone-col{position:sticky;top:20px}
+  .phone{width:100%;max-width:280px;margin:0 auto;background:#0f172a;border-radius:34px;
+    padding:11px;box-shadow:var(--shadow)}
+  .phone-screen{background:#f5f6f8;border-radius:26px;overflow:hidden;min-height:430px;display:flex;flex-direction:column}
+  .phone-top{background:#fff;padding:13px 16px 11px;border-bottom:1px solid #eceef2;text-align:center}
+  .phone-top .name{font-size:13.5px;font-weight:600}
+  .phone-top .num{font-size:11px;color:var(--faint);margin-top:1px}
+  .phone-body{padding:16px 14px;flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+  .bubble{max-width:82%;background:#fff;border:1px solid #e9ebef;color:var(--ink);
+    padding:10px 13px;border-radius:16px 16px 16px 5px;font-size:13.5px;line-height:1.5;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);white-space:pre-wrap;word-break:break-word}
+  .bubble .mf{color:var(--primary);font-weight:600}
+  .phone-time{font-size:10px;color:var(--faint);text-align:center;margin-bottom:2px}
+  .preview-cap{text-align:center;font-size:11.5px;color:var(--faint);margin-top:12px}
+
+  /* Sent screen */
+  .sent{max-width:460px;margin:60px auto 0;text-align:center}
+  .sent .burst{width:82px;height:82px;border-radius:99px;background:#e7f6ee;color:#16a34a;
+    display:grid;place-items:center;margin:0 auto 22px;animation:pop .4s cubic-bezier(.2,1.4,.5,1)}
+  .sent .burst svg{width:40px;height:40px}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+  .sent h1{font-size:27px}
+  .sent .stat{display:inline-flex;gap:26px;margin:20px 0 4px;padding:16px 26px;
+    background:var(--card);border:1px solid var(--border);border-radius:16px}
+  .sent .stat .n{font-size:22px;font-weight:700;letter-spacing:-.5px}
+  .sent .stat .k{font-size:12px;color:var(--muted);margin-top:2px}
+  .sent .again{margin-top:26px}
+  .btn-ghost{background:#fff;border:1px solid var(--border);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      ReadySMS
+    </div>
+    <span class="crumb"><b>New blast</b></span>
+    <div class="steps">
+      <span>Goal</span><span class="dot" id="d1"></span>
+      <span>Compose</span><span class="dot" id="d2"></span>
+      <span>Sent</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: GOAL GALLERY -->
+  <section class="screen active" id="s-goal">
+    <h1>What do you want to do?</h1>
+    <p class="sub">Pick your goal — we'll write the message and pick the right people. You can change anything after.</p>
+    <div class="grid" id="goalGrid"></div>
+    <div class="helprow">1,240 contacts ready · compliance handled automatically on every send</div>
+  </section>
+
+  <!-- SCREEN 2: COMPOSER -->
+  <section class="screen" id="s-compose">
+    <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All goals</button>
+    <div class="composer">
+      <div class="card pad">
+        <div class="goal-tag" id="goalTag"></div>
+
+        <!-- Audience -->
+        <div class="lbl">Sending to</div>
+        <div class="aud-box">
+          <span class="a-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <div>
+            <div class="a-name" id="audName">—</div>
+            <div class="a-meta" id="audMeta">—</div>
+          </div>
+          <button class="change" id="changeAud">Change</button>
+        </div>
+        <div class="aud-picker" id="audPicker"></div>
+
+        <!-- Message -->
+        <div class="msgwrap">
+          <div class="lbl">Message <span class="editnote">✎ You can edit anything</span></div>
+          <textarea class="editor" id="editor" spellcheck="true"></textarea>
+          <div class="toolrow">
+            <button class="chip" data-mf="{{first_name}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>First name</button>
+            <button class="chip" data-mf="{{last_name}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Last name</button>
+            <span class="counter" id="counter"></span>
+          </div>
+        </div>
+
+        <div class="sendrow">
+          <button class="btn btn-primary" id="sendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <span id="sendLbl">Send to 210 people</span>
+          </button>
+          <div class="sendmeta"><b>Sends now</b> at carrier speed<br>local presence · opt-outs skipped</div>
+        </div>
+
+        <div class="defaults">
+          <span class="def"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Sends now</span>
+          <span class="def"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Carrier speed</span>
+          <span class="def"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Local presence</span>
+          <span class="def"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Opt-outs skipped</span>
+        </div>
+
+        <div class="compliance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Opt-out language &amp; quiet hours are added automatically.
+        </div>
+      </div>
+
+      <!-- Phone preview -->
+      <div class="phone-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="phone-top">
+              <div class="name">You</div>
+              <div class="num">local number · SMS</div>
+            </div>
+            <div class="phone-body">
+              <div class="phone-time">Today 9:41 AM</div>
+              <div class="bubble" id="preview"></div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-cap">Preview for <span id="previewName">Sarah</span> — shows real names on send</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: SENT -->
+  <section class="screen" id="s-sent">
+    <div class="sent">
+      <div class="burst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h1>Sent ✓</h1>
+      <p class="sub" id="sentSub" style="margin-bottom:0">Your blast is going out now at carrier speed.</p>
+      <div class="stat">
+        <div><div class="n" id="sentCount">210</div><div class="k">Recipients</div></div>
+        <div><div class="n" id="sentSeg">1</div><div class="k">Segments each</div></div>
+        <div><div class="n">Now</div><div class="k">Delivery</div></div>
+      </div>
+      <div class="again">
+        <button class="btn btn-ghost" id="againBtn">Create another blast</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  // --- Demo data ---
+  var AUD = {
+    new_leads:  {name:"New leads this week", count:210, sub:"Contacts added in the last 7 days"},
+    vip:        {name:"VIP customers",        count:88,  sub:"Your top past clients"},
+    everyone:   {name:"Everyone",             count:1240,sub:"All contacts (opt-outs skipped)"},
+    followup:   {name:"Oct Promo — non-responders", count:298, sub:"Reuse a recent blast, people who didn't reply"}
+  };
+  var AUD_LIST = ["new_leads","vip","everyone","followup"];
+
+  // Icon set (inline SVG)
+  var IC = {
+    home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>',
+    reply: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17l-5-5 5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>',
+    tag:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.4" fill="currentColor"/></svg>',
+    wave:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    star:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>',
+    key:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 0-7 7 5 5 0 0 0 7-7zm0 0L15 8m0 0l3 3 3-3-3-3"/></svg>'
+  };
+  var users = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>';
+
+  // --- The goals: distinct, well-written realtor templates ---
+  var GOALS = [
+    {
+      id:"listing", icon:IC.home, tint:"t-blue",
+      title:"New listing / Open house",
+      desc:"Announce a fresh listing and drive foot traffic to the open house.",
+      aud:"new_leads",
+      msg:"Hi {{first_name}}, it's Jordan with ReadyRealty 👋 Just listed a stunning 3-bed in a spot I think you'll love. Open house this Sat 12–3pm — want me to text you the address & photos?"
+    },
+    {
+      id:"followup", icon:IC.reply, tint:"t-cyan",
+      title:"Follow up with non-responders",
+      desc:"Re-engage the people from a recent blast who never replied.",
+      aud:"followup",
+      msg:"Hey {{first_name}}, circling back — I know life gets busy! Still happy to answer any questions about the market or your home's value. Just reply here anytime, no pressure at all."
+    },
+    {
+      id:"price", icon:IC.tag, tint:"t-amber",
+      title:"Price drop / Promo",
+      desc:"Share a price change or a limited-time offer with your best clients.",
+      aud:"vip",
+      msg:"{{first_name}}, good news 🎉 A home you'd been eyeing just dropped in price — and it won't last. Want the details before it hits the wider market? Reply YES and I'll send them over."
+    },
+    {
+      id:"checkin", icon:IC.wave, tint:"t-green",
+      title:"Just checking in / Reminder",
+      desc:"A warm, no-agenda touch that keeps you top of mind.",
+      aud:"everyone",
+      msg:"Hi {{first_name}}, it's Jordan — just checking in! Whether you're thinking of buying, selling, or just curious what your home's worth these days, I'm here. Hope you're doing great 😊"
+    },
+    {
+      id:"review", icon:IC.star, tint:"t-violet",
+      title:"Ask for a review / referral",
+      desc:"Turn a happy client into a 5-star review or a warm intro.",
+      aud:"vip",
+      msg:"{{first_name}}, it was such a pleasure working with you! If you have 30 seconds, a quick review would mean the world — and if you know anyone buying or selling, I'd love an intro. Thank you! 🙏"
+    },
+    {
+      id:"expired", icon:IC.key, tint:"t-rose",
+      title:"Reach expired listings",
+      desc:"Restart the conversation with owners whose listing lapsed.",
+      aud:"everyone",
+      msg:"Hi {{first_name}}, I noticed your home didn't sell last time around — that's more common than you'd think. I've got a fresh strategy that's been moving these fast. Open to a quick chat this week?"
+    }
+  ];
+
+  // --- State ---
+  var state = { goal:null, audKey:null };
+
+  // --- Elements ---
+  var $ = function(id){return document.getElementById(id);};
+  var grid = $("goalGrid");
+
+  // Build goal cards
+  GOALS.forEach(function(g){
+    var a = AUD[g.aud];
+    var card = document.createElement("button");
+    card.className = "goal";
+    card.setAttribute("aria-label", g.title);
+    card.innerHTML =
+      '<span class="ic '+g.tint+'">'+g.icon+'</span>'+
+      '<div><h3>'+g.title+'</h3><p>'+g.desc+'</p>'+
+      '<span class="aud-hint">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'+
+        a.name+' · '+a.count.toLocaleString()+'</span></div>';
+    card.addEventListener("click", function(){ openComposer(g); });
+    grid.appendChild(card);
+  });
+
+  // --- Screen switching ---
+  function show(id){
+    ["s-goal","s-compose","s-sent"].forEach(function(s){
+      $(s).classList.toggle("active", s===id);
+    });
+    $("d1").classList.toggle("on", id!=="s-goal");
+    $("d2").classList.toggle("on", id==="s-sent");
+    window.scrollTo(0,0);
+  }
+
+  // --- Open composer with a goal ---
+  function openComposer(g){
+    state.goal = g;
+    state.audKey = g.aud;
+    $("goalTag").innerHTML = '<span class="'+g.tint.replace('t-','t-')+'" style="display:inline-flex">'+g.icon+'</span> '+g.title;
+    // recolor the tag icon inline
+    var tagIcon = $("goalTag").querySelector("svg");
+    if(tagIcon){ tagIcon.style.width="14px"; tagIcon.style.height="14px"; }
+    $("editor").value = g.msg;
+    buildPicker();
+    renderAud();
+    sync();
+    $("audPicker").classList.remove("open");
+    show("s-compose");
+    $("editor").focus();
+    $("editor").setSelectionRange(g.msg.length, g.msg.length);
+  }
+
+  // --- Audience display ---
+  function renderAud(){
+    var a = AUD[state.audKey];
+    $("audName").textContent = a.name;
+    $("audMeta").textContent = a.count.toLocaleString()+" people · "+a.sub;
+  }
+
+  function buildPicker(){
+    var p = $("audPicker");
+    p.innerHTML = "";
+    AUD_LIST.forEach(function(k){
+      var a = AUD[k];
+      var opt = document.createElement("div");
+      opt.className = "aud-opt"+(k===state.audKey?" sel":"");
+      opt.innerHTML =
+        '<span class="radio"></span>'+
+        '<div><div class="o-name">'+a.name+'</div><div class="o-sub">'+a.sub+'</div></div>'+
+        '<span class="o-count">'+a.count.toLocaleString()+'</span>';
+      opt.addEventListener("click", function(){
+        state.audKey = k;
+        renderAud(); sync();
+        p.classList.remove("open");
+        // refresh selected states
+        Array.prototype.forEach.call(p.children, function(c,i){
+          c.classList.toggle("sel", AUD_LIST[i]===k);
+        });
+      });
+      p.appendChild(opt);
+    });
+  }
+
+  $("changeAud").addEventListener("click", function(){
+    $("audPicker").classList.toggle("open");
+  });
+
+  // --- Message sync: preview + counter + send label ---
+  function sync(){
+    var raw = $("editor").value;
+    var a = AUD[state.audKey];
+
+    // Preview: substitute a friendly demo name, highlight merge fields
+    var previewName = "Sarah";
+    $("previewName").textContent = previewName;
+    var html = escapeHtml(raw)
+      .replace(/\{\{first_name\}\}/g, '<span class="mf">'+previewName+'</span>')
+      .replace(/\{\{last_name\}\}/g, '<span class="mf">Chen</span>');
+    $("preview").innerHTML = html || '<span style="color:#9aa1af">Your message preview…</span>';
+
+    // Counter — 160 = 1 segment
+    var len = raw.length;
+    var segs = Math.max(1, Math.ceil(len/160));
+    $("counter").innerHTML = '<b>'+len+'</b>/160 · '+segs+' segment'+(segs>1?'s':'');
+
+    // Send label
+    $("sendLbl").textContent = "Send to "+a.count.toLocaleString()+" "+(a.count===1?"person":"people");
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  $("editor").addEventListener("input", sync);
+
+  // Merge-field chips → insert at cursor
+  document.querySelectorAll(".chip[data-mf]").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      var ed = $("editor");
+      var mf = chip.getAttribute("data-mf");
+      var s = ed.selectionStart, e = ed.selectionEnd;
+      ed.value = ed.value.slice(0,s) + mf + ed.value.slice(e);
+      ed.focus();
+      ed.setSelectionRange(s+mf.length, s+mf.length);
+      sync();
+    });
+  });
+
+  // --- Back ---
+  $("backBtn").addEventListener("click", function(){ show("s-goal"); });
+
+  // --- Send ---
+  $("sendBtn").addEventListener("click", function(){
+    var a = AUD[state.audKey];
+    var raw = $("editor").value;
+    var segs = Math.max(1, Math.ceil(raw.length/160));
+    $("sentCount").textContent = a.count.toLocaleString();
+    $("sentSeg").textContent = segs;
+    $("sentSub").textContent = "Your blast to "+a.name+" is going out now at carrier speed.";
+    show("s-sent");
+  });
+
+  // --- Create another ---
+  $("againBtn").addEventListener("click", function(){ show("s-goal"); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Text · ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-h:#1d4ed8;
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --bg:#eef1f5; --card:#fff;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg); color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- Phone shell ---- */
+  .phone{
+    width:390px; height:812px; max-height:calc(100vh - 48px);
+    background:var(--card); border-radius:44px;
+    box-shadow:var(--shadow); overflow:hidden;
+    display:flex; flex-direction:column; position:relative;
+    border:1px solid var(--border);
+  }
+  /* Header */
+  .hdr{
+    padding:14px 16px 12px; border-bottom:1px solid var(--border);
+    display:flex; flex-direction:column; gap:2px; background:var(--card);
+    position:relative; z-index:5;
+  }
+  .hdr-top{display:flex; align-items:center; justify-content:space-between}
+  .hdr-title{font-size:16px; font-weight:600}
+  .hdr-sub{font-size:12px; color:var(--muted)}
+  .icon-btn{
+    width:34px;height:34px;border-radius:99px;border:none;background:transparent;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary);
+  }
+  .icon-btn:hover{background:#eff4ff}
+
+  /* To: row */
+  .to-row{
+    display:flex; align-items:flex-start; gap:8px;
+    padding:12px 16px; border-bottom:1px solid var(--border);
+    flex-wrap:wrap; background:var(--card); position:relative; z-index:4;
+  }
+  .to-label{font-size:15px; color:var(--muted); padding-top:5px; font-weight:500}
+  .pills{display:flex; flex-wrap:wrap; gap:6px; flex:1; align-items:center; min-height:30px}
+  .pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:#eaf0ff; color:var(--primary-h);
+    padding:5px 6px 5px 12px; border-radius:99px;
+    font-size:13.5px; font-weight:600; animation:pop .18s ease;
+  }
+  .pill .cnt{background:#dbe4ff; color:var(--primary-h); padding:1px 7px; border-radius:99px; font-size:12px}
+  .pill button{
+    border:none;background:transparent;color:var(--primary);cursor:pointer;
+    width:20px;height:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .pill button:hover{background:#d3ddff}
+  @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+  .add-btn{
+    display:inline-flex;align-items:center;gap:5px;
+    border:1px dashed #c3ccdd; background:#fff; color:var(--primary);
+    padding:5px 12px; border-radius:99px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .add-btn:hover{background:#f5f8ff;border-color:var(--primary)}
+  .to-total{
+    width:100%; font-size:12.5px; color:var(--muted); padding-top:2px;
+  }
+  .to-total b{color:var(--ink)}
+
+  /* Conversation area */
+  .convo{
+    flex:1; overflow-y:auto; padding:20px 16px 12px;
+    background:linear-gradient(180deg,#f7f9fc, #eef1f5);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .day-sep{text-align:center; font-size:11px; color:var(--faint); margin:2px 0 6px; font-weight:600}
+  .bubble{
+    max-width:78%; padding:10px 14px; border-radius:20px; font-size:15px; line-height:1.35;
+    align-self:flex-end; background:var(--primary); color:#fff;
+    box-shadow:0 1px 2px rgba(37,99,235,.25); word-wrap:break-word; white-space:pre-wrap;
+  }
+  .bubble.empty{background:#dbe4f0; color:#9aa1af}
+  .bubble .mf{background:rgba(255,255,255,.28); border-radius:6px; padding:0 4px}
+  .meta{align-self:flex-end; font-size:11px; color:var(--faint); margin:-4px 4px 4px}
+  .preview-note{
+    align-self:center; font-size:11px; color:var(--faint);
+    background:#fff; border:1px solid var(--border); border-radius:99px;
+    padding:3px 10px; margin-top:2px;
+  }
+
+  /* Compose bar */
+  .compose{
+    border-top:1px solid var(--border); background:var(--card);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; gap:8px; position:relative; z-index:6;
+  }
+  .compose-row{display:flex; align-items:flex-end; gap:8px}
+  .mf-btn{
+    flex:none; width:38px;height:38px;border-radius:99px;border:1px solid var(--border);
+    background:#fff;color:var(--primary);font-size:16px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mf-btn:hover{background:#f5f8ff;border-color:var(--primary)}
+  .input-wrap{
+    flex:1; border:1px solid var(--border); border-radius:20px; background:#fff;
+    padding:8px 12px; min-height:38px; max-height:120px; overflow-y:auto;
+    font-size:15px; line-height:1.35; outline:none;
+  }
+  .input-wrap:empty:before{content:attr(data-ph); color:var(--faint)}
+  .input-wrap:focus{border-color:var(--primary)}
+  .input-wrap .chip{
+    display:inline-flex;align-items:center; background:#eaf0ff; color:var(--primary-h);
+    border-radius:6px; padding:0 5px; font-size:14px; font-weight:600;
+    white-space:nowrap; margin:0 1px;
+  }
+  .send-btn{
+    flex:none; width:38px;height:38px;border-radius:99px;border:none;
+    background:var(--primary); color:#fff; cursor:pointer;
+    display:flex;align-items:center;justify-content:center; transition:transform .1s, background .15s;
+  }
+  .send-btn:hover{background:var(--primary-h)}
+  .send-btn:active{transform:scale(.9)}
+  .send-btn:disabled{background:#c3ccdd; cursor:default}
+  .compose-foot{display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--faint); padding:0 2px}
+  .compose-foot .comp{display:inline-flex;align-items:center;gap:4px}
+
+  /* Merge field menu */
+  .mf-menu, .seg-menu{
+    position:absolute; background:#fff; border:1px solid var(--border);
+    border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+    z-index:20; min-width:220px;
+  }
+  .mf-menu{bottom:60px; left:12px}
+  .menu-h{font-size:11px; color:var(--faint); font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:10px 14px 6px}
+  .menu-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:11px 14px; cursor:pointer; font-size:14.5px;
+  }
+  .menu-item:hover{background:#f5f8ff}
+  .menu-item .m-cnt{font-size:12px; color:var(--muted); background:#f1f4f9; padding:2px 9px; border-radius:99px}
+  .menu-item.added{opacity:.45; pointer-events:none}
+  .menu-item .m-icon{color:var(--primary)}
+  .menu-sep{height:1px; background:var(--border); margin:4px 0}
+  code{background:#f1f4f9; border-radius:5px; padding:1px 5px; font-size:13px; color:var(--primary-h)}
+
+  /* Segment picker overlay */
+  .seg-menu{
+    left:16px; right:16px; top:96px; max-width:none; min-width:0;
+    max-height:70%; overflow-y:auto; animation:slidein .18s ease;
+  }
+  @keyframes slidein{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+  /* backdrop */
+  .backdrop{position:absolute; inset:0; background:rgba(15,23,42,.08); z-index:15}
+  .hidden{display:none !important}
+
+  /* Sending / sent overlay */
+  .send-overlay{
+    position:absolute; inset:0; background:rgba(255,255,255,.86); backdrop-filter:blur(3px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    z-index:40; text-align:center; padding:32px;
+  }
+  .fly{
+    width:64px;height:64px;border-radius:99px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 8px 30px rgba(37,99,235,.4);
+  }
+  .fly.launch{animation:launch 1s cubic-bezier(.4,0,.2,1) forwards}
+  @keyframes launch{
+    0%{transform:translateY(0) scale(1);opacity:1}
+    60%{transform:translateY(-40px) scale(.9);opacity:1}
+    100%{transform:translateY(-160px) scale(.4);opacity:0}
+  }
+  .check{
+    width:76px;height:76px;border-radius:99px;background:#16a34a;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    animation:pop .3s ease; box-shadow:0 8px 30px rgba(22,163,74,.35);
+  }
+  .send-overlay h2{margin:0; font-size:22px}
+  .send-overlay p{margin:0; color:var(--muted); font-size:14px; max-width:260px; line-height:1.4}
+  .ghost-btn{
+    margin-top:6px; border:1px solid var(--border); background:#fff; color:var(--ink);
+    padding:10px 20px; border-radius:99px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .ghost-btn:hover{background:#f5f8ff}
+  .dots{display:flex;gap:6px}
+  .dots span{width:8px;height:8px;border-radius:99px;background:var(--primary);animation:blink 1.2s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}
+  .dots span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-top">
+      <button class="icon-btn" title="Back" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div style="text-align:center">
+        <div class="hdr-title">New Text</div>
+        <div class="hdr-sub" id="hdrSub">1,240 contacts ready</div>
+      </div>
+      <div style="width:34px"></div>
+    </div>
+  </div>
+
+  <!-- To: row -->
+  <div class="to-row">
+    <div class="to-label">To:</div>
+    <div class="pills" id="pills">
+      <button class="add-btn" id="addBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add people
+      </button>
+    </div>
+    <div class="to-total" id="toTotal">Tap “Add people” to choose who gets this text.</div>
+  </div>
+
+  <!-- Conversation -->
+  <div class="convo" id="convo">
+    <div class="day-sep">Today</div>
+    <div class="bubble empty" id="bubble">Start typing your message…</div>
+    <div class="meta" id="bubbleMeta"></div>
+    <div class="preview-note" id="previewNote">Preview — {{first_name}} fills in per person</div>
+  </div>
+
+  <!-- Compose bar -->
+  <div class="compose">
+    <div class="compose-row">
+      <button class="mf-btn" id="mfBtn" title="Insert a name field" aria-label="Insert merge field">{}</button>
+      <div class="input-wrap" id="input" contenteditable="true" data-ph="Text message" role="textbox" aria-multiline="true"></div>
+      <button class="send-btn" id="sendBtn" title="Send" aria-label="Send" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+    <div class="compose-foot">
+      <span class="comp">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        Reply STOP auto-added · opt-outs skipped
+      </span>
+      <span id="counter">0 / 160 · 1 segment</span>
+    </div>
+  </div>
+
+  <!-- Merge field menu -->
+  <div class="mf-menu hidden" id="mfMenu">
+    <div class="menu-h">Insert a name</div>
+    <div class="menu-item" data-mf="first_name"><span>First name</span><code>{{first_name}}</code></div>
+    <div class="menu-item" data-mf="last_name"><span>Last name</span><code>{{last_name}}</code></div>
+  </div>
+
+  <!-- Segment picker -->
+  <div class="backdrop hidden" id="backdrop"></div>
+  <div class="seg-menu hidden" id="segMenu">
+    <div class="menu-h">Everyone</div>
+    <div class="menu-item" data-seg="all" data-count="1240">
+      <span style="display:flex;align-items:center;gap:9px"><span class="m-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>All contacts</span>
+      <span class="m-cnt">1,240</span>
+    </div>
+    <div class="menu-sep"></div>
+    <div class="menu-h">Saved segments</div>
+    <div class="menu-item" data-seg="vip" data-count="88">
+      <span style="display:flex;align-items:center;gap:9px"><span class="m-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z"/></svg>
+      </span>VIP customers</span>
+      <span class="m-cnt">88</span>
+    </div>
+    <div class="menu-item" data-seg="newleads" data-count="210">
+      <span style="display:flex;align-items:center;gap:9px"><span class="m-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      </span>New leads this week</span>
+      <span class="m-cnt">210</span>
+    </div>
+    <div class="menu-sep"></div>
+    <div class="menu-h">Recent blasts</div>
+    <div class="menu-item" data-seg="octpromo" data-count="340">
+      <span style="display:flex;align-items:center;gap:9px"><span class="m-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      </span>Oct Promo</span>
+      <span class="m-cnt">340</span>
+    </div>
+    <div class="menu-item" data-seg="expired" data-count="88">
+      <span style="display:flex;align-items:center;gap:9px"><span class="m-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      </span>Expired listings</span>
+      <span class="m-cnt">88</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SAMPLE_NAME = "Sarah";
+  var SAMPLE_LAST = "Miller";
+  var SAMPLE_MSG  = "Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.";
+  var LABELS = {
+    all:"Everyone", vip:"VIP customers", newleads:"New leads this week",
+    octpromo:"Oct Promo", expired:"Expired listings"
+  };
+
+  var $  = function(id){return document.getElementById(id);};
+  var pills=$('pills'), addBtn=$('addBtn'), toTotal=$('toTotal'), hdrSub=$('hdrSub');
+  var input=$('input'), bubble=$('bubble'), bubbleMeta=$('bubbleMeta'), previewNote=$('previewNote');
+  var counter=$('counter'), sendBtn=$('sendBtn'), mfBtn=$('mfBtn'), mfMenu=$('mfMenu');
+  var segMenu=$('segMenu'), backdrop=$('backdrop'), phone=$('phone');
+
+  var recipients = []; // {seg,count}
+
+  /* ---------- Recipients ---------- */
+  function total(){ return recipients.reduce(function(s,r){return s+r.count;},0); }
+
+  function renderPills(){
+    // remove existing pills (keep addBtn)
+    Array.prototype.slice.call(pills.querySelectorAll('.pill')).forEach(function(p){p.remove();});
+    recipients.forEach(function(r){
+      var pill=document.createElement('span'); pill.className='pill';
+      pill.innerHTML='<span>'+LABELS[r.seg]+'</span><span class="cnt">'+r.count.toLocaleString()+'</span>'+
+        '<button aria-label="Remove" data-seg="'+r.seg+'">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
+      pills.insertBefore(pill, addBtn);
+    });
+    // total line
+    if(recipients.length===0){
+      toTotal.innerHTML='Tap “Add people” to choose who gets this text.';
+    }else{
+      var n=total();
+      toTotal.innerHTML='→ <b>'+n.toLocaleString()+' '+(n===1?'person':'people')+'</b> will get this text';
+    }
+    // mark added in menu
+    Array.prototype.slice.call(segMenu.querySelectorAll('.menu-item')).forEach(function(mi){
+      var s=mi.getAttribute('data-seg');
+      mi.classList.toggle('added', recipients.some(function(r){return r.seg===s;}));
+    });
+    updateSendState();
+  }
+
+  pills.addEventListener('click', function(e){
+    var btn=e.target.closest('button[data-seg]');
+    if(btn){ var s=btn.getAttribute('data-seg'); recipients=recipients.filter(function(r){return r.seg!==s;}); renderPills(); }
+  });
+
+  function openSeg(){ segMenu.classList.remove('hidden'); backdrop.classList.remove('hidden'); }
+  function closeSeg(){ segMenu.classList.add('hidden'); backdrop.classList.add('hidden'); }
+  addBtn.addEventListener('click', openSeg);
+  backdrop.addEventListener('click', closeSeg);
+
+  segMenu.addEventListener('click', function(e){
+    var mi=e.target.closest('.menu-item'); if(!mi||mi.classList.contains('added'))return;
+    var seg=mi.getAttribute('data-seg'), count=parseInt(mi.getAttribute('data-count'),10);
+    if(seg==='all'){ recipients=[{seg:'all',count:1240}]; } // Everyone replaces others
+    else { recipients=recipients.filter(function(r){return r.seg!=='all';}); recipients.push({seg:seg,count:count}); }
+    renderPills(); closeSeg();
+  });
+
+  /* ---------- Compose: message model ----------
+     The input holds text nodes + .chip spans (data-mf). We read it into a token
+     string so preview + counter stay in sync. */
+  function readMessage(){
+    var out='';
+    input.childNodes.forEach&&input.childNodes.forEach(function(){});
+    Array.prototype.forEach.call(input.childNodes, function(node){
+      if(node.nodeType===3){ out+=node.textContent; }
+      else if(node.classList&&node.classList.contains('chip')){ out+='{{'+node.getAttribute('data-mf')+'}}'; }
+      else if(node.tagName==='BR'){ out+='\n'; }
+      else { out+=node.textContent||''; }
+    });
+    return out;
+  }
+
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // count chars: merge fields counted at their rendered sample length (honest-ish preview)
+  function renderedLength(msg){
+    return msg.replace(/\{\{first_name\}\}/g, SAMPLE_NAME).replace(/\{\{last_name\}\}/g, SAMPLE_LAST).length;
+  }
+
+  function updatePreview(){
+    var msg=readMessage();
+    if(msg.trim()===''){
+      bubble.className='bubble empty'; bubble.textContent='Start typing your message…';
+      bubbleMeta.textContent=''; previewNote.style.opacity=(msg.indexOf('{{')>-1)?'1':'0';
+    }else{
+      bubble.className='bubble';
+      var html=escapeHtml(msg)
+        .replace(/\{\{first_name\}\}/g,'<span class="mf">'+SAMPLE_NAME+'</span>')
+        .replace(/\{\{last_name\}\}/g,'<span class="mf">'+SAMPLE_LAST+'</span>');
+      bubble.innerHTML=html;
+      bubbleMeta.textContent='Delivered';
+      previewNote.style.opacity = (msg.indexOf('{{')>-1)?'1':'0';
+    }
+    var len=renderedLength(msg);
+    var segs=Math.max(1, Math.ceil(len/160));
+    counter.textContent=len+' / 160 · '+segs+' segment'+(segs===1?'':'s');
+    updateSendState();
+    // keep convo scrolled to bottom
+    var c=$('convo'); c.scrollTop=c.scrollHeight;
+  }
+
+  function updateSendState(){
+    var has = readMessage().trim()!=='' && recipients.length>0;
+    sendBtn.disabled=!has;
+  }
+
+  input.addEventListener('input', updatePreview);
+  // prevent rich paste — plain text only
+  input.addEventListener('paste', function(e){
+    e.preventDefault();
+    var t=(e.clipboardData||window.clipboardData).getData('text');
+    document.execCommand('insertText', false, t);
+  });
+
+  /* ---------- Merge field insert ---------- */
+  function insertChip(mf){
+    input.focus();
+    var chip=document.createElement('span');
+    chip.className='chip'; chip.setAttribute('data-mf',mf); chip.contentEditable='false';
+    chip.textContent = mf==='first_name' ? '{{first_name}}' : '{{last_name}}';
+    var space=document.createTextNode(' ');
+    var sel=window.getSelection();
+    if(sel.rangeCount && input.contains(sel.anchorNode)){
+      var range=sel.getRangeAt(0); range.deleteContents();
+      range.insertNode(space); range.insertNode(chip);
+      range.setStartAfter(space); range.collapse(true);
+      sel.removeAllRanges(); sel.addRange(range);
+    }else{
+      input.appendChild(chip); input.appendChild(space);
+    }
+    updatePreview();
+  }
+  mfBtn.addEventListener('click', function(e){
+    e.stopPropagation(); mfMenu.classList.toggle('hidden');
+  });
+  mfMenu.addEventListener('click', function(e){
+    var it=e.target.closest('.menu-item'); if(!it)return;
+    insertChip(it.getAttribute('data-mf')); mfMenu.classList.add('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!mfMenu.contains(e.target) && e.target!==mfBtn) mfMenu.classList.add('hidden');
+  });
+
+  /* ---------- Send ---------- */
+  sendBtn.addEventListener('click', function(){
+    if(sendBtn.disabled) return;
+    var n=total();
+    var ov=document.createElement('div'); ov.className='send-overlay';
+    ov.innerHTML=
+      '<div class="fly launch"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>'+
+      '<div class="dots"><span></span><span></span><span></span></div>'+
+      '<p>Sending to '+n.toLocaleString()+' '+(n===1?'person':'people')+'…</p>';
+    phone.appendChild(ov);
+    setTimeout(function(){
+      ov.innerHTML=
+        '<div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+        '<h2>Sent to '+n.toLocaleString()+' '+(n===1?'person':'people')+' ✓</h2>'+
+        '<p>Going out now on local-presence numbers. Opt-outs were skipped automatically.</p>'+
+        '<button class="ghost-btn" id="againBtn">Send another</button>';
+      $('againBtn').addEventListener('click', function(){
+        recipients=[]; renderPills();
+        input.innerHTML=''; updatePreview();
+        ov.remove();
+      });
+    }, 1150);
+  });
+
+  /* ---------- Seed with sample message (rendered as text + chips) ---------- */
+  (function seed(){
+    // Build the sample message into the input with real chips
+    var parts=SAMPLE_MSG.split(/(\{\{first_name\}\}|\{\{last_name\}\})/);
+    parts.forEach(function(p){
+      if(p==='{{first_name}}'||p==='{{last_name}}'){
+        var mf=p==='{{first_name}}'?'first_name':'last_name';
+        var chip=document.createElement('span');
+        chip.className='chip'; chip.setAttribute('data-mf',mf); chip.contentEditable='false';
+        chip.textContent=p; input.appendChild(chip);
+      }else if(p){ input.appendChild(document.createTextNode(p)); }
+    });
+    // Pre-add "New leads this week" so the demo lands mid-flow, ready to send
+    recipients=[{seg:'newleads',count:210}];
+    renderPills(); updatePreview();
+  })();
+})();
+</script>
+</body>
+</html>
