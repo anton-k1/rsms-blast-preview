@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New SMS Blast — one box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===================================================================
+   REAL ReadySMS design tokens + component styles, extracted verbatim
+   from the live app (pages-preview/index.html): :root vars, .card,
+   .card-head, .seg, .blast-* atoms, .set-toggle/.set-track, .bm-*,
+   .rds fallback selects, phone preview. Light mode only. Only small
+   additions live under "PROTO additions".
+   =================================================================== */
+:root{
+  --bg:#FCFCFD;
+  --bg-soft:#F7F8FA;
+  --card:#FFFFFF;
+  --hairline:#EAEBEF;
+  --hairline-strong:#E2E4E9;
+  --ink:#1A1A2E;
+  --ink-2:#3F4150;
+  --muted:#6F7287;
+  --faint:#6F7287;
+  --accent:#2563EB;
+  --accent-deep:#1D4ED8;
+  --accent-tint:#EFF4FF;
+  --green:#1F7A4D;
+  --green-tint:#EBF6F0;
+  --amber:#9A6700;
+  --amber-tint:#FBF3E4;
+  --red:#B3403E;
+  --red-tint:#FBEFEE;
+  --blue-tint:#EDF2FB;
+  --shadow:0 1px 2px rgba(26,26,46,.04), 0 4px 16px rgba(26,26,46,.04);
+  --shadow-sm:0 1px 2px rgba(26,26,46,.05);
+  --r:10px;
+  --r-sm:8px;
+  --r-md:12px;
+  --ai-grad:linear-gradient(135deg,#2563eb,#0ea5e9);
+  --ai-strip:linear-gradient(90deg,#2563eb,#0ea5e9,#06b6d4);
+  --ai-grad-soft:linear-gradient(135deg,rgba(37,99,235,.12),rgba(14,165,233,.12));
+  --ai-grad-shadow:0 2px 6px rgba(37,99,235,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:rgba(120,130,150,.32) transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(120,130,150,.32);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(120,130,150,.55);background-clip:padding-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:'cv05','cv11','ss01';
+}
+svg{display:block}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit;transition:background-color .11s ease,border-color .11s ease,color .11s ease,box-shadow .12s ease}
+[hidden]{display:none!important}
+
+/* ===== Cards / headers ===== */
+.card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px 0}
+.card-title{font-size:14.5px;font-weight:600;letter-spacing:-.012em}
+.card-sub{font-size:12px;color:var(--faint);font-weight:450;margin-top:1px}
+.ch-spacer{flex:1}
+
+/* ===== Segmented control ===== */
+.seg{display:inline-flex;background:var(--bg-soft);border:1px solid var(--hairline);border-radius:8px;padding:2px;gap:1px}
+.seg button{padding:5px 13px;border-radius:6px;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:-.004em;transition:background .12s ease,color .12s ease,box-shadow .12s ease;border:1px solid transparent}
+.seg button.on{background:#fff;color:var(--ink);font-weight:550;box-shadow:var(--shadow-sm);border:1px solid var(--hairline)}
+@media(max-width:1023px){
+  .seg{max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex:0 0 auto;white-space:nowrap}
+}
+
+/* ===== Blast form atoms ===== */
+.blast-label{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:-.01em;margin-bottom:6px;display:block}
+.bm-req{color:var(--accent);font-weight:700}
+.bm-input{width:100%;height:36px;padding:0 12px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);box-sizing:border-box;outline:none;transition:border-color .15s,box-shadow .15s}
+.bm-input::placeholder{color:var(--faint)}
+.bm-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-select-wrap{position:relative;min-width:0}
+.blast-select-wrap > svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--faint)}
+.blast-select{appearance:none;-webkit-appearance:none;width:100%;height:36px;padding:0 32px 0 12px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;outline:none}
+.blast-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-count-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;background:var(--blue-tint);color:var(--accent-deep);border-radius:999px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.blast-count-chip svg{color:var(--accent)}
+
+/* Message toolbar + counter */
+.blast-msg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.blast-msg-head .blast-label{margin-bottom:0}
+.blast-tools{display:flex;align-items:center;gap:4px}
+.blast-tool{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--hairline);border-radius:6px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+.blast-tool:hover{background:var(--bg-soft);color:var(--ink-2);border-color:var(--hairline-strong)}
+.blast-tool .blast-merge-glyph{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--accent);line-height:1}
+.blast-tool svg{width:13px;height:13px}
+.blast-tool-ai{color:#fff;border:0;background:var(--ai-grad);box-shadow:0 2px 7px rgba(37,99,235,.26)}
+.blast-tool-ai svg{color:#fff;stroke:#fff}
+.blast-tool-ai:hover{color:#fff;background:var(--ai-grad);box-shadow:0 3px 10px rgba(37,99,235,.34)}
+.blast-textarea{width:100%;min-height:108px;resize:vertical;padding:10px 12px;font:inherit;font-size:13.5px;line-height:1.55;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);outline:none;box-sizing:border-box}
+.blast-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.blast-counter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.blast-counter b{color:var(--muted);font-weight:600}
+
+/* AI compose card */
+.bm-ai{border:1px solid var(--hairline-strong);background:var(--card);border-radius:var(--r);overflow:hidden}
+.bm-ai-head{display:flex;align-items:center;gap:9px;padding:12px 14px 4px;font-size:13px;font-weight:650;color:var(--ink)}
+.bm-ai-mark{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--ai-grad);flex:none;box-shadow:var(--ai-grad-shadow)}
+.bm-ai-mark svg{width:13px;height:13px;stroke:#fff}
+.bm-ai-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.bm-ai-prompt{width:100%;box-sizing:border-box;min-height:54px;resize:vertical;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--card);padding:9px 11px;font:inherit;font-size:13px;line-height:1.5;color:var(--ink);outline:none}
+.bm-ai-prompt::placeholder{color:var(--faint)}
+.bm-ai-prompt:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.bm-ai-genrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bm-ai-gen{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:#fff;background:var(--ai-grad);border:1px solid var(--accent-deep);border-radius:var(--r-sm);cursor:pointer;box-shadow:var(--shadow-sm)}
+.bm-ai-gen:hover{background:var(--accent-deep)}
+.bm-ai-gen svg{width:13px;height:13px;stroke:currentColor}
+.bm-ai-quick{font-size:11px;color:var(--faint)}
+
+/* Recipients */
+.bm-rtop{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bm-rtop .blast-label{margin-bottom:0}
+.bm-rtop .ch-spacer{flex:1}
+.bm-rtabs{flex-wrap:wrap}
+.bm-rpanes{margin-top:10px}
+.bm-rpane{display:flex;flex-direction:column;gap:8px}
+.bm-hint{font-size:12px;color:var(--faint);line-height:1.5}
+.bm-pick-list{display:flex;flex-direction:column;border:1px solid var(--hairline);border-radius:var(--r-sm);overflow:hidden;background:var(--card)}
+.bm-pick-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--hairline);cursor:pointer;font-size:13px;color:var(--ink-2)}
+.bm-pick-row:last-child{border-bottom:none}
+.bm-pick-row:hover{background:var(--bg-soft)}
+.bm-pick-row input{accent-color:var(--accent);width:14px;height:14px;flex:none;margin:0;cursor:pointer}
+.bm-pick-name{font-weight:600;color:var(--ink);letter-spacing:-.005em}
+.bm-pick-meta{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.bm-pick-meta b{font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.bm-csv{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 16px;border:1.5px dashed var(--hairline-strong);border-radius:var(--r-sm);background:var(--bg-soft);color:var(--muted);font-size:12.5px;cursor:pointer}
+.bm-csv:hover{border-color:var(--accent);color:var(--ink-2)}
+.bm-csv svg{width:22px;height:22px;stroke:var(--faint)}
+
+/* set-toggle switch (real) */
+.set-toggle{position:relative;width:42px;height:25px;flex:none;display:inline-block}
+.set-toggle input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.set-track{position:absolute;inset:0;border-radius:999px;background:var(--hairline-strong);transition:background .18s ease;pointer-events:none}
+.set-track::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(26,26,46,.22),0 0 0 .5px rgba(26,26,46,.05);transition:transform .18s ease}
+.set-toggle input:checked + .set-track{background:var(--green)}
+.set-toggle input:checked + .set-track::after{transform:translateX(17px)}
+.set-toggle input:focus-visible + .set-track{box-shadow:0 0 0 3px var(--accent-tint)}
+
+/* setting rows */
+.set-rows{display:flex;flex-direction:column}
+.set-row{display:flex;align-items:center;gap:16px;padding:16px 18px}
+.set-row + .set-row{border-top:1px solid var(--hairline)}
+.set-row-main{min-width:0;flex:1}
+.set-row-title{font-size:14px;font-weight:600;color:var(--ink)}
+.set-row-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+
+/* days pills / inline input (advanced) */
+.bm-day{height:30px;padding:0 11px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:var(--card);border:1px solid var(--hairline-strong);border-radius:999px;cursor:pointer;transition:all .12s}
+.bm-day:hover{border-color:var(--accent)}
+.bm-day.on{color:#fff;background:var(--accent);border-color:var(--accent-deep)}
+.bm-days{display:flex;gap:6px;flex-wrap:wrap}
+.bm-input-inline{height:32px;width:auto;max-width:170px}
+
+/* compliance note */
+.blast-compliance{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--bg-soft);border:1px solid var(--hairline);border-radius:var(--r-sm);font-size:12.5px;line-height:1.5;color:var(--muted)}
+.blast-compliance svg{flex:none;margin-top:1px;color:var(--green);width:15px;height:15px}
+
+/* A/B tile */
+.bm-ab-badge{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;font-size:11px;font-weight:700;color:#fff;flex:none}
+.bm-ab-a{background:#2563EB}.bm-ab-b{background:#475569}.bm-ab-c{background:#0EA5E9}.bm-ab-d{background:#8B5CF6}
+.bm-ab-vhead{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.bm-ab-vhead .bm-ab-del{margin-left:auto;color:var(--faint);border:0;background:none;padding:3px;border-radius:6px}
+.bm-ab-vhead .bm-ab-del:hover{background:var(--red-tint);color:var(--red)}
+.bm-ab-vhead .bm-ab-del svg{width:14px;height:14px}
+textarea.bm-ab-tx{resize:vertical;width:100%;display:block;min-height:70px;font:inherit;font-size:13px;line-height:1.5;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);padding:9px 11px;box-sizing:border-box}
+textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+
+/* buttons */
+.blast-btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;font:inherit;font-size:13.5px;font-weight:600;letter-spacing:-.01em;border-radius:var(--r-sm);cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s}
+.blast-btn-ghost{color:var(--ink-2);background:var(--card);border:1px solid var(--hairline-strong);box-shadow:var(--shadow-sm)}
+.blast-btn-ghost:hover{background:var(--bg-soft)}
+.blast-btn-primary{color:#fff;background:var(--accent);border:1px solid var(--accent-deep);box-shadow:var(--shadow-sm)}
+.blast-btn-primary:hover{background:var(--accent-deep)}
+
+/* =======================  PROTO additions (minimal)  ======================= */
+/* Full-page single column, centered ~640px. */
+.fc-wrap{max-width:672px;margin:0 auto;padding:26px 16px 120px}
+.fc-head{margin-bottom:18px}
+.fc-title{font-size:20px;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
+.fc-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.fc-sect{padding:16px 18px;margin-bottom:14px}
+.fc-sect-head{display:flex;align-items:center;gap:10px;padding:0 0 12px}
+.fc-field{margin-bottom:14px}
+.fc-field:last-child{margin-bottom:0}
+.fc-row{display:flex;align-items:center;gap:12px}
+/* collapsible section (Delivery / Advanced) */
+.fc-disclose > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 18px}
+.fc-disclose > summary::-webkit-details-marker{display:none}
+.fc-disclose-cv{width:15px;height:15px;stroke:var(--faint);transition:transform .16s ease;margin-left:auto;flex:none}
+.fc-disclose[open] > summary .fc-disclose-cv{transform:rotate(180deg)}
+.fc-disclose-body{padding:2px 18px 18px}
+.fc-disclose-title{font-size:14.5px;font-weight:600;letter-spacing:-.012em;color:var(--ink)}
+.fc-disclose-sub{font-size:12px;color:var(--faint);font-weight:450;margin-top:1px}
+/* expandable toggle row (advanced items) */
+.fc-trow{display:flex;align-items:flex-start;gap:14px;padding:14px 0}
+.fc-trow + .fc-trow{border-top:1px solid var(--hairline)}
+.fc-trow-main{flex:1;min-width:0}
+.fc-trow-title{font-size:13.5px;font-weight:600;color:var(--ink)}
+.fc-trow-sub{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+.fc-trow-body{margin-top:11px;padding-top:12px;border-top:1px dashed var(--hairline-strong);display:flex;flex-direction:column;gap:11px}
+.fc-mini-label{font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:6px}
+/* radios */
+.fc-radios{display:flex;gap:8px;flex-wrap:wrap}
+.fc-radio{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);font-size:13px;font-weight:550;color:var(--ink-2);cursor:pointer;background:var(--card);transition:border-color .12s,background .12s}
+.fc-radio:hover{background:var(--bg-soft)}
+.fc-radio input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.fc-radio.on{border-color:var(--accent);background:var(--accent-tint);color:var(--accent-deep)}
+/* slider */
+.fc-slider{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:999px;background:var(--hairline-strong);outline:none;margin:6px 0}
+.fc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 3px rgba(26,26,46,.3);cursor:pointer}
+.fc-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 3px rgba(26,26,46,.3);cursor:pointer}
+.fc-slider-val{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.fc-slider-val b{color:var(--ink);font-weight:650}
+/* drip builder */
+.fc-drip{display:flex;flex-direction:column;gap:10px}
+.fc-drip-step{border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--bg-soft);padding:12px}
+.fc-drip-step-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.fc-drip-badge{width:22px;height:22px;border-radius:6px;background:var(--accent-tint);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none}
+.fc-drip-delay{font-size:12px;color:var(--muted)}
+.fc-drip-del{margin-left:auto;color:var(--faint);border:0;background:none;padding:4px;border-radius:6px;cursor:pointer}
+.fc-drip-del:hover{background:var(--red-tint);color:var(--red)}
+.fc-drip-del svg{width:15px;height:15px}
+.fc-drip-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
+.fc-drip-add:hover{border-color:var(--accent);background:var(--accent-tint)}
+
+/* opt-out surfacing */
+.fc-optout{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
+.fc-optout-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);background:var(--bg-soft);border:1px dashed var(--hairline-strong);border-radius:6px;padding:4px 9px;font-weight:600}
+.fc-optout-chip svg{width:12px;height:12px;stroke:var(--green)}
+.fc-optout a{color:var(--accent-deep);font-weight:600}
+
+/* custom select — styled, non-native: blue selected value + Custom… entry */
+.csel{position:relative;display:inline-block;min-width:130px}
+.csel-btn{display:flex;align-items:center;gap:8px;width:100%;height:36px;padding:0 10px 0 12px;font:inherit;font-size:13.5px;font-weight:500;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left}
+.csel-btn:hover{border-color:var(--accent)}
+.csel-btn .csel-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csel-cv{margin-left:auto;width:15px;height:15px;stroke:var(--faint);flex:none;transition:transform .15s}
+.csel.open .csel-cv{transform:rotate(180deg)}
+.csel.open .csel-btn{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.csel-menu{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:100%;max-height:248px;overflow:auto;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:0 8px 28px rgba(26,26,46,.16);padding:4px}
+.csel-opt{display:block;width:100%;text-align:left;padding:7px 10px;border-radius:6px;font:inherit;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.csel-opt:hover{background:var(--bg-soft)}
+.csel-opt.on{color:var(--ink);font-weight:650;background:var(--bg-soft)}
+.csel-custom{border-top:1px solid var(--hairline);margin-top:4px;color:var(--accent-deep);font-weight:600}
+.csel-input{display:flex;gap:6px;padding:6px}
+.csel-input input{flex:1;height:32px;min-width:0;padding:0 10px;font:inherit;font-size:13px;color:var(--ink);border:1px solid var(--accent);border-radius:6px;outline:none;box-shadow:0 0 0 3px var(--accent-tint)}
+.csel-input button{height:32px;padding:0 12px;font-size:12px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px}
+
+/* filter builder — exact copy of the CRM contacts filter */
+.fb-del{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);color:var(--faint);background:var(--card);flex:none}
+.fb-del:hover{background:var(--red-tint);color:var(--red);border-color:var(--red-tint)}
+.fb-del svg{width:15px;height:15px}
+.fb-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
+.fb-add:hover{border-color:var(--accent);background:var(--accent-tint)}
+/* AI helper (icon chip + input + Ask) */
+.cfb-ai{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--hairline-strong);border-radius:var(--r-md);background:var(--card);box-shadow:var(--shadow-sm);margin-bottom:16px}
+.cfb-ai-ic{width:32px;height:32px;flex:none;border-radius:9px;background:var(--ai-grad);display:flex;align-items:center;justify-content:center;box-shadow:var(--ai-grad-shadow)}
+.cfb-ai-ic svg{width:16px;height:16px}
+.cfb-ai input{flex:1;min-width:0;height:38px;border:0;outline:none;font:inherit;font-size:13.5px;color:var(--ink);background:transparent;padding:0 4px}
+.cfb-ai input::placeholder{color:var(--faint)}
+.cfb-ai-go{flex:none;height:36px;padding:0 20px;font:inherit;font-size:13px;font-weight:600;color:#fff;background:var(--accent);border-radius:var(--r-sm)}
+.cfb-ai-go:hover{background:var(--accent-deep)}
+/* condition rows */
+.cfb-conds{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+.cfb-row{display:grid;grid-template-columns:auto minmax(108px,1fr) minmax(104px,1fr) minmax(126px,1.25fr) auto;gap:8px;align-items:center}
+.cfb-conj{min-width:46px}
+.cfb-where{font-size:12.5px;font-weight:600;color:var(--muted);padding-left:2px}
+.cfb-conj-sel{appearance:none;-webkit-appearance:none;height:34px;padding:0 22px 0 10px;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--bg-soft);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer;outline:none}
+.cfb-val{min-width:0}
+.cfb-noval{font-size:12.5px;color:var(--faint);font-style:italic}
+.cfb-rel{display:inline-flex;align-items:center;gap:7px}
+.cfb-rel .bm-input{width:74px}
+.cfb-rel-lbl{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.cfb-multi{position:relative}
+.cfb-multi-trig{display:flex;align-items:center;gap:6px;width:100%;height:36px;padding:0 10px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left}
+.cfb-multi-lbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfb-multi-trig .fb-cv{width:15px;height:15px;stroke:var(--faint);flex:none}
+.cfb-multi-menu{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:100%;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:0 8px 28px rgba(26,26,46,.16);padding:4px}
+.cfb-mo{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.cfb-mo:hover{background:var(--bg-soft)}
+.cfb-mo input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.cfb-mempty{padding:9px 11px;font-size:12px;color:var(--faint);white-space:nowrap}
+.cfb-tokin{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:36px;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--card);box-shadow:var(--shadow-sm)}
+.cfb-token{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 3px 0 8px;font-size:12px;font-weight:600;color:var(--ink-2);background:var(--bg-soft);border:1px solid var(--hairline-strong);border-radius:5px}
+.cfb-token-x{color:var(--faint);font-size:15px;line-height:1;padding:0 3px}
+.cfb-token-x:hover{color:var(--red)}
+.cfb-tok-input{flex:1;min-width:90px;border:0;outline:none;font:inherit;font-size:13px;background:transparent;height:26px}
+@media(max-width:560px){.cfb-row{grid-template-columns:1fr 1fr;gap:8px}.cfb-conj{grid-column:1/3}.cfb-val{grid-column:1/2}.cfb-del{grid-column:2;justify-self:end}}
+/* card spacing: Advanced disclosure needs the same gap as .fc-sect */
+.fc-disclose{margin-bottom:14px}
+/* mini calendar popover (schedule + filter dates) */
+.cal-pop{position:absolute;z-index:120;width:252px;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-md);box-shadow:0 12px 34px rgba(26,26,46,.2);padding:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-title{font-size:13px;font-weight:650;color:var(--ink)}
+.cal-nav{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--muted)}
+.cal-nav:hover{background:var(--bg-soft);color:var(--ink)}
+.cal-nav svg{width:15px;height:15px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:600;color:var(--faint);text-align:center;padding:4px 0}
+.cal-day{height:30px;border-radius:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;font-variant-numeric:tabular-nums;border:0;background:none}
+.cal-day:hover{background:var(--bg-soft)}
+.cal-day.sel{background:var(--accent);color:#fff;font-weight:650}
+.cal-day.today{box-shadow:inset 0 0 0 1px var(--accent)}
+.cal-time{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+.cal-time .blast-label{margin:0}
+.cal-time .bm-input{height:32px;width:104px}
+.cal-done{margin-left:auto;height:30px;padding:0 14px;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px}
+
+/* one-box: single card, sections divided by hairlines */
+.ob-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:6px}
+.ob-card > *{border:0!important;border-radius:0!important;box-shadow:none!important;margin-bottom:0!important}
+.ob-card > * + *{border-top:1px solid var(--hairline)!important}
+.ob-card .bm-ai{overflow:visible}
+
+/* sticky footer */
+.fc-foot{position:sticky;bottom:0;left:0;right:0;z-index:20;margin-top:6px;background:rgba(252,252,253,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--hairline);padding:12px 16px}
+.fc-foot-inner{max-width:672px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.fc-foot .ch-spacer{flex:1}
+.fc-send{min-width:180px;justify-content:center}
+.fc-send.is-sent{background:var(--green);border-color:var(--green);pointer-events:none}
+.fc-send .fc-send-check{display:none;align-items:center;gap:7px}
+.fc-send.is-sent .fc-send-label{display:none}
+.fc-send.is-sent .fc-send-check{display:inline-flex;animation:fcPop .28s cubic-bezier(.16,1,.3,1)}
+.fc-send-check svg{width:16px;height:16px;stroke:#fff}
+@keyframes fcPop{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:520px){
+  .fc-foot-inner{flex-wrap:wrap}
+  .fc-send{flex:1 1 100%;order:-1}
+  .blast-btn{flex:1}
+}
+</style>
+</head>
+<body>
+<div class="fc-wrap">
+
+  <div class="fc-head">
+    <div class="fc-title">New SMS Blast</div>
+  </div>
+
+  <div class="ob-card">
+
+  <!-- 1. Build with AI (does the whole blast, not just the copy) -->
+  <div class="card bm-ai" style="margin-bottom:14px">
+    <div class="bm-ai-head">
+      <span class="bm-ai-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg></span>
+      Build with AI
+      <span class="ch-spacer"></span>
+    </div>
+    <div style="padding:0 14px 10px;font-size:12px;color:var(--muted);line-height:1.5">Describe your campaign and Ralph writes the copy, picks the right recipients, and suggests the best time to send. You can tweak everything below.</div>
+    <div class="bm-ai-body">
+      <textarea class="bm-ai-prompt" id="aiPrompt" placeholder="Describe your campaign, e.g. &ldquo;invite my new leads to an open house Saturday 2pm and ask them to reply YES for a private slot.&rdquo;"></textarea>
+      <div class="bm-ai-genrow">
+        <button class="bm-ai-gen" id="aiGen" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>
+          Build blast
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Message (Type toggle now lives here) -->
+  <div class="card fc-sect" id="msgSect">
+    <div class="fc-field">
+      <div class="seg" id="modeSeg" role="tablist" aria-label="Blast type">
+        <button type="button" class="on" data-mode="once">Send once</button>
+        <button type="button" data-mode="seq">Sequence</button>
+      </div>
+    </div>
+
+    <!-- once: single message -->
+    <div id="onceWrap">
+      <div class="blast-msg-head">
+        <label class="blast-label" for="msg">Message <span class="bm-req">*</span></label>
+        <div class="blast-tools">
+          <button class="blast-tool" type="button" id="tMerge" title="Insert merge field"><span class="blast-merge-glyph">{··}</span>Merge</button>
+          <button class="blast-tool" type="button" id="tTpl" title="Templates">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Templates
+          </button>
+          <button class="blast-tool blast-tool-ai" type="button" id="tVariety" title="Add variety. AI rewrites your message into {a|b|c} variants so every send differs, improving deliverability">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M4 10a8 8 0 0 1 14-3M20 14a8 8 0 0 1-14 3"/></svg>Add variety
+          </button>
+        </div>
+      </div>
+      <textarea class="blast-textarea" id="msg" spellcheck="false" placeholder="Write your text message here… tap {··} to add merge fields like the recipient's first name.">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
+      <div class="blast-counter">
+        <span><b id="charCount">0</b> characters</span>
+        <span><b id="segCount">1</b> segment · 160 chars/segment</span>
+      </div>
+    </div>
+
+    <!-- sequence: drip steps (step 1 is the message) -->
+    <div id="dripWrap" hidden>
+      <span class="blast-label">Sequence steps</span>
+      <div class="fc-drip" id="dripSteps">
+        <div class="fc-drip-step">
+          <div class="fc-drip-step-top">
+            <span class="fc-drip-badge">1</span>
+            <span class="fc-drip-delay">Sends immediately</span>
+          </div>
+          <textarea class="blast-textarea" style="min-height:64px" placeholder="First message…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
+        </div>
+      </div>
+      <button type="button" class="fc-drip-add" id="dripAdd" style="margin-top:10px">＋ Add step</button>
+    </div>
+
+    <!-- opt-out language (surfaced now that the preview is gone) -->
+    <div class="fc-optout">
+      <span class="fc-optout-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span id="optoutText">Reply STOP to opt out</span>
+      </span>
+      auto-appended to every message · <a href="#" id="optoutEdit">edit in Settings</a>
+    </div>
+  </div>
+
+  <!-- 3. Recipients -->
+  <div class="card fc-sect">
+    <div class="bm-rtop">
+      <span class="blast-label">Recipients</span>
+      <span class="ch-spacer"></span>
+      <span class="blast-count-chip" id="recipChip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="recipCount">1,240</span> recipients
+      </span>
+    </div>
+    <div class="seg bm-rtabs" id="recipSeg" role="tablist" aria-label="Recipient source">
+      <button type="button" class="on" data-rp="everyone">Everyone · 1,240</button>
+      <button type="button" data-rp="folders">Folders</button>
+      <button type="button" data-rp="recent">Recent blasts</button>
+      <button type="button" data-rp="filter">Filter</button>
+      <button type="button" data-rp="csv">CSV</button>
+    </div>
+    <div class="bm-rpanes">
+      <div class="bm-rpane" data-rpane="everyone">
+        <div class="bm-hint">Sends to all <b>1,240</b> contacts who haven't opted out.</div>
+      </div>
+      <div class="bm-rpane" data-rpane="folders" hidden>
+        <div class="bm-pick-list" id="folderList">
+          <label class="bm-pick-row"><input type="checkbox" data-folder="210"><span class="bm-pick-name">Buyers</span><span class="bm-pick-meta"><b>210</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="164"><span class="bm-pick-name">Sellers</span><span class="bm-pick-meta"><b>164</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="145"><span class="bm-pick-name">Past clients</span><span class="bm-pick-meta"><b>145</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="88"><span class="bm-pick-name">VIP customers</span><span class="bm-pick-meta"><b>88</b> contacts</span></label>
+        </div>
+        <div class="bm-hint">Pick one folder or several. <b>Everyone</b> sends to all contacts.</div>
+      </div>
+      <div class="bm-rpane" data-rpane="recent" hidden>
+        <div class="bm-pick-list" id="recentList">
+          <label class="bm-pick-row"><input type="checkbox" data-rc="340"><span class="bm-pick-name">Oct Promo</span><span class="bm-pick-meta"><b>340</b> recipients</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-rc="88"><span class="bm-pick-name">Expired listings</span><span class="bm-pick-meta"><b>88</b> recipients</span></label>
+        </div>
+        <div class="bm-hint">Re-send to everyone who received one or more past blasts (select all that apply).</div>
+      </div>
+      <div class="bm-rpane" data-rpane="filter" hidden>
+        <!-- AI filter helper (same as the CRM / inbox filter) -->
+        <div class="cfb-ai">
+          <span class="cfb-ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg></span>
+          <input type="text" id="fbAiInput" placeholder="Describe what you want to see… e.g. unread leads in TX who replied">
+          <button type="button" class="cfb-ai-go" id="fbAiGo">Ask</button>
+        </div>
+        <!-- manual builder — exact copy of the CRM contacts filter -->
+        <div class="cfb-conds" id="cfbConds"></div>
+        <button type="button" class="fb-add" id="cfbAdd">＋ Add condition</button>
+      </div>
+      <div class="bm-rpane" data-rpane="csv" hidden>
+        <label class="bm-csv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span><b style="color:var(--ink-2)">Upload a CSV</b><br>Drop a file or click to choose. We map phone and merge columns.</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Delivery -->
+  <div class="card fc-sect">
+    <div class="fc-sect-head">
+      <div><div class="card-title">Delivery</div></div>
+    </div>
+
+    <div class="fc-field">
+      <div class="fc-radios" id="whenRadios">
+        <label class="fc-radio on"><input type="radio" name="when" value="now" checked>Send now</label>
+        <label class="fc-radio"><input type="radio" name="when" value="sched">Schedule</label>
+      </div>
+      <div id="schedWrap" hidden style="margin-top:10px">
+        <input class="bm-input" id="schedAt" readonly placeholder="Pick a date &amp; time" style="max-width:260px;cursor:pointer">
+      </div>
+    </div>
+
+    <div class="set-rows" style="border:1px solid var(--hairline);border-radius:var(--r-sm)">
+      <div class="set-row">
+        <div class="set-row-main">
+          <div class="set-row-title">Smart Scheduling</div>
+          <div class="set-row-sub">Send each contact at their best-response hour instead of all at once.</div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" id="smartSched" aria-label="Smart Scheduling"><span class="set-track"></span></span>
+      </div>
+    </div>
+
+    <div class="fc-field" style="margin-top:16px">
+      <div class="fc-row" style="justify-content:space-between">
+        <span class="fc-mini-label" style="margin:0">Sending speed · Throttle</span>
+        <span class="fc-slider-val"><b id="speedVal">300</b> msgs/min</span>
+      </div>
+      <input type="range" class="fc-slider" id="speed" min="30" max="600" step="30" value="300">
+      <div class="fc-slider-val">Higher = faster delivery. Lower = gentler on carriers &amp; your team.</div>
+    </div>
+  </div>
+
+  <!-- 5. Advanced -->
+  <details class="card fc-disclose">
+    <summary>
+      <div><div class="fc-disclose-title">Advanced</div></div>
+      <svg class="fc-disclose-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="fc-disclose-body">
+
+      <!-- A/B test (robust + AI) -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">A/B test</div>
+          <div class="fc-trow-sub">Send variants to a small sample, then auto-send the best performer to the rest.</div>
+          <div class="fc-trow-body" data-adv="ab" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <button type="button" class="blast-tool blast-tool-ai" id="abAiWrite" title="Let AI write the variants for you">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>Let AI write variants
+              </button>
+            </div>
+            <div id="abVariants">
+              <div class="bm-ab-var" data-v="a" style="margin-bottom:10px">
+                <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-a">A</span> Variant A</div>
+                <textarea class="bm-ab-tx" id="abA">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
+              </div>
+              <div class="bm-ab-var" data-v="b" style="margin-bottom:10px">
+                <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-b">B</span> Variant B <button type="button" class="bm-ab-del" title="Remove variant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+                <textarea class="bm-ab-tx" id="abB" placeholder="Second version…">{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm. Reply YES and I'll hold a slot.</textarea>
+              </div>
+            </div>
+            <button type="button" class="fb-add" id="abAdd">＋ Add variant</button>
+            <div>
+              <span class="fc-mini-label">Sample size per variant</span>
+              <div class="csel" id="abSample" data-default="10% each" data-options="5% each|10% each|15% each|20% each|25% each" style="max-width:200px"></div>
+              <div class="bm-hint" style="margin-top:6px">Each variant is tried on this share of your list first. Everyone else gets whichever version wins.</div>
+            </div>
+            <div>
+              <span class="fc-mini-label">Pick winner by</span>
+              <div class="csel" id="abWinner" data-default="Positive reply rate" data-options="Positive reply rate|Reply rate|Lowest opt-out rate" style="max-width:240px"></div>
+            </div>
+            <div>
+              <label class="fc-row" style="gap:9px;cursor:pointer">
+                <span class="set-toggle"><input type="checkbox" id="abAuto" checked aria-label="Auto-optimize"><span class="set-track"></span></span>
+                <span style="font-size:12.5px;color:var(--ink-2);font-weight:600">Auto-optimize</span>
+              </label>
+              <div class="bm-hint" style="margin:6px 0 0 52px">We compare the variants on a schedule, send more of whichever is winning, and pause the rest — no manual step.</div>
+              <div class="fc-row" id="abRevalRow" style="margin:10px 0 0 52px;gap:8px;flex-wrap:wrap">
+                <span style="font-size:12.5px;color:var(--ink-2)">Re-check the winner every</span>
+                <div class="csel" id="abReval" data-default="6 hours" data-options="1 hour|3 hours|6 hours|12 hours|Daily|After 250 sent|After 500 sent" style="min-width:150px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="ab" aria-label="A/B test"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Follow-up -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Follow-up non-responders</div>
+          <div class="fc-trow-sub">Auto-send a second message to anyone who doesn't reply.</div>
+          <div class="fc-trow-body" data-adv="fu" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <span style="font-size:12.5px;color:var(--ink-2)">If no reply within</span>
+              <input class="bm-input bm-input-inline" id="fuNum" type="number" min="1" value="2" style="width:64px;text-align:center">
+              <div class="csel" id="fuUnit" data-default="days" data-options="hours|days|weeks" style="min-width:104px"></div>
+            </div>
+            <textarea class="bm-ab-tx" placeholder="Follow-up message…">Just circling back {{first_name}}, still happy to hold a private slot Saturday if you're interested. Reply YES.</textarea>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="fu" aria-label="Follow-up"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Delivery window (Send evenly now lives here) -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Delivery window</div>
+          <div class="fc-trow-sub">Only send during these hours (quiet hours are always enforced regardless).</div>
+          <div class="fc-trow-body" data-adv="win" hidden>
+            <div class="fc-row" style="flex-wrap:wrap;gap:8px">
+              <div class="csel fc-time" id="winFrom" data-default="9:00 AM" style="min-width:130px"></div>
+              <span style="font-size:12.5px;color:var(--muted)">to</span>
+              <div class="csel fc-time" id="winTo" data-default="7:00 PM" style="min-width:130px"></div>
+            </div>
+            <div>
+              <span class="fc-mini-label">Days</span>
+              <div class="bm-days" id="advDays">
+                <button type="button" class="bm-day on">Mon</button>
+                <button type="button" class="bm-day on">Tue</button>
+                <button type="button" class="bm-day on">Wed</button>
+                <button type="button" class="bm-day on">Thu</button>
+                <button type="button" class="bm-day on">Fri</button>
+                <button type="button" class="bm-day">Sat</button>
+                <button type="button" class="bm-day">Sun</button>
+              </div>
+            </div>
+            <label class="fc-row" style="gap:9px;cursor:pointer;padding-top:2px">
+              <span class="set-toggle"><input type="checkbox" id="sendEvenly" checked aria-label="Send evenly"><span class="set-track"></span></span>
+              <span style="font-size:12.5px;color:var(--ink-2)">Send evenly, spreading the batch across the window so replies don't spike all at once</span>
+            </label>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="win" aria-label="Delivery window"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Repeat -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Repeat</div>
+          <div class="fc-trow-sub">Re-send this blast on a schedule to new contacts that match.</div>
+          <div class="fc-trow-body" data-adv="rep" hidden>
+            <div class="csel" id="repEvery" data-default="Weekly" data-options="Daily|Every 2 days|Every weekday|Weekly|Every 2 weeks|Monthly|Every quarter" style="max-width:220px"></div>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="rep" aria-label="Repeat"><span class="set-track"></span></span>
+      </div>
+
+      <!-- Auto-stop (more conditions) -->
+      <div class="fc-trow">
+        <div class="fc-trow-main">
+          <div class="fc-trow-title">Auto-stop</div>
+          <div class="fc-trow-sub">Halt the blast if any of these conditions is met, protecting your sender reputation.</div>
+          <div class="fc-trow-body" data-adv="stop" hidden>
+            <div class="seg" id="stopJoin" style="align-self:flex-start"><button type="button" class="on" data-j="any">Stop if any</button><button type="button" data-j="all">Stop if all</button></div>
+            <div id="stopConds" style="display:flex;flex-direction:column;gap:10px"></div>
+            <button type="button" class="fb-add" id="stopAdd" style="margin-top:2px">＋ Add stop condition</button>
+          </div>
+        </div>
+        <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="stop" aria-label="Auto-stop"><span class="set-track"></span></span>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- 6. Send from -->
+  <div class="card fc-sect">
+    <div class="fc-field">
+      <span class="blast-label">Send from</span>
+      <div class="blast-select-wrap">
+        <select class="blast-select" id="sendFrom">
+          <optgroup label="Smart">
+            <option value="local">Local presence (matches area code)</option>
+            <option value="rotate">Rotate pool</option>
+          </optgroup>
+          <optgroup label="Your numbers">
+            <option value="+14155550182">+1 (415) 555‑0182 · San Francisco</option>
+            <option value="+16465550147">+1 (646) 555‑0147 · New York</option>
+            <option value="+13105550193">+1 (310) 555‑0193 · Los Angeles</option>
+          </optgroup>
+        </select>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="bm-hint" style="margin-top:6px" id="sendFromHint">Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.</div>
+    </div>
+    <div class="blast-compliance" style="margin-top:4px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Every message auto-appends opt-out language and honors STOP. Quiet hours are always enforced.
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<!-- 7. Sticky footer -->
+<div class="fc-foot">
+  <div class="fc-foot-inner">
+    <button type="button" class="blast-btn blast-btn-ghost" id="cancelBtn">Cancel</button>
+    <button type="button" class="blast-btn blast-btn-ghost" id="draftBtn">Save draft</button>
+    <span class="ch-spacer"></span>
+    <button type="button" class="blast-btn blast-btn-primary fc-send" id="sendBtn">
+      <span class="fc-send-label">Send to <span id="footCount">1,240</span></span>
+      <span class="fc-send-check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Sent</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SAMPLE_FIRST = 'Sarah';
+  var $ = function(id){ return document.getElementById(id); };
+  var msg = $('msg');
+
+  function fmt(n){ return n.toLocaleString('en-US'); }
+
+  /* ---------- custom select (styled, non-native) ---------- */
+  function timeOptions(){
+    var a = [];
+    for(var t = 6*60; t <= 22*60; t += 30){
+      var h = Math.floor(t/60), m = t%60, ap = h < 12 ? 'AM' : 'PM', hr = h % 12; if(hr === 0) hr = 12;
+      a.push(hr + ':' + (m ? '30' : '00') + ' ' + ap);
+    }
+    return a;
+  }
+  function buildCsel(el){
+    var opts = el.classList.contains('fc-time') ? timeOptions() : (el.dataset.options || '').split('|').filter(Boolean);
+    var def = el.dataset.default || opts[0] || '';
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'csel-btn is-default';
+    btn.innerHTML = '<span class="csel-lbl"></span><svg class="csel-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+    var menu = document.createElement('div');
+    menu.className = 'csel-menu'; menu.hidden = true;
+    opts.forEach(function(o){
+      var b = document.createElement('button'); b.type = 'button';
+      if(o === '__custom__'){ b.className = 'csel-opt csel-custom'; b.textContent = 'Custom…'; b.dataset.custom = '1'; }
+      else { b.className = 'csel-opt'; b.textContent = o; b.dataset.v = o; }
+      menu.appendChild(b);
+    });
+    el.appendChild(btn); el.appendChild(menu);
+    el._setVal = function(v, isDefault){
+      el.dataset.value = v;
+      btn.querySelector('.csel-lbl').textContent = v;
+      btn.classList.toggle('is-default', !!isDefault);
+      [].forEach.call(menu.querySelectorAll('.csel-opt'), function(o){ o.classList.toggle('on', o.dataset.v === v); });
+    };
+    el._setVal(def, true);
+  }
+  [].forEach.call(document.querySelectorAll('.csel'), buildCsel);
+
+  document.addEventListener('click', function(e){
+    // close any open menus not being interacted with
+    [].forEach.call(document.querySelectorAll('.csel.open'), function(c){
+      if(!c.contains(e.target)){ c.classList.remove('open'); c.querySelector('.csel-menu').hidden = true; }
+    });
+    var btn = e.target.closest('.csel-btn');
+    if(btn){
+      var cs = btn.closest('.csel');
+      var open = !cs.classList.contains('open');
+      cs.classList.toggle('open', open);
+      cs.querySelector('.csel-menu').hidden = !open;
+      return;
+    }
+    var opt = e.target.closest('.csel-opt');
+    if(opt){
+      var cs2 = opt.closest('.csel'), menu = opt.closest('.csel-menu');
+      if(opt.dataset.custom){
+        if(menu.querySelector('.csel-input')) return;
+        var row = document.createElement('div'); row.className = 'csel-input';
+        row.innerHTML = '<input type="text" placeholder="Type a value…"><button type="button">Set</button>';
+        menu.appendChild(row);
+        var inp = row.querySelector('input'); inp.focus();
+        function commit(){ cs2._setVal(inp.value.trim() || cs2.dataset.value, false); cs2.classList.remove('open'); menu.hidden = true; row.remove(); }
+        row.querySelector('button').addEventListener('click', commit);
+        inp.addEventListener('keydown', function(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); commit(); } });
+        return;
+      }
+      cs2._setVal(opt.dataset.v, false);
+      cs2.classList.remove('open'); menu.hidden = true;
+    }
+  });
+
+  /* ---------- live message: char/segment count ---------- */
+  function segs(len){ if(len <= 160) return 1; return Math.ceil(len / 153); }
+  function renderCount(){
+    var raw = msg.value || '';
+    var filled = raw.replace(/\{\{\s*first_name\s*\}\}/gi, SAMPLE_FIRST).replace(/\{\{\s*last_name\s*\}\}/gi, 'Chen');
+    $('charCount').textContent = filled.length;
+    $('segCount').textContent = segs(filled.length);
+  }
+  msg.addEventListener('input', renderCount);
+  renderCount();
+
+  /* ---------- mode tabs (once / sequence) ---------- */
+  $('modeSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var seq = b.dataset.mode === 'seq';
+    $('dripWrap').hidden = !seq;
+    $('onceWrap').hidden = seq;
+  });
+
+  /* ---------- drip: add / remove step ---------- */
+  $('dripAdd').addEventListener('click', function(){
+    var steps = $('dripSteps'), n = steps.children.length + 1;
+    var div = document.createElement('div');
+    div.className = 'fc-drip-step';
+    div.innerHTML =
+      '<div class="fc-drip-step-top">' +
+        '<span class="fc-drip-badge">' + n + '</span>' +
+        '<span class="fc-drip-delay">Sends 2 days after step ' + (n-1) + '</span>' +
+        '<button type="button" class="fc-drip-del" aria-label="Remove step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>' +
+      '</div>' +
+      '<textarea class="blast-textarea" style="min-height:64px" placeholder="Follow-up message…"></textarea>';
+    steps.appendChild(div);
+  });
+  $('dripSteps').addEventListener('click', function(e){
+    var del = e.target.closest('.fc-drip-del'); if(!del) return;
+    del.closest('.fc-drip-step').remove();
+    [].forEach.call($('dripSteps').children, function(step, i){
+      step.querySelector('.fc-drip-badge').textContent = i + 1;
+    });
+  });
+
+  /* ---------- message tools ---------- */
+  function insertAtCursor(text){
+    var s = msg.selectionStart || msg.value.length, e = msg.selectionEnd || msg.value.length;
+    msg.value = msg.value.slice(0, s) + text + msg.value.slice(e);
+    msg.focus(); msg.selectionStart = msg.selectionEnd = s + text.length;
+    renderCount();
+  }
+  $('tMerge').addEventListener('click', function(){ insertAtCursor('{{first_name}}'); });
+  $('tTpl').addEventListener('click', function(){
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.';
+    renderCount();
+  });
+  $('tVariety').addEventListener('click', function(){
+    if(!msg.value.trim()) return;
+    msg.value = '{Hi|Hey|Hello} {{first_name}}, {open house|private showing} Sat 2pm at 1427 Birchwood. Reply YES {for a private slot|to reserve a time}.';
+    renderCount();
+  });
+
+  /* ---------- AI build (does more than draft) ---------- */
+  $('aiGen').addEventListener('click', function(){
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.';
+    renderCount();
+    // AI also picks recipients and timing (demo): switch to Folders, check "Buyers"
+    var folderBtn = document.querySelector('#recipSeg button[data-rp="folders"]');
+    if(folderBtn) folderBtn.click();
+    var buyers = document.querySelector('#folderList input[data-folder="210"]');
+    if(buyers && !buyers.checked){ buyers.checked = true; recompute(); }
+    $('msgSect').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  /* ---------- opt-out (from settings) ---------- */
+  $('optoutEdit').addEventListener('click', function(e){
+    e.preventDefault();
+    var cur = $('optoutText').textContent;
+    var next = prompt('Opt-out text appended to every message (set in Settings):', cur);
+    if(next && next.trim()) $('optoutText').textContent = next.trim();
+  });
+
+  /* ---------- recipients ---------- */
+  var recipCount = 1240;
+  function setRecip(n){
+    recipCount = n;
+    $('recipCount').textContent = fmt(n);
+    $('footCount').textContent = fmt(n);
+  }
+  setRecip(1240);
+
+  $('recipSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var rp = b.dataset.rp;
+    [].forEach.call(document.querySelectorAll('.bm-rpane'), function(p){ p.hidden = p.dataset.rpane !== rp; });
+    if(rp === 'everyone') setRecip(1240);
+    else if(rp === 'filter') cfbUpdateCount();
+    else if(rp === 'csv') setRecip(0);
+    else recompute();
+  });
+  function recompute(){
+    var active = document.querySelector('#recipSeg button.on').dataset.rp, total = 0;
+    if(active === 'folders'){
+      [].forEach.call(document.querySelectorAll('#folderList input:checked'), function(i){ total += +i.dataset.folder; });
+    } else if(active === 'recent'){
+      [].forEach.call(document.querySelectorAll('#recentList input:checked'), function(i){ total += +i.dataset.rc; });
+    }
+    setRecip(total);
+  }
+  $('folderList').addEventListener('change', recompute);
+  $('recentList').addEventListener('change', recompute);
+
+  /* ---------- filter builder — exact copy of the CRM contacts filter ---------- */
+  var CFB_FIELDS = [
+    {key:'name',label:'Name',type:'text',ops:['is','is not','contains','does not contain','is any of','is none of']},
+    {key:'tags',label:'Tags',type:'tags',opts:['Buyer','Seller','Hot','Pre-approved','Investor','First-time','Cash','Relocating'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'score',label:'Lead score',type:'number',ops:['>','<','≥','≤','=','≠','is empty','is not empty']},
+    {key:'source',label:'Source',type:'enum',opts:['Zillow','Open House','Referral','GHL Form','Cold List'],ops:['is any of','is none of']},
+    {key:'status',label:'Status',type:'enum',opts:['Active','In drip','Follow up','Opted out','Archived','Blocked','New','DNC'],ops:['is any of','is none of']},
+    {key:'area',label:'Area code',type:'enum',opts:['512','737','830','972','254'],ops:['is any of','is none of']},
+    {key:'phone',label:'Phone',type:'text',ops:['contains','is','is not','is any of']},
+    {key:'email',label:'Email',type:'text',ops:['contains','does not contain','is','is any of','is empty','is not empty']},
+    {key:'assigned',label:'Assigned to',type:'enum',opts:['Unassigned','Maria Cortez','Jordan Lee'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'sequence',label:'Sequence',type:'enum',opts:['Welcome drip','Open house follow-up','HELOC nurture'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'list',label:'Contact list',type:'enum',opts:['Buyers','Sellers','Past clients'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'lastactivity',label:'Last activity',type:'date',ops:['after','before','more than','less than','is empty','is not empty']},
+    {key:'created',label:'Date added',type:'date',ops:['after','before']}
+  ];
+  var CFBY = {}; CFB_FIELDS.forEach(function(f){ CFBY[f.key] = f; });
+  var CFB_NOVAL = {'is empty':1,'is not empty':1}, CFB_MULTI = {'is any of':1,'is none of':1};
+  var cfbConds = [], cfbMatch = 'and';
+  var SELCHEV = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  var MENUCHEV = '<svg class="fb-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  function cesc(s){ return ('' + s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function cfbDefVal(op){ return CFB_MULTI[op] ? [] : ''; }
+  function cfbMlbl(a){ return a.length === 0 ? 'Select…' : (a.length === 1 ? a[0] : a.length + ' selected'); }
+  function cfbMulti(c, i){
+    var f = CFBY[c.field], vals = Array.isArray(c.value) ? c.value : [];
+    var opts = (f.opts && f.opts.length) ? f.opts.map(function(o){ return '<label class="cfb-mo"><input type="checkbox" class="cfb-mcheck" data-i="' + i + '" value="' + cesc(o) + '"' + (vals.indexOf(o) >= 0 ? ' checked' : '') + '><span>' + cesc(o) + '</span></label>'; }).join('') : '<div class="cfb-mempty">' + (f.type === 'tags' ? 'No tags yet' : 'Nothing to choose from yet') + '</div>';
+    return '<div class="cfb-multi" data-i="' + i + '"><button type="button" class="cfb-multi-trig"><span class="cfb-multi-lbl">' + cesc(cfbMlbl(vals)) + '</span>' + MENUCHEV + '</button><div class="cfb-multi-menu" hidden>' + opts + '</div></div>';
+  }
+  function cfbTokens(c, i){
+    var vals = Array.isArray(c.value) ? c.value : (c.value ? [c.value] : []);
+    var t = vals.map(function(v, k){ return '<span class="cfb-token">' + cesc(v) + '<button type="button" class="cfb-token-x" data-i="' + i + '" data-tok="' + k + '" aria-label="Remove">×</button></span>'; }).join('');
+    return '<div class="cfb-tokin" data-i="' + i + '">' + t + '<input class="cfb-tok-input" data-i="' + i + '" type="text" placeholder="' + (vals.length ? 'add another…' : 'Type, press Enter…') + '"></div>';
+  }
+  function cfbValCtl(c, i){
+    var f = CFBY[c.field];
+    if(CFB_NOVAL[c.op]) return '<span class="cfb-noval">no value needed</span>';
+    if(CFB_MULTI[c.op]){ if(f.type === 'enum' || f.type === 'tags') return cfbMulti(c, i); return cfbTokens(c, i); }
+    if((c.op === 'more than' || c.op === 'less than') && f.type === 'date')
+      return '<span class="cfb-rel"><input class="bm-input cfb-value" data-i="' + i + '" type="number" min="1" placeholder="5" value="' + cesc(c.value || '') + '"><span class="cfb-rel-lbl">days ago</span></span>';
+    if(f.type === 'enum' || f.type === 'tags')
+      return '<div class="blast-select-wrap"><select class="blast-select cfb-value" data-i="' + i + '"><option value=""' + (c.value ? '' : ' selected') + '>Select…</option>' + f.opts.map(function(o){ return '<option' + (o === c.value ? ' selected' : '') + '>' + cesc(o) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>';
+    if(f.type === 'number') return '<input class="bm-input cfb-value" data-i="' + i + '" type="number" placeholder="0" value="' + cesc(c.value || '') + '">';
+    if(f.type === 'date') return '<input class="bm-input cfb-date" data-i="' + i + '" type="text" readonly placeholder="Pick a date" value="' + cesc(c.value || '') + '" style="cursor:pointer">';
+    return '<input class="bm-input cfb-value" data-i="' + i + '" type="text" placeholder="Enter text…" value="' + cesc(c.value || '') + '">';
+  }
+  function cfbRender(){
+    var html = '';
+    cfbConds.forEach(function(c, i){
+      var f = CFBY[c.field], ops = f.ops;
+      var conj = i === 0 ? '<span class="cfb-where">Where</span>'
+        : (i === 1 ? '<select class="cfb-conj-sel"><option value="and"' + (cfbMatch === 'and' ? ' selected' : '') + '>And</option><option value="or"' + (cfbMatch === 'or' ? ' selected' : '') + '>Or</option></select>'
+        : '<span class="cfb-where">' + (cfbMatch === 'or' ? 'Or' : 'And') + '</span>');
+      html += '<div class="cfb-row" data-i="' + i + '">'
+        + '<div class="cfb-conj">' + conj + '</div>'
+        + '<div class="blast-select-wrap"><select class="blast-select cfb-field" data-i="' + i + '">' + CFB_FIELDS.map(function(ff){ return '<option value="' + ff.key + '"' + (ff.key === c.field ? ' selected' : '') + '>' + cesc(ff.label) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>'
+        + '<div class="blast-select-wrap"><select class="blast-select cfb-op" data-i="' + i + '">' + ops.map(function(o){ return '<option' + (o === c.op ? ' selected' : '') + '>' + cesc(o) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>'
+        + '<div class="cfb-val">' + cfbValCtl(c, i) + '</div>'
+        + '<button type="button" class="fb-del cfb-del" data-del="' + i + '" aria-label="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+        + '</div>';
+    });
+    $('cfbConds').innerHTML = html;
+    cfbUpdateCount();
+  }
+  function cfbComplete(c){ if(CFB_NOVAL[c.op]) return true; if(CFB_MULTI[c.op]) return Array.isArray(c.value) ? c.value.length > 0 : !!c.value; return c.value !== '' && c.value != null; }
+  function cfbUpdateCount(){
+    var n = cfbConds.filter(cfbComplete).length;
+    setRecip(n === 0 ? 1240 : Math.max(12, Math.round(1240 / Math.pow(1.8, n))));
+  }
+  function cfbAddCond(){ var f = CFB_FIELDS[0]; cfbConds.push({ field: f.key, op: f.ops[0], value: cfbDefVal(f.ops[0]) }); cfbRender(); }
+  cfbAddCond();
+  $('cfbAdd').addEventListener('click', cfbAddCond);
+  var cfbRoot = $('cfbConds');
+  cfbRoot.addEventListener('change', function(e){
+    var t = e.target, i = +t.getAttribute('data-i');
+    if(t.classList.contains('cfb-field')){ var c = cfbConds[i]; c.field = t.value; var f = CFBY[t.value]; c.op = f.ops[0]; c.value = cfbDefVal(c.op); cfbRender(); return; }
+    if(t.classList.contains('cfb-op')){ var c2 = cfbConds[i]; c2.op = t.value; c2.value = cfbDefVal(c2.op); cfbRender(); return; }
+    if(t.classList.contains('cfb-conj-sel')){ cfbMatch = t.value; cfbRender(); return; }
+    if(t.classList.contains('cfb-mcheck')){ var arr = Array.isArray(cfbConds[i].value) ? cfbConds[i].value : []; if(t.checked){ if(arr.indexOf(t.value) < 0) arr.push(t.value); } else { arr = arr.filter(function(x){ return x !== t.value; }); } cfbConds[i].value = arr; var lbl = t.closest('.cfb-multi').querySelector('.cfb-multi-lbl'); if(lbl) lbl.textContent = cfbMlbl(arr); cfbUpdateCount(); return; }
+    if(t.classList.contains('cfb-value')){ cfbConds[i].value = t.value; cfbUpdateCount(); }
+  });
+  cfbRoot.addEventListener('input', function(e){ var t = e.target; if(t.classList.contains('cfb-value') && t.type !== 'checkbox'){ cfbConds[+t.getAttribute('data-i')].value = t.value; cfbUpdateCount(); } });
+  cfbRoot.addEventListener('keydown', function(e){ var t = e.target; if(t.classList.contains('cfb-tok-input') && e.key === 'Enter'){ e.preventDefault(); var i = +t.getAttribute('data-i'), v = t.value.trim(); if(v){ var arr = Array.isArray(cfbConds[i].value) ? cfbConds[i].value : []; arr.push(v); cfbConds[i].value = arr; cfbRender(); } } });
+  cfbRoot.addEventListener('click', function(e){
+    if(e.target.closest('.cfb-multi-menu')){ e.stopPropagation(); return; }
+    var del = e.target.closest('.cfb-del');
+    if(del){ cfbConds.splice(+del.getAttribute('data-del'), 1); if(!cfbConds.length) cfbAddCond(); else cfbRender(); return; }
+    var trig = e.target.closest('.cfb-multi-trig');
+    if(trig){ var menu = trig.nextElementSibling, open = menu.hidden; document.querySelectorAll('.cfb-multi-menu').forEach(function(m){ m.hidden = true; }); menu.hidden = !open; e.stopPropagation(); return; }
+    var tx = e.target.closest('.cfb-token-x');
+    if(tx){ var ti = +tx.getAttribute('data-i'), tk = +tx.getAttribute('data-tok'); if(Array.isArray(cfbConds[ti].value)){ cfbConds[ti].value.splice(tk, 1); cfbRender(); } return; }
+    var dd = e.target.closest('.cfb-date');
+    if(dd){ openCalendar(dd, false, function(val){ cfbConds[+dd.getAttribute('data-i')].value = val; cfbRender(); }); return; }
+  });
+  document.addEventListener('click', function(){ document.querySelectorAll('.cfb-multi-menu').forEach(function(m){ m.hidden = true; }); });
+  $('fbAiGo').addEventListener('click', function(){
+    // demo: turn the natural-language prompt into matching conditions
+    cfbConds = [ { field:'status', op:'is any of', value:['New'] }, { field:'lastactivity', op:'less than', value:'30' } ];
+    cfbMatch = 'and'; cfbRender();
+  });
+
+  /* ---------- shared mini calendar (schedule + filter date fields) ---------- */
+  $('schedAt').addEventListener('click', function(){ openCalendar(this, true); });
+  function openCalendar(input, withTime, onPick){
+    var ex = document.querySelector('.cal-pop'); if(ex) ex.remove();
+    var MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var DOW = ['S','M','T','W','T','F','S'];
+    var view = new Date(); view.setDate(1);
+    var sel = null;
+    var pop = document.createElement('div'); pop.className = 'cal-pop';
+    document.body.appendChild(pop);
+    var r = input.getBoundingClientRect();
+    pop.style.left = (window.scrollX + r.left) + 'px';
+    pop.style.top = (window.scrollY + r.bottom + 6) + 'px';
+    function draw(){
+      var y = view.getFullYear(), m = view.getMonth();
+      var first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var h = '<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button><span class="cal-title">' + MON[m] + ' ' + y + '</span><button type="button" class="cal-nav" data-nav="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="cal-grid">';
+      DOW.forEach(function(w){ h += '<div class="cal-dow">' + w + '</div>'; });
+      for(var i = 0; i < first; i++) h += '<div></div>';
+      for(var day = 1; day <= days; day++){
+        var cur = new Date(y, m, day), cls = 'cal-day';
+        if(sel && cur.getTime() === sel.getTime()) cls += ' sel';
+        if(cur.getTime() === today.getTime()) cls += ' today';
+        h += '<button type="button" class="' + cls + '" data-day="' + day + '">' + day + '</button>';
+      }
+      h += '</div>';
+      if(withTime) h += '<div class="cal-time"><span class="blast-label">Time</span><input class="bm-input" id="calTime" type="text" placeholder="2:00 PM"><button type="button" class="cal-done">Done</button></div>';
+      pop.innerHTML = h;
+    }
+    draw();
+    function fmt(dt){ var s = MON[dt.getMonth()].slice(0, 3) + ' ' + dt.getDate() + ', ' + dt.getFullYear(); var tv = pop.querySelector('#calTime'); if(withTime && tv && tv.value.trim()) s += ' · ' + tv.value.trim(); return s; }
+    function commit(){ if(!sel) sel = new Date(); input.value = fmt(sel); if(onPick) onPick(input.value); pop.remove(); document.removeEventListener('click', outside, true); }
+    function outside(e){ if(!pop.contains(e.target) && e.target !== input){ pop.remove(); document.removeEventListener('click', outside, true); } }
+    pop.addEventListener('click', function(e){
+      var nav = e.target.closest('.cal-nav'); if(nav){ view.setMonth(view.getMonth() + (+nav.getAttribute('data-nav'))); draw(); return; }
+      var dc = e.target.closest('.cal-day'); if(dc){ sel = new Date(view.getFullYear(), view.getMonth(), +dc.getAttribute('data-day')); sel.setHours(0, 0, 0, 0); if(withTime) draw(); else commit(); return; }
+      if(e.target.closest('.cal-done')){ commit(); return; }
+    });
+    setTimeout(function(){ document.addEventListener('click', outside, true); }, 0);
+  }
+
+  /* ---------- delivery: when radios ---------- */
+  $('whenRadios').addEventListener('change', function(e){
+    [].forEach.call(this.querySelectorAll('.fc-radio'), function(l){ l.classList.remove('on'); });
+    e.target.closest('.fc-radio').classList.add('on');
+    $('schedWrap').hidden = e.target.value !== 'sched';
+  });
+
+  /* ---------- speed slider ---------- */
+  $('speed').addEventListener('input', function(){ $('speedVal').textContent = this.value; });
+
+  /* ---------- advanced toggles reveal their body ---------- */
+  [].forEach.call(document.querySelectorAll('.advToggle'), function(t){
+    t.addEventListener('change', function(){
+      var body = this.closest('.fc-trow').querySelector('.fc-trow-body');
+      if(body) body.hidden = !this.checked;
+    });
+  });
+  $('advDays').addEventListener('click', function(e){
+    var d = e.target.closest('.bm-day'); if(d) d.classList.toggle('on');
+  });
+
+  /* ---------- A/B: add / remove variant + AI write ---------- */
+  var abLetters = ['A','B','C','D'], abClasses = ['bm-ab-a','bm-ab-b','bm-ab-c','bm-ab-d'];
+  $('abAdd').addEventListener('click', function(){
+    var vars = $('abVariants'), i = vars.children.length; if(i >= 4) return;
+    var div = document.createElement('div'); div.className = 'bm-ab-var'; div.dataset.v = abLetters[i].toLowerCase(); div.style.marginBottom = '10px';
+    div.innerHTML =
+      '<div class="bm-ab-vhead"><span class="bm-ab-badge ' + abClasses[i] + '">' + abLetters[i] + '</span> Variant ' + abLetters[i] +
+      ' <button type="button" class="bm-ab-del" title="Remove variant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>' +
+      '<textarea class="bm-ab-tx" placeholder="Another version…"></textarea>';
+    vars.appendChild(div);
+    if(vars.children.length >= 4) this.style.display = 'none';
+  });
+  $('abVariants').addEventListener('click', function(e){
+    var del = e.target.closest('.bm-ab-del'); if(!del) return;
+    var v = del.closest('.bm-ab-var'); if(v.dataset.v === 'a') return;
+    v.remove(); $('abAdd').style.display = '';
+    // relabel remaining
+    [].forEach.call($('abVariants').children, function(node, i){
+      node.dataset.v = abLetters[i].toLowerCase();
+      var badge = node.querySelector('.bm-ab-badge');
+      badge.className = 'bm-ab-badge ' + abClasses[i]; badge.textContent = abLetters[i];
+      var head = node.querySelector('.bm-ab-vhead');
+      head.childNodes[1].textContent = ' Variant ' + abLetters[i] + ' ';
+    });
+  });
+  $('abAiWrite').addEventListener('click', function(){
+    var samples = [
+      'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.',
+      "{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm. Reply YES and I'll hold a slot.",
+      'Quick one {{first_name}}, 1427 Birchwood is open Sat 2pm. Reply YES and I\'ll save you a time before it books up.',
+      'Open house this Sat, {{first_name}}! 1427 Birchwood, 2pm. Reply YES for first pick of private slots.'
+    ];
+    [].forEach.call($('abVariants').querySelectorAll('.bm-ab-tx'), function(tx, i){ tx.value = samples[i] || samples[0]; });
+  });
+
+  /* ---------- auto-stop: multiple conditions ---------- */
+  var STOP_METRICS = 'Opt-out rate|Spam-complaint rate|Delivery-failure rate'.split('|');
+  function stopRow(metric, val, unit){
+    var row = document.createElement('div'); row.className = 'fc-row'; row.style.cssText = 'flex-wrap:wrap;gap:8px';
+    row.innerHTML =
+      '<span style="font-size:12.5px;color:var(--ink-2)">When</span>' +
+      '<div class="csel stop-m" data-default="' + (metric||STOP_METRICS[0]) + '" data-options="' + STOP_METRICS.join('|') + '" style="min-width:190px"></div>' +
+      '<span style="font-size:12.5px;color:var(--ink-2)">exceeds</span>' +
+      '<input class="bm-input bm-input-inline" type="number" min="0" value="' + (val||'3') + '" style="width:64px;text-align:center">' +
+      '<div class="csel stop-u" data-default="' + (unit||'%') + '" data-options="%|total" style="min-width:96px"></div>' +
+      '<button type="button" class="fb-del" aria-label="Remove condition"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+    $('stopConds').appendChild(row);
+    [].forEach.call(row.querySelectorAll('.csel'), buildCsel);
+  }
+  stopRow('Opt-out rate', '3', '%');
+  $('stopAdd').addEventListener('click', function(){ stopRow('Spam-complaint rate', '1', '%'); });
+  $('stopConds').addEventListener('click', function(e){
+    var del = e.target.closest('.fb-del'); if(!del) return;
+    if($('stopConds').children.length > 1) del.closest('.fc-row').remove();
+  });
+  $('stopJoin').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+  });
+  var abAutoT = $('abAuto'), abRevalRow = $('abRevalRow');
+  if(abAutoT) abAutoT.addEventListener('change', function(){ abRevalRow.hidden = !this.checked; });
+
+  /* ---------- send from hint ---------- */
+  $('sendFrom').addEventListener('change', function(){
+    var hints = {
+      local: "Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.",
+      rotate: "Cycles through every number in your pool to spread volume and protect reputation."
+    };
+    $('sendFromHint').textContent = hints[this.value] || 'All messages send from this single number.';
+  });
+
+  /* ---------- footer actions ---------- */
+  $('draftBtn').addEventListener('click', function(){
+    var old = this.textContent; this.textContent = 'Saved ✓';
+    var self = this; setTimeout(function(){ self.textContent = old; }, 1400);
+  });
+  $('cancelBtn').addEventListener('click', function(){
+    if(confirm('Discard this blast?')) location.reload();
+  });
+  $('sendBtn').addEventListener('click', function(){
+    if(recipCount < 1){ alert('Pick some recipients first.'); return; }
+    this.classList.add('is-sent');
+  });
+})();
+</script>
+</body>
+</html>
