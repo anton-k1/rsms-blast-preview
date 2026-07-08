@@ -244,12 +244,6 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 .fc-drip-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
 .fc-drip-add:hover{border-color:var(--accent);background:var(--accent-tint)}
 
-/* compact live preview (single bubble, no phone frame) */
-.fc-preview{display:flex;flex-direction:column;align-items:flex-end;margin-top:12px}
-.blast-bubble{max-width:82%;background:var(--accent);border-radius:16px;border-bottom-right-radius:5px;padding:9px 12px;font-size:13px;line-height:1.5;color:#fff;box-shadow:var(--shadow-sm);white-space:pre-wrap;word-break:break-word}
-.blast-bubble .blast-mf{background:rgba(255,255,255,.24);color:#fff;font-weight:600;border-radius:4px;padding:0 3px}
-.blast-bubble .blast-stop{display:block;margin-top:6px;color:rgba(255,255,255,.72);font-size:11.5px}
-
 /* opt-out surfacing */
 .fc-optout{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
 .fc-optout-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);background:var(--bg-soft);border:1px dashed var(--hairline-strong);border-radius:6px;padding:4px 9px;font-weight:600}
@@ -258,9 +252,8 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 
 /* custom select — styled, non-native: blue selected value + Custom… entry */
 .csel{position:relative;display:inline-block;min-width:130px}
-.csel-btn{display:flex;align-items:center;gap:8px;width:100%;height:36px;padding:0 10px 0 12px;font:inherit;font-size:13.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left}
+.csel-btn{display:flex;align-items:center;gap:8px;width:100%;height:36px;padding:0 10px 0 12px;font:inherit;font-size:13.5px;font-weight:500;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left}
 .csel-btn:hover{border-color:var(--accent)}
-.csel-btn.is-default{color:var(--ink);font-weight:500}
 .csel-btn .csel-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .csel-cv{margin-left:auto;width:15px;height:15px;stroke:var(--faint);flex:none;transition:transform .15s}
 .csel.open .csel-cv{transform:rotate(180deg)}
@@ -268,31 +261,71 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 .csel-menu{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:100%;max-height:248px;overflow:auto;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:0 8px 28px rgba(26,26,46,.16);padding:4px}
 .csel-opt{display:block;width:100%;text-align:left;padding:7px 10px;border-radius:6px;font:inherit;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .csel-opt:hover{background:var(--bg-soft)}
-.csel-opt.on{color:var(--accent-deep);font-weight:650;background:var(--accent-tint)}
+.csel-opt.on{color:var(--ink);font-weight:650;background:var(--bg-soft)}
 .csel-custom{border-top:1px solid var(--hairline);margin-top:4px;color:var(--accent-deep);font-weight:600}
 .csel-input{display:flex;gap:6px;padding:6px}
 .csel-input input{flex:1;height:32px;min-width:0;padding:0 10px;font:inherit;font-size:13px;color:var(--ink);border:1px solid var(--accent);border-radius:6px;outline:none;box-shadow:0 0 0 3px var(--accent-tint)}
 .csel-input button{height:32px;padding:0 12px;font-size:12px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px}
 
-/* filter builder (CRM-parity: AND/OR + rows + AI) */
-.fb{display:flex;flex-direction:column;gap:9px}
-.fb-join{display:inline-flex;align-self:flex-start;background:var(--bg-soft);border:1px solid var(--hairline);border-radius:7px;padding:2px;gap:1px}
-.fb-join button{padding:3px 13px;border-radius:5px;font-size:12px;font-weight:600;color:var(--muted)}
-.fb-join button.on{background:#fff;color:var(--accent-deep);box-shadow:var(--shadow-sm);border:1px solid var(--hairline)}
-.fb-cond{display:grid;grid-template-columns:1fr 1fr 1.3fr auto;gap:8px;align-items:center}
+/* filter builder — exact copy of the CRM contacts filter */
 .fb-del{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);color:var(--faint);background:var(--card);flex:none}
 .fb-del:hover{background:var(--red-tint);color:var(--red);border-color:var(--red-tint)}
 .fb-del svg{width:15px;height:15px}
 .fb-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
 .fb-add:hover{border-color:var(--accent);background:var(--accent-tint)}
-.fb-ai{position:relative;margin-bottom:4px}
-.fb-ai .fb-ai-spark{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--accent);pointer-events:none}
-.fb-ai input{width:100%;height:38px;padding:0 104px 0 34px;font:inherit;font-size:13px;color:var(--ink);border:1px solid #C9DAF8;border-radius:var(--r-sm);background:var(--accent-tint);outline:none}
-.fb-ai input::placeholder{color:var(--accent-deep);opacity:.7}
-.fb-ai input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.fb-ai-go{position:absolute;right:6px;top:6px;height:26px;padding:0 12px;font-size:12px;font-weight:600;color:#fff;background:var(--ai-grad);border-radius:6px;box-shadow:0 2px 6px rgba(37,99,235,.26)}
-.fb-divider{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--faint);text-transform:uppercase;margin:2px 0}
-.fb-divider::before,.fb-divider::after{content:"";flex:1;height:1px;background:var(--hairline)}
+/* AI helper (icon chip + input + Ask) */
+.cfb-ai{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--hairline-strong);border-radius:var(--r-md);background:var(--card);box-shadow:var(--shadow-sm);margin-bottom:16px}
+.cfb-ai-ic{width:32px;height:32px;flex:none;border-radius:9px;background:var(--ai-grad);display:flex;align-items:center;justify-content:center;box-shadow:var(--ai-grad-shadow)}
+.cfb-ai-ic svg{width:16px;height:16px}
+.cfb-ai input{flex:1;min-width:0;height:38px;border:0;outline:none;font:inherit;font-size:13.5px;color:var(--ink);background:transparent;padding:0 4px}
+.cfb-ai input::placeholder{color:var(--faint)}
+.cfb-ai-go{flex:none;height:36px;padding:0 20px;font:inherit;font-size:13px;font-weight:600;color:#fff;background:var(--accent);border-radius:var(--r-sm)}
+.cfb-ai-go:hover{background:var(--accent-deep)}
+/* condition rows */
+.cfb-conds{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+.cfb-row{display:grid;grid-template-columns:auto minmax(108px,1fr) minmax(104px,1fr) minmax(126px,1.25fr) auto;gap:8px;align-items:center}
+.cfb-conj{min-width:46px}
+.cfb-where{font-size:12.5px;font-weight:600;color:var(--muted);padding-left:2px}
+.cfb-conj-sel{appearance:none;-webkit-appearance:none;height:34px;padding:0 22px 0 10px;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--bg-soft);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer;outline:none}
+.cfb-val{min-width:0}
+.cfb-noval{font-size:12.5px;color:var(--faint);font-style:italic}
+.cfb-rel{display:inline-flex;align-items:center;gap:7px}
+.cfb-rel .bm-input{width:74px}
+.cfb-rel-lbl{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.cfb-multi{position:relative}
+.cfb-multi-trig{display:flex;align-items:center;gap:6px;width:100%;height:36px;padding:0 10px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);cursor:pointer;text-align:left}
+.cfb-multi-lbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfb-multi-trig .fb-cv{width:15px;height:15px;stroke:var(--faint);flex:none}
+.cfb-multi-menu{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:100%;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-sm);box-shadow:0 8px 28px rgba(26,26,46,.16);padding:4px}
+.cfb-mo{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;font-size:13px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.cfb-mo:hover{background:var(--bg-soft)}
+.cfb-mo input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.cfb-mempty{padding:9px 11px;font-size:12px;color:var(--faint);white-space:nowrap}
+.cfb-tokin{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:36px;padding:4px 8px;border:1px solid var(--hairline-strong);border-radius:var(--r-sm);background:var(--card);box-shadow:var(--shadow-sm)}
+.cfb-token{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 3px 0 8px;font-size:12px;font-weight:600;color:var(--ink-2);background:var(--bg-soft);border:1px solid var(--hairline-strong);border-radius:5px}
+.cfb-token-x{color:var(--faint);font-size:15px;line-height:1;padding:0 3px}
+.cfb-token-x:hover{color:var(--red)}
+.cfb-tok-input{flex:1;min-width:90px;border:0;outline:none;font:inherit;font-size:13px;background:transparent;height:26px}
+@media(max-width:560px){.cfb-row{grid-template-columns:1fr 1fr;gap:8px}.cfb-conj{grid-column:1/3}.cfb-val{grid-column:1/2}.cfb-del{grid-column:2;justify-self:end}}
+/* card spacing: Advanced disclosure needs the same gap as .fc-sect */
+.fc-disclose{margin-bottom:14px}
+/* mini calendar popover (schedule + filter dates) */
+.cal-pop{position:absolute;z-index:120;width:252px;background:var(--card);border:1px solid var(--hairline-strong);border-radius:var(--r-md);box-shadow:0 12px 34px rgba(26,26,46,.2);padding:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-title{font-size:13px;font-weight:650;color:var(--ink)}
+.cal-nav{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--muted)}
+.cal-nav:hover{background:var(--bg-soft);color:var(--ink)}
+.cal-nav svg{width:15px;height:15px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:600;color:var(--faint);text-align:center;padding:4px 0}
+.cal-day{height:30px;border-radius:7px;font-size:12.5px;color:var(--ink-2);cursor:pointer;font-variant-numeric:tabular-nums;border:0;background:none}
+.cal-day:hover{background:var(--bg-soft)}
+.cal-day.sel{background:var(--accent);color:#fff;font-weight:650}
+.cal-day.today{box-shadow:inset 0 0 0 1px var(--accent)}
+.cal-time{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+.cal-time .blast-label{margin:0}
+.cal-time .bm-input{height:32px;width:104px}
+.cal-done{margin-left:auto;height:30px;padding:0 14px;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px}
 
 /* sticky footer */
 .fc-foot{position:sticky;bottom:0;left:0;right:0;z-index:20;margin-top:6px;background:rgba(252,252,253,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--hairline);padding:12px 16px}
@@ -309,8 +342,6 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   .fc-foot-inner{flex-wrap:wrap}
   .fc-send{flex:1 1 100%;order:-1}
   .blast-btn{flex:1}
-  .fb-cond{grid-template-columns:1fr 1fr;grid-auto-rows:auto}
-  .fb-cond .fb-del{grid-column:2;justify-self:end}
 }
 </style>
 </head>
@@ -343,7 +374,6 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   <!-- 2. Message (Type toggle now lives here) -->
   <div class="card fc-sect" id="msgSect">
     <div class="fc-field">
-      <span class="blast-label">Type</span>
       <div class="seg" id="modeSeg" role="tablist" aria-label="Blast type">
         <button type="button" class="on" data-mode="once">Send once</button>
         <button type="button" data-mode="seq">Sequence</button>
@@ -368,9 +398,6 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="blast-counter">
         <span><b id="charCount">0</b> characters</span>
         <span><b id="segCount">1</b> segment · 160 chars/segment</span>
-      </div>
-      <div class="fc-preview">
-        <div class="blast-bubble"><span id="pvBody"></span><span class="blast-stop" id="pvStop">Reply STOP to opt out</span></div>
       </div>
     </div>
 
@@ -437,22 +464,15 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
         <div class="bm-hint">Re-send to everyone who received one or more past blasts (select all that apply).</div>
       </div>
       <div class="bm-rpane" data-rpane="filter" hidden>
-        <!-- AI filter builder -->
-        <div class="fb-ai">
-          <svg class="fb-ai-spark" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>
-          <input type="text" id="fbAiInput" placeholder="Describe who to reach, e.g. buyers in Austin who replied in the last 30 days">
-          <button type="button" class="fb-ai-go" id="fbAiGo">Build</button>
+        <!-- AI filter helper (same as the CRM / inbox filter) -->
+        <div class="cfb-ai">
+          <span class="cfb-ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg></span>
+          <input type="text" id="fbAiInput" placeholder="Describe what you want to see… e.g. unread leads in TX who replied">
+          <button type="button" class="cfb-ai-go" id="fbAiGo">Ask</button>
         </div>
-        <div class="fb-divider">or build it manually</div>
-        <!-- manual builder (CRM-parity: AND/OR + rows) -->
-        <div class="fb">
-          <div class="fb-join" id="fbJoin">
-            <button type="button" class="on" data-join="and">Match all (AND)</button>
-            <button type="button" data-join="or">Match any (OR)</button>
-          </div>
-          <div id="fbConds"></div>
-          <button type="button" class="fb-add" id="fbAdd">＋ Add condition</button>
-        </div>
+        <!-- manual builder — exact copy of the CRM contacts filter -->
+        <div class="cfb-conds" id="cfbConds"></div>
+        <button type="button" class="fb-add" id="cfbAdd">＋ Add condition</button>
       </div>
       <div class="bm-rpane" data-rpane="csv" hidden>
         <label class="bm-csv">
@@ -470,13 +490,12 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     </div>
 
     <div class="fc-field">
-      <span class="fc-mini-label">When to send</span>
       <div class="fc-radios" id="whenRadios">
         <label class="fc-radio on"><input type="radio" name="when" value="now" checked>Send now</label>
         <label class="fc-radio"><input type="radio" name="when" value="sched">Schedule</label>
       </div>
       <div id="schedWrap" hidden style="margin-top:10px">
-        <input class="bm-input" id="schedAt" placeholder="e.g. Sat 2:00 PM, Nov 9" style="max-width:260px">
+        <input class="bm-input" id="schedAt" readonly placeholder="Pick a date &amp; time" style="max-width:260px;cursor:pointer">
       </div>
     </div>
 
@@ -532,16 +551,24 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
             <button type="button" class="fb-add" id="abAdd">＋ Add variant</button>
             <div>
               <span class="fc-mini-label">Sample size per variant</span>
-              <div class="csel" id="abSample" data-default="10% each" data-options="5% each|10% each|15% each|20% each|25% each|__custom__" style="max-width:200px"></div>
+              <div class="csel" id="abSample" data-default="10% each" data-options="5% each|10% each|15% each|20% each|25% each" style="max-width:200px"></div>
+              <div class="bm-hint" style="margin-top:6px">Each variant is tried on this share of your list first. Everyone else gets whichever version wins.</div>
             </div>
             <div>
               <span class="fc-mini-label">Pick winner by</span>
-              <div class="csel" id="abWinner" data-default="Positive reply rate" data-options="Positive reply rate|Reply rate|Click rate|Lowest opt-out rate|Let AI decide" style="max-width:240px"></div>
+              <div class="csel" id="abWinner" data-default="Positive reply rate" data-options="Positive reply rate|Reply rate|Lowest opt-out rate" style="max-width:240px"></div>
             </div>
-            <label class="fc-row" style="gap:9px;cursor:pointer">
-              <span class="set-toggle"><input type="checkbox" id="abAuto" checked aria-label="Auto-optimize"><span class="set-track"></span></span>
-              <span style="font-size:12.5px;color:var(--ink-2)">Auto-optimize by keeping the winner and retiring losers automatically</span>
-            </label>
+            <div>
+              <label class="fc-row" style="gap:9px;cursor:pointer">
+                <span class="set-toggle"><input type="checkbox" id="abAuto" checked aria-label="Auto-optimize"><span class="set-track"></span></span>
+                <span style="font-size:12.5px;color:var(--ink-2);font-weight:600">Auto-optimize</span>
+              </label>
+              <div class="bm-hint" style="margin:6px 0 0 52px">We compare the variants on a schedule, send more of whichever is winning, and pause the rest — no manual step.</div>
+              <div class="fc-row" id="abRevalRow" style="margin:10px 0 0 52px;gap:8px;flex-wrap:wrap">
+                <span style="font-size:12.5px;color:var(--ink-2)">Re-check the winner every</span>
+                <div class="csel" id="abReval" data-default="6 hours" data-options="1 hour|3 hours|6 hours|12 hours|Daily|After 250 sent|After 500 sent" style="min-width:150px"></div>
+              </div>
+            </div>
           </div>
         </div>
         <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="ab" aria-label="A/B test"><span class="set-track"></span></span>
@@ -602,7 +629,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
           <div class="fc-trow-title">Repeat</div>
           <div class="fc-trow-sub">Re-send this blast on a schedule to new contacts that match.</div>
           <div class="fc-trow-body" data-adv="rep" hidden>
-            <div class="csel" id="repEvery" data-default="Weekly" data-options="Daily|Every 2 days|Every weekday|Weekly|Every 2 weeks|Monthly|Every quarter|__custom__" style="max-width:220px"></div>
+            <div class="csel" id="repEvery" data-default="Weekly" data-options="Daily|Every 2 days|Every weekday|Weekly|Every 2 weeks|Monthly|Every quarter" style="max-width:220px"></div>
           </div>
         </div>
         <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="rep" aria-label="Repeat"><span class="set-track"></span></span>
@@ -614,8 +641,9 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
           <div class="fc-trow-title">Auto-stop</div>
           <div class="fc-trow-sub">Halt the blast if any of these conditions is met, protecting your sender reputation.</div>
           <div class="fc-trow-body" data-adv="stop" hidden>
-            <div id="stopConds"></div>
-            <button type="button" class="fb-add" id="stopAdd">＋ Add stop condition</button>
+            <div class="seg" id="stopJoin" style="align-self:flex-start"><button type="button" class="on" data-j="any">Stop if any</button><button type="button" data-j="all">Stop if all</button></div>
+            <div id="stopConds" style="display:flex;flex-direction:column;gap:10px"></div>
+            <button type="button" class="fb-add" id="stopAdd" style="margin-top:2px">＋ Add stop condition</button>
           </div>
         </div>
         <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="stop" aria-label="Auto-stop"><span class="set-track"></span></span>
@@ -680,7 +708,6 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       var h = Math.floor(t/60), m = t%60, ap = h < 12 ? 'AM' : 'PM', hr = h % 12; if(hr === 0) hr = 12;
       a.push(hr + ':' + (m ? '30' : '00') + ' ' + ap);
     }
-    a.push('__custom__');
     return a;
   }
   function buildCsel(el){
@@ -742,16 +769,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 
   /* ---------- live message: char/segment count ---------- */
   function segs(len){ if(len <= 160) return 1; return Math.ceil(len / 153); }
-  function esc(s){ return s.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
   function renderCount(){
     var raw = msg.value || '';
     var filled = raw.replace(/\{\{\s*first_name\s*\}\}/gi, SAMPLE_FIRST).replace(/\{\{\s*last_name\s*\}\}/gi, 'Chen');
     $('charCount').textContent = filled.length;
     $('segCount').textContent = segs(filled.length);
-    var html = esc(raw)
-      .replace(/\{\{\s*first_name\s*\}\}/gi, '<span class="blast-mf">' + SAMPLE_FIRST + '</span>')
-      .replace(/\{\{\s*last_name\s*\}\}/gi, '<span class="blast-mf">Chen</span>');
-    $('pvBody').innerHTML = html || '<span style="opacity:.6">Your message preview…</span>';
   }
   msg.addEventListener('input', renderCount);
   renderCount();
@@ -823,7 +845,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     e.preventDefault();
     var cur = $('optoutText').textContent;
     var next = prompt('Opt-out text appended to every message (set in Settings):', cur);
-    if(next && next.trim()){ $('optoutText').textContent = next.trim(); $('pvStop').textContent = next.trim(); }
+    if(next && next.trim()) $('optoutText').textContent = next.trim();
   });
 
   /* ---------- recipients ---------- */
@@ -842,7 +864,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     var rp = b.dataset.rp;
     [].forEach.call(document.querySelectorAll('.bm-rpane'), function(p){ p.hidden = p.dataset.rpane !== rp; });
     if(rp === 'everyone') setRecip(1240);
-    else if(rp === 'filter') setRecip(642);
+    else if(rp === 'filter') cfbUpdateCount();
     else if(rp === 'csv') setRecip(0);
     else recompute();
   });
@@ -858,37 +880,148 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   $('folderList').addEventListener('change', recompute);
   $('recentList').addEventListener('change', recompute);
 
-  /* ---------- filter builder (CRM-parity) ---------- */
-  var FB_FIELDS = 'Tag|City|State|Source|Last reply|Last blast|Created|Custom field'.split('|');
-  var FB_OPS = 'is|is not|contains|starts with|is known|is unknown'.split('|');
-  function fbRow(){
-    var row = document.createElement('div'); row.className = 'fb-cond';
-    row.innerHTML =
-      '<div class="csel fb-f" data-default="' + FB_FIELDS[0] + '" data-options="' + FB_FIELDS.join('|') + '"></div>' +
-      '<div class="csel fb-o" data-default="' + FB_OPS[0] + '" data-options="' + FB_OPS.join('|') + '"></div>' +
-      '<input class="bm-input" placeholder="e.g. Buyer">' +
-      '<button type="button" class="fb-del" aria-label="Remove condition"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
-    $('fbConds').appendChild(row);
-    [].forEach.call(row.querySelectorAll('.csel'), buildCsel);
+  /* ---------- filter builder — exact copy of the CRM contacts filter ---------- */
+  var CFB_FIELDS = [
+    {key:'name',label:'Name',type:'text',ops:['is','is not','contains','does not contain','is any of','is none of']},
+    {key:'tags',label:'Tags',type:'tags',opts:['Buyer','Seller','Hot','Pre-approved','Investor','First-time','Cash','Relocating'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'score',label:'Lead score',type:'number',ops:['>','<','≥','≤','=','≠','is empty','is not empty']},
+    {key:'source',label:'Source',type:'enum',opts:['Zillow','Open House','Referral','GHL Form','Cold List'],ops:['is any of','is none of']},
+    {key:'status',label:'Status',type:'enum',opts:['Active','In drip','Follow up','Opted out','Archived','Blocked','New','DNC'],ops:['is any of','is none of']},
+    {key:'area',label:'Area code',type:'enum',opts:['512','737','830','972','254'],ops:['is any of','is none of']},
+    {key:'phone',label:'Phone',type:'text',ops:['contains','is','is not','is any of']},
+    {key:'email',label:'Email',type:'text',ops:['contains','does not contain','is','is any of','is empty','is not empty']},
+    {key:'assigned',label:'Assigned to',type:'enum',opts:['Unassigned','Maria Cortez','Jordan Lee'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'sequence',label:'Sequence',type:'enum',opts:['Welcome drip','Open house follow-up','HELOC nurture'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'list',label:'Contact list',type:'enum',opts:['Buyers','Sellers','Past clients'],ops:['is any of','is none of','is empty','is not empty']},
+    {key:'lastactivity',label:'Last activity',type:'date',ops:['after','before','more than','less than','is empty','is not empty']},
+    {key:'created',label:'Date added',type:'date',ops:['after','before']}
+  ];
+  var CFBY = {}; CFB_FIELDS.forEach(function(f){ CFBY[f.key] = f; });
+  var CFB_NOVAL = {'is empty':1,'is not empty':1}, CFB_MULTI = {'is any of':1,'is none of':1};
+  var cfbConds = [], cfbMatch = 'and';
+  var SELCHEV = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  var MENUCHEV = '<svg class="fb-cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  function cesc(s){ return ('' + s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function cfbDefVal(op){ return CFB_MULTI[op] ? [] : ''; }
+  function cfbMlbl(a){ return a.length === 0 ? 'Select…' : (a.length === 1 ? a[0] : a.length + ' selected'); }
+  function cfbMulti(c, i){
+    var f = CFBY[c.field], vals = Array.isArray(c.value) ? c.value : [];
+    var opts = (f.opts && f.opts.length) ? f.opts.map(function(o){ return '<label class="cfb-mo"><input type="checkbox" class="cfb-mcheck" data-i="' + i + '" value="' + cesc(o) + '"' + (vals.indexOf(o) >= 0 ? ' checked' : '') + '><span>' + cesc(o) + '</span></label>'; }).join('') : '<div class="cfb-mempty">' + (f.type === 'tags' ? 'No tags yet' : 'Nothing to choose from yet') + '</div>';
+    return '<div class="cfb-multi" data-i="' + i + '"><button type="button" class="cfb-multi-trig"><span class="cfb-multi-lbl">' + cesc(cfbMlbl(vals)) + '</span>' + MENUCHEV + '</button><div class="cfb-multi-menu" hidden>' + opts + '</div></div>';
   }
-  fbRow();
-  $('fbAdd').addEventListener('click', fbRow);
-  $('fbConds').addEventListener('click', function(e){
-    var del = e.target.closest('.fb-del'); if(!del) return;
-    if($('fbConds').children.length > 1) del.closest('.fb-cond').remove();
+  function cfbTokens(c, i){
+    var vals = Array.isArray(c.value) ? c.value : (c.value ? [c.value] : []);
+    var t = vals.map(function(v, k){ return '<span class="cfb-token">' + cesc(v) + '<button type="button" class="cfb-token-x" data-i="' + i + '" data-tok="' + k + '" aria-label="Remove">×</button></span>'; }).join('');
+    return '<div class="cfb-tokin" data-i="' + i + '">' + t + '<input class="cfb-tok-input" data-i="' + i + '" type="text" placeholder="' + (vals.length ? 'add another…' : 'Type, press Enter…') + '"></div>';
+  }
+  function cfbValCtl(c, i){
+    var f = CFBY[c.field];
+    if(CFB_NOVAL[c.op]) return '<span class="cfb-noval">no value needed</span>';
+    if(CFB_MULTI[c.op]){ if(f.type === 'enum' || f.type === 'tags') return cfbMulti(c, i); return cfbTokens(c, i); }
+    if((c.op === 'more than' || c.op === 'less than') && f.type === 'date')
+      return '<span class="cfb-rel"><input class="bm-input cfb-value" data-i="' + i + '" type="number" min="1" placeholder="5" value="' + cesc(c.value || '') + '"><span class="cfb-rel-lbl">days ago</span></span>';
+    if(f.type === 'enum' || f.type === 'tags')
+      return '<div class="blast-select-wrap"><select class="blast-select cfb-value" data-i="' + i + '"><option value=""' + (c.value ? '' : ' selected') + '>Select…</option>' + f.opts.map(function(o){ return '<option' + (o === c.value ? ' selected' : '') + '>' + cesc(o) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>';
+    if(f.type === 'number') return '<input class="bm-input cfb-value" data-i="' + i + '" type="number" placeholder="0" value="' + cesc(c.value || '') + '">';
+    if(f.type === 'date') return '<input class="bm-input cfb-date" data-i="' + i + '" type="text" readonly placeholder="Pick a date" value="' + cesc(c.value || '') + '" style="cursor:pointer">';
+    return '<input class="bm-input cfb-value" data-i="' + i + '" type="text" placeholder="Enter text…" value="' + cesc(c.value || '') + '">';
+  }
+  function cfbRender(){
+    var html = '';
+    cfbConds.forEach(function(c, i){
+      var f = CFBY[c.field], ops = f.ops;
+      var conj = i === 0 ? '<span class="cfb-where">Where</span>'
+        : (i === 1 ? '<select class="cfb-conj-sel"><option value="and"' + (cfbMatch === 'and' ? ' selected' : '') + '>And</option><option value="or"' + (cfbMatch === 'or' ? ' selected' : '') + '>Or</option></select>'
+        : '<span class="cfb-where">' + (cfbMatch === 'or' ? 'Or' : 'And') + '</span>');
+      html += '<div class="cfb-row" data-i="' + i + '">'
+        + '<div class="cfb-conj">' + conj + '</div>'
+        + '<div class="blast-select-wrap"><select class="blast-select cfb-field" data-i="' + i + '">' + CFB_FIELDS.map(function(ff){ return '<option value="' + ff.key + '"' + (ff.key === c.field ? ' selected' : '') + '>' + cesc(ff.label) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>'
+        + '<div class="blast-select-wrap"><select class="blast-select cfb-op" data-i="' + i + '">' + ops.map(function(o){ return '<option' + (o === c.op ? ' selected' : '') + '>' + cesc(o) + '</option>'; }).join('') + '</select>' + SELCHEV + '</div>'
+        + '<div class="cfb-val">' + cfbValCtl(c, i) + '</div>'
+        + '<button type="button" class="fb-del cfb-del" data-del="' + i + '" aria-label="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+        + '</div>';
+    });
+    $('cfbConds').innerHTML = html;
+    cfbUpdateCount();
+  }
+  function cfbComplete(c){ if(CFB_NOVAL[c.op]) return true; if(CFB_MULTI[c.op]) return Array.isArray(c.value) ? c.value.length > 0 : !!c.value; return c.value !== '' && c.value != null; }
+  function cfbUpdateCount(){
+    var n = cfbConds.filter(cfbComplete).length;
+    setRecip(n === 0 ? 1240 : Math.max(12, Math.round(1240 / Math.pow(1.8, n))));
+  }
+  function cfbAddCond(){ var f = CFB_FIELDS[0]; cfbConds.push({ field: f.key, op: f.ops[0], value: cfbDefVal(f.ops[0]) }); cfbRender(); }
+  cfbAddCond();
+  $('cfbAdd').addEventListener('click', cfbAddCond);
+  var cfbRoot = $('cfbConds');
+  cfbRoot.addEventListener('change', function(e){
+    var t = e.target, i = +t.getAttribute('data-i');
+    if(t.classList.contains('cfb-field')){ var c = cfbConds[i]; c.field = t.value; var f = CFBY[t.value]; c.op = f.ops[0]; c.value = cfbDefVal(c.op); cfbRender(); return; }
+    if(t.classList.contains('cfb-op')){ var c2 = cfbConds[i]; c2.op = t.value; c2.value = cfbDefVal(c2.op); cfbRender(); return; }
+    if(t.classList.contains('cfb-conj-sel')){ cfbMatch = t.value; cfbRender(); return; }
+    if(t.classList.contains('cfb-mcheck')){ var arr = Array.isArray(cfbConds[i].value) ? cfbConds[i].value : []; if(t.checked){ if(arr.indexOf(t.value) < 0) arr.push(t.value); } else { arr = arr.filter(function(x){ return x !== t.value; }); } cfbConds[i].value = arr; var lbl = t.closest('.cfb-multi').querySelector('.cfb-multi-lbl'); if(lbl) lbl.textContent = cfbMlbl(arr); cfbUpdateCount(); return; }
+    if(t.classList.contains('cfb-value')){ cfbConds[i].value = t.value; cfbUpdateCount(); }
   });
-  $('fbJoin').addEventListener('click', function(e){
-    var b = e.target.closest('button'); if(!b) return;
-    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
-    b.classList.add('on');
+  cfbRoot.addEventListener('input', function(e){ var t = e.target; if(t.classList.contains('cfb-value') && t.type !== 'checkbox'){ cfbConds[+t.getAttribute('data-i')].value = t.value; cfbUpdateCount(); } });
+  cfbRoot.addEventListener('keydown', function(e){ var t = e.target; if(t.classList.contains('cfb-tok-input') && e.key === 'Enter'){ e.preventDefault(); var i = +t.getAttribute('data-i'), v = t.value.trim(); if(v){ var arr = Array.isArray(cfbConds[i].value) ? cfbConds[i].value : []; arr.push(v); cfbConds[i].value = arr; cfbRender(); } } });
+  cfbRoot.addEventListener('click', function(e){
+    if(e.target.closest('.cfb-multi-menu')){ e.stopPropagation(); return; }
+    var del = e.target.closest('.cfb-del');
+    if(del){ cfbConds.splice(+del.getAttribute('data-del'), 1); if(!cfbConds.length) cfbAddCond(); else cfbRender(); return; }
+    var trig = e.target.closest('.cfb-multi-trig');
+    if(trig){ var menu = trig.nextElementSibling, open = menu.hidden; document.querySelectorAll('.cfb-multi-menu').forEach(function(m){ m.hidden = true; }); menu.hidden = !open; e.stopPropagation(); return; }
+    var tx = e.target.closest('.cfb-token-x');
+    if(tx){ var ti = +tx.getAttribute('data-i'), tk = +tx.getAttribute('data-tok'); if(Array.isArray(cfbConds[ti].value)){ cfbConds[ti].value.splice(tk, 1); cfbRender(); } return; }
+    var dd = e.target.closest('.cfb-date');
+    if(dd){ openCalendar(dd, false, function(val){ cfbConds[+dd.getAttribute('data-i')].value = val; cfbRender(); }); return; }
   });
+  document.addEventListener('click', function(){ document.querySelectorAll('.cfb-multi-menu').forEach(function(m){ m.hidden = true; }); });
   $('fbAiGo').addEventListener('click', function(){
-    // demo: turn the prompt into a couple of conditions
-    $('fbConds').innerHTML = '';
-    fbRow(); fbRow();
-    var join = document.querySelector('#fbJoin button[data-join="and"]');
-    if(join){ [].forEach.call($('fbJoin').children, function(x){ x.classList.remove('on'); }); join.classList.add('on'); }
+    // demo: turn the natural-language prompt into matching conditions
+    cfbConds = [ { field:'status', op:'is any of', value:['New'] }, { field:'lastactivity', op:'less than', value:'30' } ];
+    cfbMatch = 'and'; cfbRender();
   });
+
+  /* ---------- shared mini calendar (schedule + filter date fields) ---------- */
+  $('schedAt').addEventListener('click', function(){ openCalendar(this, true); });
+  function openCalendar(input, withTime, onPick){
+    var ex = document.querySelector('.cal-pop'); if(ex) ex.remove();
+    var MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var DOW = ['S','M','T','W','T','F','S'];
+    var view = new Date(); view.setDate(1);
+    var sel = null;
+    var pop = document.createElement('div'); pop.className = 'cal-pop';
+    document.body.appendChild(pop);
+    var r = input.getBoundingClientRect();
+    pop.style.left = (window.scrollX + r.left) + 'px';
+    pop.style.top = (window.scrollY + r.bottom + 6) + 'px';
+    function draw(){
+      var y = view.getFullYear(), m = view.getMonth();
+      var first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var h = '<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button><span class="cal-title">' + MON[m] + ' ' + y + '</span><button type="button" class="cal-nav" data-nav="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="cal-grid">';
+      DOW.forEach(function(w){ h += '<div class="cal-dow">' + w + '</div>'; });
+      for(var i = 0; i < first; i++) h += '<div></div>';
+      for(var day = 1; day <= days; day++){
+        var cur = new Date(y, m, day), cls = 'cal-day';
+        if(sel && cur.getTime() === sel.getTime()) cls += ' sel';
+        if(cur.getTime() === today.getTime()) cls += ' today';
+        h += '<button type="button" class="' + cls + '" data-day="' + day + '">' + day + '</button>';
+      }
+      h += '</div>';
+      if(withTime) h += '<div class="cal-time"><span class="blast-label">Time</span><input class="bm-input" id="calTime" type="text" placeholder="2:00 PM"><button type="button" class="cal-done">Done</button></div>';
+      pop.innerHTML = h;
+    }
+    draw();
+    function fmt(dt){ var s = MON[dt.getMonth()].slice(0, 3) + ' ' + dt.getDate() + ', ' + dt.getFullYear(); var tv = pop.querySelector('#calTime'); if(withTime && tv && tv.value.trim()) s += ' · ' + tv.value.trim(); return s; }
+    function commit(){ if(!sel) sel = new Date(); input.value = fmt(sel); if(onPick) onPick(input.value); pop.remove(); document.removeEventListener('click', outside, true); }
+    function outside(e){ if(!pop.contains(e.target) && e.target !== input){ pop.remove(); document.removeEventListener('click', outside, true); } }
+    pop.addEventListener('click', function(e){
+      var nav = e.target.closest('.cal-nav'); if(nav){ view.setMonth(view.getMonth() + (+nav.getAttribute('data-nav'))); draw(); return; }
+      var dc = e.target.closest('.cal-day'); if(dc){ sel = new Date(view.getFullYear(), view.getMonth(), +dc.getAttribute('data-day')); sel.setHours(0, 0, 0, 0); if(withTime) draw(); else commit(); return; }
+      if(e.target.closest('.cal-done')){ commit(); return; }
+    });
+    setTimeout(function(){ document.addEventListener('click', outside, true); }, 0);
+  }
 
   /* ---------- delivery: when radios ---------- */
   $('whenRadios').addEventListener('change', function(e){
@@ -947,11 +1080,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   });
 
   /* ---------- auto-stop: multiple conditions ---------- */
-  var STOP_METRICS = 'Opt-out rate|Spam-complaint rate|Hard-bounce rate|Delivery-failure rate|Unsubscribes'.split('|');
+  var STOP_METRICS = 'Opt-out rate|Spam-complaint rate|Delivery-failure rate'.split('|');
   function stopRow(metric, val, unit){
     var row = document.createElement('div'); row.className = 'fc-row'; row.style.cssText = 'flex-wrap:wrap;gap:8px';
     row.innerHTML =
-      '<span style="font-size:12.5px;color:var(--ink-2)">Stop if</span>' +
+      '<span style="font-size:12.5px;color:var(--ink-2)">When</span>' +
       '<div class="csel stop-m" data-default="' + (metric||STOP_METRICS[0]) + '" data-options="' + STOP_METRICS.join('|') + '" style="min-width:190px"></div>' +
       '<span style="font-size:12.5px;color:var(--ink-2)">exceeds</span>' +
       '<input class="bm-input bm-input-inline" type="number" min="0" value="' + (val||'3') + '" style="width:64px;text-align:center">' +
@@ -961,11 +1094,18 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     [].forEach.call(row.querySelectorAll('.csel'), buildCsel);
   }
   stopRow('Opt-out rate', '3', '%');
-  $('stopAdd').addEventListener('click', function(){ stopRow('Hard-bounce rate', '5', '%'); });
+  $('stopAdd').addEventListener('click', function(){ stopRow('Spam-complaint rate', '1', '%'); });
   $('stopConds').addEventListener('click', function(e){
     var del = e.target.closest('.fb-del'); if(!del) return;
     if($('stopConds').children.length > 1) del.closest('.fc-row').remove();
   });
+  $('stopJoin').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    [].forEach.call(this.children, function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+  });
+  var abAutoT = $('abAuto'), abRevalRow = $('abRevalRow');
+  if(abAutoT) abAutoT.addEventListener('change', function(){ abRevalRow.hidden = !this.checked; });
 
   /* ---------- send from hint ---------- */
   $('sendFrom').addEventListener('change', function(){
