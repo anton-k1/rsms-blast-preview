@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Blast — ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --border:#e5e7ef; --border2:#eef0f4; --bg:#eef1f5; --card:#fff;
+    --r-lg:16px; --r-md:11px; --r-pill:99px;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font); background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:28px 20px 120px}
+  .topbar{display:flex; align-items:center; gap:12px; margin-bottom:22px}
+  .topbar .logo{width:34px;height:34px;border-radius:9px;background:var(--ai);
+    display:grid;place-items:center;flex:none}
+  .topbar h1{font-size:19px; margin:0; font-weight:650; letter-spacing:-.01em}
+  .topbar .sub{font-size:13px; color:var(--muted); margin-top:1px}
+
+  /* Accordion section cards */
+  .sec{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--r-lg); margin-bottom:14px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(20,20,50,.04);
+    transition:box-shadow .18s, border-color .18s;
+  }
+  .sec.open{box-shadow:var(--shadow); border-color:#dbe2f0}
+  .sec-head{
+    display:flex; align-items:center; gap:14px; width:100%;
+    padding:17px 20px; cursor:pointer; background:none; border:0; text-align:left;
+    font-family:var(--font); color:var(--ink);
+  }
+  .sec-head:hover{background:#fafbfd}
+  .sec-num{
+    width:26px;height:26px;border-radius:var(--r-pill);flex:none;
+    background:#f1f4fa;color:var(--primary);font-weight:700;font-size:13px;
+    display:grid;place-items:center;
+  }
+  .sec.open .sec-num{background:var(--primary);color:#fff}
+  .sec-titles{flex:1;min-width:0}
+  .sec-title{font-size:15px;font-weight:640;letter-spacing:-.01em}
+  .sec-summary{font-size:13px;color:var(--muted);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sec-summary b{color:var(--ink);font-weight:600}
+  .chev{width:18px;height:18px;color:var(--faint);flex:none;
+    transition:transform .2s}
+  .sec.open .chev{transform:rotate(180deg)}
+  .sec-body{display:none; padding:2px 20px 20px}
+  .sec.open .sec-body{display:block}
+
+  /* Generic controls */
+  label.fld{display:block;font-size:12.5px;font-weight:600;color:var(--muted);
+    margin:0 0 6px;text-transform:none}
+  textarea,input[type=text],input[type=date],input[type=time],select{
+    width:100%;font-family:var(--font);font-size:14.5px;color:var(--ink);
+    border:1px solid var(--border);border-radius:var(--r-md);
+    padding:11px 13px;background:#fff;outline:none;
+  }
+  textarea:focus,input:focus,select:focus{border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  textarea{resize:vertical;min-height:104px;line-height:1.5}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:0}
+
+  .btn{font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:var(--r-md);border:1px solid var(--border);background:#fff;
+    color:var(--ink);padding:9px 15px;display:inline-flex;align-items:center;
+    gap:7px;transition:background .15s,border-color .15s}
+  .btn:hover{background:#f6f8fc;border-color:#d7deec}
+  .btn svg{width:16px;height:16px}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.primary:hover{background:#1d4fd7}
+  .btn.ai{background:var(--ai);border:0;color:#fff}
+  .btn.ai:hover{filter:brightness(1.05)}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .btn.ghost{background:none;border-color:var(--border)}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .chip{font-size:13px;padding:6px 12px;border-radius:var(--r-pill);
+    border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--ink);
+    font-weight:500;font-family:var(--font);transition:all .13s;white-space:nowrap}
+  .chip:hover{border-color:#c9d4ea;background:#f7f9fc}
+  .chip.on{background:#eef3ff;border-color:var(--primary);color:var(--primary);
+    font-weight:600}
+  .chip .ct{color:var(--faint);font-weight:500;margin-left:3px}
+  .chip.on .ct{color:var(--primary)}
+
+  /* segmented toggle */
+  .seg{display:inline-flex;background:#f1f4fa;border-radius:var(--r-pill);
+    padding:3px;gap:2px}
+  .seg button{border:0;background:none;font-family:var(--font);font-size:13.5px;
+    font-weight:600;color:var(--muted);padding:7px 15px;border-radius:var(--r-pill);
+    cursor:pointer;transition:all .15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+  .hint{font-size:12.5px;color:var(--faint);margin-top:7px;line-height:1.5}
+  .divide{height:1px;background:var(--border2);margin:18px 0}
+
+  /* toolbar under textarea */
+  .msgtools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+  .count{margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .count b{color:var(--ink)}
+
+  /* phone preview */
+  .previewGrid{display:grid;grid-template-columns:1fr 232px;gap:22px;margin-top:18px}
+  @media(max-width:640px){.previewGrid{grid-template-columns:1fr}}
+  .phone{background:#0f172a;border-radius:30px;padding:11px;
+    box-shadow:0 10px 30px rgba(15,23,42,.25);justify-self:center;width:212px}
+  .phone-scr{background:#f2f4f8;border-radius:22px;min-height:300px;padding:16px 12px;
+    display:flex;flex-direction:column}
+  .phone-top{text-align:center;font-size:11px;color:var(--muted);
+    padding-bottom:12px;border-bottom:1px solid #e3e7ee;margin-bottom:14px}
+  .phone-top b{display:block;color:var(--ink);font-size:13px;font-weight:600}
+  .bubble{background:#fff;border-radius:15px 15px 15px 4px;padding:10px 13px;
+    font-size:13px;line-height:1.45;color:var(--ink);
+    box-shadow:0 1px 2px rgba(0,0,0,.07);max-width:92%;word-wrap:break-word}
+  .bubble.b{align-self:flex-end;background:#2563eb;color:#fff;
+    border-radius:15px 15px 4px 15px;margin-top:8px}
+  .pv-meta{font-size:10.5px;color:var(--faint);margin-top:6px;text-align:center}
+
+  /* drip / sequence + follow-up steps */
+  .step{border:1px solid var(--border);border-radius:var(--r-md);padding:14px;
+    margin-top:12px;background:#fafbfd;position:relative}
+  .step-h{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .step-dot{width:22px;height:22px;border-radius:50%;background:var(--primary);
+    color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+  .step-h .t{font-size:13.5px;font-weight:640;flex:1}
+  .step .rm{background:none;border:0;color:var(--faint);cursor:pointer;font-size:18px;
+    line-height:1;padding:2px 5px;border-radius:6px}
+  .step .rm:hover{background:#f0f0f4;color:#dc2626}
+  .delay-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;
+    color:var(--muted)}
+  .delay-row input{width:64px;text-align:center}
+
+  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:4px 0}
+  .switch-row .lbl{font-size:14px;font-weight:560}
+  .switch-row .lbl small{display:block;font-size:12.5px;color:var(--muted);
+    font-weight:400;margin-top:2px}
+  .switch{position:relative;width:42px;height:24px;flex:none;cursor:pointer}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .track{position:absolute;inset:0;background:#d5dae4;border-radius:99px;
+    transition:.2s}
+  .switch .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;
+    background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked+.track{background:var(--primary)}
+  .switch input:checked+.track+.knob{transform:translateX(18px)}
+
+  .collapse{max-height:0;overflow:hidden;transition:max-height .25s ease}
+  .collapse.on{max-height:1400px}
+
+  .cost-line{background:#f7f9fc;border:1px solid var(--border2);border-radius:var(--r-md);
+    padding:12px 14px;margin-top:14px;font-size:13px;color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center}
+  .cost-line b{color:var(--ink);font-size:15px;font-weight:650}
+
+  .consent{font-size:11.5px;color:var(--faint);margin-top:16px;line-height:1.5;
+    display:flex;gap:7px;align-items:flex-start}
+  .consent svg{width:14px;height:14px;flex:none;margin-top:1px}
+
+  /* sticky footer */
+  .footer{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.92);
+    backdrop-filter:blur(10px);border-top:1px solid var(--border);
+    padding:13px 20px;z-index:40}
+  .footer-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:16px}
+  .foot-sum{font-size:13px;color:var(--muted);flex:1;min-width:0}
+  .foot-sum b{color:var(--ink);font-weight:600}
+  .send-btn{font-size:15px;font-weight:650;padding:12px 26px;border-radius:var(--r-pill);
+    background:var(--primary);border:0;color:#fff;cursor:pointer;display:inline-flex;
+    align-items:center;gap:8px;transition:all .18s;white-space:nowrap}
+  .send-btn:hover{background:#1d4fd7}
+  .send-btn.sent{background:#16a34a}
+  .send-btn svg{width:17px;height:17px}
+  .send-btn:disabled{opacity:.55;cursor:default}
+
+  /* AI modal + CSV modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:60;
+    display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.on{display:flex}
+  .modal{background:#fff;border-radius:var(--r-lg);max-width:440px;width:100%;
+    box-shadow:var(--shadow);padding:22px;animation:pop .2s ease}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h3{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .modal h3 .sp{width:20px;height:20px;border-radius:6px;background:var(--ai);
+    display:grid;place-items:center}
+  .modal p{margin:0 0 14px;font-size:13px;color:var(--muted)}
+  .modal .acts{display:flex;gap:9px;justify-content:flex-end;margin-top:16px}
+  .ai-sugg{border:1px solid var(--border);border-radius:var(--r-md);padding:11px 13px;
+    font-size:13.5px;line-height:1.5;cursor:pointer;margin-top:9px;background:#fafbfd}
+  .ai-sugg:hover{border-color:var(--primary);background:#f5f8ff}
+
+  .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#0f172a;color:#fff;padding:11px 18px;border-radius:var(--r-pill);
+    font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:all .3s;z-index:70;
+    box-shadow:var(--shadow)}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fileinput{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div>
+      <h1>New Blast</h1>
+      <div class="sub">Compose, target, and schedule an SMS campaign</div>
+    </div>
+  </div>
+
+  <!-- ① MESSAGE -->
+  <section class="sec open" id="sec1">
+    <button class="sec-head" onclick="toggle('sec1')">
+      <span class="sec-num">1</span>
+      <span class="sec-titles">
+        <span class="sec-title">Message</span>
+        <span class="sec-summary" id="sum1">Send once · <span id="sum1seg">1 segment</span></span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sec-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <div class="seg" id="modeSeg">
+          <button class="on" data-mode="once" onclick="setMode('once')">Send once</button>
+          <button data-mode="seq" onclick="setMode('seq')">Sequence</button>
+        </div>
+        <button class="btn ai" onclick="openAI()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
+          Build with AI
+        </button>
+      </div>
+
+      <div id="onceBlock">
+        <label class="fld">Message</label>
+        <textarea id="msg" oninput="recount()">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+        <div class="msgtools">
+          <button class="btn sm" onclick="insertToken('{{first_name}}')">{··} first_name</button>
+          <button class="btn sm" onclick="insertToken('{{last_name}}')">{··} last_name</button>
+          <button class="btn sm ghost" onclick="openTemplates()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Templates</button>
+          <button class="btn sm ghost" onclick="addVariety()" title="Spin the message so carriers see varied text">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+            Add variety</button>
+          <span class="count" id="count"><b>63</b>/160 · 1 seg</span>
+        </div>
+
+        <div class="previewGrid">
+          <div>
+            <div class="hint" style="margin-top:4px">Live preview uses your first contact, <b>Sarah Chen</b>. Merge fields fill in per recipient at send.</div>
+            <div class="divide"></div>
+            <div class="switch-row">
+              <span class="lbl">Include opt-out line
+                <small>Appends "Reply STOP to opt out" — required for compliance</small></span>
+              <label class="switch"><input type="checkbox" id="optout" checked onchange="renderPreview()"><span class="track"></span><span class="knob"></span></label>
+            </div>
+          </div>
+          <div>
+            <div class="phone">
+              <div class="phone-scr">
+                <div class="phone-top"><b>ReadySMS</b>(949) 555-0142</div>
+                <div class="bubble" id="pvBubble"></div>
+                <div class="pv-meta">Preview · delivered</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sequence / drip builder -->
+      <div id="seqBlock" style="display:none">
+        <div class="hint" style="margin-top:2px">Drip a series of messages to every recipient. Each step waits its delay after the previous one.</div>
+        <div id="seqSteps"></div>
+        <button class="btn ghost sm" style="margin-top:12px" onclick="addSeqStep()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add step</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② RECIPIENTS -->
+  <section class="sec" id="sec2">
+    <button class="sec-head" onclick="toggle('sec2')">
+      <span class="sec-num">2</span>
+      <span class="sec-titles">
+        <span class="sec-title">Recipients</span>
+        <span class="sec-summary" id="sum2">Everyone · <b>1,240</b></span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sec-body">
+      <label class="fld">Everyone</label>
+      <div class="chips">
+        <button class="chip on" data-r="all" data-n="1240" onclick="pickRecip(this)">All contacts <span class="ct">1,240</span></button>
+      </div>
+      <div style="height:14px"></div>
+      <label class="fld">Segments</label>
+      <div class="chips">
+        <button class="chip" data-r="vip" data-n="88" onclick="pickRecip(this)">VIP <span class="ct">88</span></button>
+        <button class="chip" data-r="new" data-n="210" onclick="pickRecip(this)">New leads <span class="ct">210</span></button>
+      </div>
+      <div style="height:14px"></div>
+      <label class="fld">Recent blasts (re-send to)</label>
+      <div class="chips">
+        <button class="chip" data-r="oct" data-n="340" onclick="pickRecip(this)">Oct Promo <span class="ct">340</span></button>
+        <button class="chip" data-r="exp" data-n="88" onclick="pickRecip(this)">Expired <span class="ct">88</span></button>
+      </div>
+      <div class="divide"></div>
+      <div class="row">
+        <button class="btn ghost" onclick="applyFilter()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg>
+          Filter…</button>
+        <button class="btn ghost" onclick="document.getElementById('csv').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Upload CSV</button>
+        <input type="file" id="csv" class="fileinput" accept=".csv" onchange="csvUploaded(this)">
+      </div>
+      <div class="cost-line">
+        <span>Sending to <b id="recCount">1,240</b> contacts</span>
+        <span>~<b id="recCost">$24.80</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ TIMING -->
+  <section class="sec" id="sec3">
+    <button class="sec-head" onclick="toggle('sec3')">
+      <span class="sec-num">3</span>
+      <span class="sec-titles">
+        <span class="sec-title">Timing</span>
+        <span class="sec-summary" id="sum3">Sends now · ~180/min</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sec-body">
+      <label class="fld">When to send</label>
+      <div class="seg" id="whenSeg">
+        <button class="on" data-when="now" onclick="setWhen('now')">Send now</button>
+        <button data-when="later" onclick="setWhen('later')">Schedule</button>
+      </div>
+      <div class="collapse" id="schedRow">
+        <div class="row" style="margin-top:14px">
+          <div><label class="fld">Date</label><input type="date" id="schDate" onchange="recount()"></div>
+          <div><label class="fld">Time</label><input type="time" id="schTime" value="09:00" onchange="recount()"></div>
+        </div>
+      </div>
+      <div class="divide"></div>
+      <div class="switch-row">
+        <span class="lbl">Smart send
+          <small>Delay each message to its recipient's local business hours</small></span>
+        <label class="switch"><input type="checkbox" id="smart" onchange="recount()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="divide"></div>
+      <label class="fld">Sending speed <span id="speedVal" style="color:var(--ink);font-weight:700">180</span> / min</label>
+      <input type="range" min="30" max="300" step="10" value="180" id="speed" oninput="speedChange()" style="width:100%;accent-color:var(--primary)">
+      <div class="hint">Carrier-safe pace. Higher speeds finish faster but may trip carrier throttles.</div>
+      <div class="divide"></div>
+      <div class="switch-row">
+        <span class="lbl">Throttle to spread across the day
+          <small>Cap hourly volume so sends look organic, not bursty</small></span>
+        <label class="switch"><input type="checkbox" id="throttle" onchange="recount()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ A/B & FOLLOW-UP -->
+  <section class="sec" id="sec4">
+    <button class="sec-head" onclick="toggle('sec4')">
+      <span class="sec-num">4</span>
+      <span class="sec-titles">
+        <span class="sec-title">A/B &amp; follow-up</span>
+        <span class="sec-summary" id="sum4">Off</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sec-body">
+      <div class="switch-row">
+        <span class="lbl">A/B test
+          <small>Split recipients — half get variant A, half get variant B</small></span>
+        <label class="switch"><input type="checkbox" id="ab" onchange="toggleAB()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="collapse" id="abRow">
+        <label class="fld" style="margin-top:14px">Variant B message</label>
+        <textarea id="msgB" placeholder="Write an alternate version to test…">Hi {{first_name}}, we're hosting a private tour Sat 2pm at 1427 Birchwood. Want a slot? Reply YES.</textarea>
+        <div class="hint">Whichever variant gets more replies wins — we'll flag it after send.</div>
+      </div>
+      <div class="divide"></div>
+      <div class="switch-row">
+        <span class="lbl">Follow-up to non-responders
+          <small>Auto-send a nudge to anyone who doesn't reply</small></span>
+        <label class="switch"><input type="checkbox" id="fup" onchange="toggleFup()"><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="collapse" id="fupRow">
+        <div class="delay-row" style="margin-top:14px">Wait
+          <input type="text" id="fupDelay" value="2" oninput="updateSummaries()"> days, then send:</div>
+        <textarea id="fupMsg">Hi {{first_name}}, still want a private slot Sat? Reply YES and I'll hold one for you.</textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ SENDING NUMBERS -->
+  <section class="sec" id="sec5">
+    <button class="sec-head" onclick="toggle('sec5')">
+      <span class="sec-num">5</span>
+      <span class="sec-titles">
+        <span class="sec-title">Sending numbers</span>
+        <span class="sec-summary" id="sum5">Local presence</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="sec-body">
+      <label class="fld">Send from</label>
+      <div class="chips" id="fromChips">
+        <button class="chip on" data-f="local" onclick="pickFrom(this)">Local presence</button>
+        <button class="chip" data-f="rotate" onclick="pickFrom(this)">Rotate numbers</button>
+      </div>
+      <div class="hint" id="fromHint">Local presence matches each contact's area code to a local number — higher answer rates for realtors.</div>
+    </div>
+  </section>
+
+  <div class="consent">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>You're only messaging contacts who opted in. Quiet hours and STOP requests are always honored automatically.</span>
+  </div>
+</div>
+
+<!-- Sticky footer -->
+<div class="footer">
+  <div class="footer-in">
+    <div class="foot-sum">Send to <b id="footN">1,240</b> · ~<b id="footCost">$24.80</b><span id="footExtra"></span></div>
+    <button class="send-btn" id="sendBtn" onclick="doSend()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      <span id="sendLabel">Send now</span>
+    </button>
+  </div>
+</div>
+
+<!-- AI modal -->
+<div class="modal-bg" id="aiModal">
+  <div class="modal">
+    <h3><span class="sp"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></span> Build with AI</h3>
+    <p>Describe the blast and pick a draft — you can still edit it.</p>
+    <input type="text" id="aiPrompt" placeholder="e.g. open house Saturday 2pm at Birchwood">
+    <div id="aiSuggs">
+      <div class="ai-sugg" onclick="useAI(this)">Hi {{first_name}}, we just listed a home you'll love — open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</div>
+      <div class="ai-sugg" onclick="useAI(this)">{{first_name}}, quick one — Sat open house at 1427 Birchwood, 2pm. Want me to hold a private slot for you? Reply YES.</div>
+      <div class="ai-sugg" onclick="useAI(this)">Hi {{first_name}}! 🏡 Open house this Sat 2pm, 1427 Birchwood. Reply YES and I'll text you the details.</div>
+    </div>
+    <div class="acts">
+      <button class="btn ghost" onclick="closeModal('aiModal')">Cancel</button>
+      <button class="btn ai" onclick="regenAI()">Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Templates modal -->
+<div class="modal-bg" id="tplModal">
+  <div class="modal">
+    <h3>Templates</h3>
+    <p>Start from a proven realtor message.</p>
+    <div id="tplList"></div>
+    <div class="acts"><button class="btn ghost" onclick="closeModal('tplModal')">Close</button></div>
+  </div>
+</div>
+
+<!-- Filter modal -->
+<div class="modal-bg" id="filterModal">
+  <div class="modal">
+    <h3>Filter contacts</h3>
+    <p>Narrow recipients by attribute.</p>
+    <label class="fld">Tag</label>
+    <select id="fTag"><option>Any tag</option><option>Buyer</option><option>Seller</option><option>Investor</option></select>
+    <label class="fld" style="margin-top:12px">Last contacted</label>
+    <select id="fLast"><option>Any time</option><option>Over 30 days ago</option><option>Over 90 days ago</option></select>
+    <div class="acts">
+      <button class="btn ghost" onclick="closeModal('filterModal')">Cancel</button>
+      <button class="btn primary" onclick="commitFilter()">Apply filter</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+var RATE = 0.02, SEG_LEN = 160;
+var state = {
+  mode:'once', when:'now', recip:{label:'Everyone', n:1240},
+  ab:false, fup:false, from:'local', smart:false, throttle:false, speed:180
+};
+
+/* ---------- accordion ---------- */
+function toggle(id){ document.getElementById(id).classList.toggle('open'); }
+
+/* ---------- helpers ---------- */
+function fmt(n){ return n.toLocaleString('en-US'); }
+function money(x){ return '$'+x.toFixed(2); }
+function segCount(text){ return Math.max(1, Math.ceil(text.length / SEG_LEN)); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('on');},1900); }
+
+/* ---------- message ---------- */
+function baseMsg(){
+  var m = document.getElementById('msg').value;
+  if(document.getElementById('optout').checked) m += '\nReply STOP to opt out';
+  return m;
+}
+function recount(){
+  var full = baseMsg();
+  var segs = segCount(full);
+  var visible = document.getElementById('msg').value.length;
+  document.getElementById('count').innerHTML = '<b>'+visible+'</b>/160 · '+segs+' seg';
+  renderPreview();
+  updateSummaries();
+}
+function renderPreview(){
+  var raw = baseMsg().replace(/{{first_name}}/g,'Sarah').replace(/{{last_name}}/g,'Chen');
+  document.getElementById('pvBubble').textContent = raw;
+}
+function insertToken(tok){
+  var ta = document.getElementById('msg');
+  var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  ta.value = v.slice(0,s) + tok + v.slice(e);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = s + tok.length;
+  recount();
+}
+function addVariety(){
+  var ta = document.getElementById('msg');
+  var openers = ['Hi {{first_name}},','Hey {{first_name}},','{{first_name}} —','Hi {{first_name}}!'];
+  var cur = ta.value;
+  var next = openers[(openers.indexOf(cur.split(',')[0]+',')+1+openers.length)%openers.length] || openers[0];
+  // swap the opener up to first comma/dash
+  ta.value = cur.replace(/^(Hi |Hey )?\{\{first_name\}\}[,!\s—-]*/, next+' ');
+  recount();
+  toast('Opener varied — carriers see fresh text');
+}
+
+/* ---------- mode: once / sequence ---------- */
+var seqSteps = [];
+function setMode(m){
+  state.mode = m;
+  document.querySelectorAll('#modeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.mode===m); });
+  document.getElementById('onceBlock').style.display = m==='once' ? '' : 'none';
+  document.getElementById('seqBlock').style.display  = m==='seq'  ? '' : 'none';
+  if(m==='seq' && seqSteps.length===0){ addSeqStep(true); addSeqStep(); }
+  updateSummaries();
+}
+function addSeqStep(first){
+  var idx = seqSteps.length;
+  var id = 'seq'+Date.now()+idx;
+  seqSteps.push(id);
+  var wrap = document.createElement('div');
+  wrap.className='step'; wrap.id=id;
+  wrap.innerHTML =
+    '<div class="step-h"><span class="step-dot">'+(idx+1)+'</span>'+
+    '<span class="t">'+(first?'First message':'Step')+'</span>'+
+    (first?'':'<button class="rm" onclick="rmSeq(\''+id+'\')">×</button>')+'</div>'+
+    (first?'':'<div class="delay-row">Wait <input type="text" value="2" oninput="updateSummaries()"> days, then send:</div>')+
+    '<textarea>'+(first?'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.':'Hi {{first_name}}, just following up on Saturday — want me to hold a slot?')+'</textarea>';
+  document.getElementById('seqSteps').appendChild(wrap);
+  renumberSeq(); updateSummaries();
+}
+function rmSeq(id){
+  var el = document.getElementById(id); if(el) el.remove();
+  seqSteps = seqSteps.filter(function(x){return x!==id;});
+  renumberSeq(); updateSummaries();
+}
+function renumberSeq(){
+  document.querySelectorAll('#seqSteps .step').forEach(function(s,i){
+    s.querySelector('.step-dot').textContent = i+1;
+  });
+}
+
+/* ---------- recipients ---------- */
+function pickRecip(btn){
+  document.querySelectorAll('#sec2 .chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on');
+  state.recip = { label: btn.textContent.replace(/\s*\d[\d,]*$/,'').trim(), n: parseInt(btn.dataset.n,10) };
+  updateSummaries();
+}
+function applyFilter(){ document.getElementById('filterModal').classList.add('on'); }
+function commitFilter(){
+  var tag = document.getElementById('fTag').value, last = document.getElementById('fLast').value;
+  // deterministic pseudo-count from selections
+  var n = 1240;
+  if(tag!=='Any tag') n = Math.round(n*0.36);
+  if(last!=='Any time') n = Math.round(n*0.55);
+  document.querySelectorAll('#sec2 .chip').forEach(function(c){ c.classList.remove('on'); });
+  state.recip = { label:'Filtered ('+(tag==='Any tag'?'all':tag)+')', n:n };
+  closeModal('filterModal'); updateSummaries();
+  toast('Filter applied · '+fmt(n)+' contacts');
+}
+function csvUploaded(inp){
+  if(!inp.files.length) return;
+  // ponytail: count = rough line estimate from file size, no real parse needed for a prototype
+  var kb = inp.files[0].size/1024;
+  var n = Math.max(1, Math.round(kb*10));
+  document.querySelectorAll('#sec2 .chip').forEach(function(c){ c.classList.remove('on'); });
+  state.recip = { label:'CSV: '+inp.files[0].name, n:n };
+  updateSummaries();
+  toast('Imported '+fmt(n)+' from CSV');
+}
+
+/* ---------- timing ---------- */
+function setWhen(w){
+  state.when = w;
+  document.querySelectorAll('#whenSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.when===w); });
+  document.getElementById('schedRow').classList.toggle('on', w==='later');
+  if(w==='later' && !document.getElementById('schDate').value){
+    var d = new Date(Date.now()+864e5); document.getElementById('schDate').value = d.toISOString().slice(0,10);
+  }
+  updateSummaries();
+}
+function speedChange(){
+  state.speed = +document.getElementById('speed').value;
+  document.getElementById('speedVal').textContent = state.speed;
+  updateSummaries();
+}
+
+/* ---------- A/B & follow-up ---------- */
+function toggleAB(){ state.ab = document.getElementById('ab').checked;
+  document.getElementById('abRow').classList.toggle('on', state.ab); updateSummaries(); }
+function toggleFup(){ state.fup = document.getElementById('fup').checked;
+  document.getElementById('fupRow').classList.toggle('on', state.fup); updateSummaries(); }
+
+/* ---------- send from ---------- */
+function pickFrom(btn){
+  document.querySelectorAll('#fromChips .chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on'); state.from = btn.dataset.f;
+  document.getElementById('fromHint').textContent = state.from==='local'
+    ? "Local presence matches each contact's area code to a local number — higher answer rates for realtors."
+    : "Rotate numbers spreads sends across your pool of numbers to protect deliverability.";
+  updateSummaries();
+}
+
+/* ---------- summaries + cost (the glue) ---------- */
+function updateSummaries(){
+  var n = state.recip.n;
+  var segs = state.mode==='seq' ? Math.max(1, document.querySelectorAll('#seqSteps textarea').length) : segCount(baseMsg());
+  var cost = n * RATE * segs;
+
+  // ① message
+  document.getElementById('sum1').innerHTML = (state.mode==='once'?'Send once':'Sequence · '+segs+' steps')+' · '+segs+' seg';
+
+  // ② recipients
+  document.getElementById('sum2').innerHTML = state.recip.label+' · <b>'+fmt(n)+'</b>';
+  document.getElementById('recCount').textContent = fmt(n);
+  document.getElementById('recCost').textContent = money(cost);
+
+  // ③ timing
+  var timing;
+  if(state.when==='now'){ timing = 'Sends now'; }
+  else {
+    var d = document.getElementById('schDate').value, t = document.getElementById('schTime').value;
+    timing = d ? 'Scheduled '+d+' '+t : 'Scheduled';
+  }
+  if(state.smart) timing += ' · Smart';
+  timing += ' · ~'+state.speed+'/min'+(state.throttle?' · throttled':'');
+  document.getElementById('sum3').textContent = timing;
+
+  // ④ A/B & follow-up
+  var s4 = [];
+  if(state.ab) s4.push('A/B on');
+  if(state.fup) s4.push('Follow-up +'+(document.getElementById('fupDelay').value||'2')+'d');
+  document.getElementById('sum4').textContent = s4.length ? s4.join(' · ') : 'Off';
+
+  // ⑤ from
+  document.getElementById('sum5').textContent = state.from==='local' ? 'Local presence' : 'Rotate numbers';
+
+  // footer + send label
+  document.getElementById('footN').textContent = fmt(n);
+  document.getElementById('footCost').textContent = money(cost);
+  var extra = [];
+  if(state.ab) extra.push('A/B');
+  if(state.fup) extra.push('follow-up');
+  document.getElementById('footExtra').innerHTML = extra.length ? ' · '+extra.join(' + ') : '';
+  document.getElementById('sendLabel').textContent = state.when==='now' ? 'Send now' : 'Schedule';
+}
+
+/* ---------- modals ---------- */
+function openAI(){ document.getElementById('aiModal').classList.add('on'); }
+function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+function useAI(el){
+  document.getElementById('msg').value = el.textContent.trim();
+  closeModal('aiModal'); setMode('once'); recount();
+  toast('Draft applied');
+}
+var aiVariants = [
+  ["Hi {{first_name}}, thinking of selling? Homes near you are moving fast — reply YES for a free valuation.",
+   "{{first_name}}, quick question: curious what your home is worth today? Reply YES and I'll send a free estimate.",
+   "Hi {{first_name}}! 📈 Prices in your area just moved. Want a free home valuation? Reply YES."],
+  ["Hi {{first_name}}, new listing just hit the market you'll want to see. Reply TOUR to book a private showing.",
+   "{{first_name}} — a home matching your search just listed. Reply TOUR and I'll set up a viewing.",
+   "Hi {{first_name}}! 🏡 Fresh listing, great price. Reply TOUR for a private walk-through this week."]
+];
+var aiIdx = 0;
+function regenAI(){
+  var set = aiVariants[aiIdx % aiVariants.length]; aiIdx++;
+  var box = document.getElementById('aiSuggs'); box.innerHTML = '';
+  set.forEach(function(txt){
+    var d = document.createElement('div'); d.className='ai-sugg'; d.textContent = txt;
+    d.onclick = function(){ useAI(d); };
+    box.appendChild(d);
+  });
+  toast('New drafts');
+}
+
+var templates = [
+  {name:'Open house invite', body:'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.'},
+  {name:'Just listed', body:'Hi {{first_name}}, a home just listed in your area you\'ll love. Reply TOUR to see it first.'},
+  {name:'Price drop', body:'Hi {{first_name}}, the home you saved just dropped in price. Want the details? Reply YES.'},
+  {name:'Free valuation', body:'Hi {{first_name}}, curious what your home is worth? Reply YES for a free, no-pressure estimate.'},
+  {name:'Check-in', body:'Hi {{first_name}}, it\'s been a while! Still thinking about a move this year? I\'m here to help.'}
+];
+function openTemplates(){
+  var list = document.getElementById('tplList'); list.innerHTML='';
+  templates.forEach(function(t){
+    var d = document.createElement('div'); d.className='ai-sugg';
+    d.innerHTML = '<b>'+t.name+'</b><br><span style="color:var(--muted)">'+t.body+'</span>';
+    d.onclick = function(){ document.getElementById('msg').value = t.body; closeModal('tplModal'); setMode('once'); recount(); toast('Template loaded'); };
+    list.appendChild(d);
+  });
+  document.getElementById('tplModal').classList.add('on');
+}
+
+/* ---------- SEND ---------- */
+function doSend(){
+  var btn = document.getElementById('sendBtn');
+  if(btn.classList.contains('sent')) return;
+  btn.disabled = true;
+  document.getElementById('sendLabel').textContent = state.when==='now' ? 'Sending…' : 'Scheduling…';
+  setTimeout(function(){
+    btn.classList.add('sent');
+    btn.querySelector('svg').outerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    document.getElementById('sendLabel').textContent = state.when==='now' ? 'Sent ✓' : 'Scheduled ✓';
+    btn.disabled = false;
+    var n = fmt(state.recip.n);
+    toast(state.when==='now' ? ('Blast sent to '+n+' contacts') : ('Scheduled for '+n+' contacts'));
+  }, 850);
+}
+
+/* modal backdrop click to close */
+document.querySelectorAll('.modal-bg').forEach(function(m){
+  m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('on'); });
+});
+['smart','throttle'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', function(){ state[id]=this.checked; });
+});
+
+/* init */
+recount();
+updateSummaries();
+</script>
+</body>
+</html>

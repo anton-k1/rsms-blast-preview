@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Blast — ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --bd:#e5e7ef; --bd2:#eef0f4; --bg:#eef1f5; --card:#fff;
+    --r-lg:16px; --r-md:11px; --r-pill:99px;
+    --sh:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit;color:inherit}
+  ::selection{background:#dbeafe}
+
+  /* ---- Top bar ---- */
+  .topbar{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 22px;background:var(--card);border-bottom:1px solid var(--bd);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:var(--ai);
+    display:grid;place-items:center;color:#fff}
+  .topbar .title{font-weight:600;font-size:14px;color:var(--muted)}
+  .topbar .spacer{flex:1}
+  .chip{font-size:12px;color:var(--muted);background:#f4f6fa;padding:5px 11px;
+    border-radius:var(--r-pill);border:1px solid var(--bd2);display:flex;align-items:center;gap:6px}
+  .chip .g{width:7px;height:7px;border-radius:50%;background:#22c55e}
+
+  /* ---- Layout ---- */
+  .wrap{display:grid;grid-template-columns:1fr 336px;gap:20px;max-width:1180px;
+    margin:22px auto;padding:0 22px 120px}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr;padding-bottom:150px}}
+
+  /* ---- Left: compose ---- */
+  .compose{display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);
+    box-shadow:0 1px 2px rgba(20,20,50,.04)}
+  .card.pad{padding:18px}
+
+  /* Build with AI */
+  .ai-card{padding:16px;border:1px solid #dbe6fb;
+    background:linear-gradient(180deg,#f5f9ff,#fff)}
+  .ai-head{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;margin-bottom:10px}
+  .ai-head .sp{width:22px;height:22px;border-radius:7px;background:var(--ai);
+    display:grid;place-items:center;color:#fff}
+  .ai-row{display:flex;gap:8px}
+  .ai-row input{flex:1;border:1px solid var(--bd);border-radius:var(--r-md);
+    padding:10px 12px;font-size:14px;background:#fff}
+  .ai-row input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px #dbeafe}
+  .btn-ai{background:var(--ai);color:#fff;font-weight:600;font-size:13px;
+    padding:0 16px;border-radius:var(--r-md);white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .btn-ai:disabled{opacity:.6;cursor:default}
+  .ai-sugg{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .ai-sugg button{font-size:12px;color:#3358c0;background:#eaf1fe;border:1px solid #dbe6fb;
+    padding:5px 11px;border-radius:var(--r-pill)}
+  .ai-sugg button:hover{background:#dfeafd}
+
+  /* Message editor */
+  .lbl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+  .tools{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+  .tool{font-size:12.5px;color:var(--ink);background:#f4f6fa;border:1px solid var(--bd2);
+    padding:6px 11px;border-radius:var(--r-md);display:flex;align-items:center;gap:6px}
+  .tool:hover{background:#eaeef5}
+  .tool svg{width:13px;height:13px;color:var(--muted)}
+  textarea#msg{width:100%;min-height:150px;border:1px solid var(--bd);border-radius:var(--r-md);
+    padding:13px 14px;font-size:15px;line-height:1.55;resize:vertical;background:#fff}
+  textarea#msg:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px #dbeafe}
+  .meta{display:flex;align-items:center;gap:14px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:600}
+  .seg-pill{margin-left:auto;background:#f0f9f2;color:#15803d;border:1px solid #c8e6d1;
+    padding:3px 10px;border-radius:var(--r-pill);font-weight:600;font-size:11.5px}
+
+  /* Merge/template popovers */
+  .pop{position:absolute;z-index:40;background:#fff;border:1px solid var(--bd);
+    border-radius:var(--r-md);box-shadow:var(--sh);padding:6px;min-width:200px;display:none}
+  .pop.show{display:block}
+  .pop button{display:flex;width:100%;text-align:left;padding:8px 10px;border-radius:8px;
+    font-size:13px;gap:8px;align-items:center}
+  .pop button:hover{background:#f4f6fa}
+  .pop .mono{font-family:ui-monospace,Menlo,monospace;color:var(--primary);font-size:12px}
+  .pop .sub{color:var(--faint);font-size:11px;margin-left:auto}
+
+  /* Phone preview */
+  .preview-wrap{display:flex;justify-content:center;padding:6px 0}
+  .phone{width:270px;border:9px solid #10141c;border-radius:34px;background:#f7f8fb;
+    padding:14px 12px 22px;box-shadow:var(--sh);position:relative}
+  .phone .notch{width:96px;height:20px;background:#10141c;border-radius:0 0 12px 12px;
+    position:absolute;top:0;left:50%;transform:translateX(-50%)}
+  .phone .hdr{text-align:center;font-size:11px;color:var(--faint);margin:12px 0 14px;font-weight:600}
+  .bubble{background:#fff;border:1px solid #eaecf1;border-radius:16px 16px 16px 5px;
+    padding:10px 12px;font-size:13.5px;line-height:1.5;max-width:88%;box-shadow:0 1px 2px rgba(0,0,0,.05);
+    word-wrap:break-word}
+  .bubble.b2{margin-top:8px;background:#eef4ff;border-color:#dbe6fb}
+  .stamp{font-size:10px;color:var(--faint);margin-top:6px;padding-left:4px}
+  .ab-tag{display:inline-block;font-size:9.5px;font-weight:700;color:var(--primary);
+    background:#eaf1fe;border-radius:5px;padding:1px 5px;margin-bottom:5px;letter-spacing:.03em}
+
+  /* ---- Right rail inspector ---- */
+  .rail{display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:82px}
+  @media(max-width:900px){.rail{position:static}}
+  .grp{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);overflow:hidden}
+  .grp-h{display:flex;align-items:center;gap:9px;padding:12px 14px;font-size:12px;
+    font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .grp-h svg{width:15px;height:15px;color:var(--faint)}
+  .grp-b{padding:0 14px 14px;display:flex;flex-direction:column;gap:11px}
+
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field>label{font-size:12.5px;color:var(--muted);font-weight:500}
+  .ctrl{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  select.mini,input.mini{width:100%;border:1px solid var(--bd);border-radius:9px;
+    padding:8px 10px;font-size:13px;background:#fff;color:var(--ink)}
+  select.mini:focus,input.mini:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px #dbeafe}
+
+  /* toggle */
+  .tog{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
+  .tog .cap{color:var(--ink);font-weight:500}
+  .tog .cap small{display:block;color:var(--faint);font-weight:400;font-size:11px}
+  .sw{width:38px;height:22px;border-radius:99px;background:#d5d9e2;position:relative;
+    transition:.18s;flex-shrink:0}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;
+    border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw.on{background:var(--primary)}
+  .sw.on::after{left:18px}
+
+  /* expanding sub-panel */
+  .sub-panel{display:none;flex-direction:column;gap:9px;padding:11px;margin-top:2px;
+    background:#f7f9fc;border:1px solid var(--bd2);border-radius:10px}
+  .sub-panel.show{display:flex}
+  .sub-panel textarea{width:100%;min-height:56px;border:1px solid var(--bd);border-radius:9px;
+    padding:8px 10px;font-size:12.5px;resize:vertical;background:#fff}
+  .sub-panel textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px #dbeafe}
+
+  .audience-count{display:flex;align-items:baseline;gap:6px;padding:8px 11px;
+    background:#f5f9ff;border:1px solid #dbe6fb;border-radius:10px}
+  .audience-count b{font-size:19px;font-weight:700;color:var(--primary)}
+  .audience-count span{font-size:12px;color:var(--muted)}
+
+  .radio-seg{display:flex;background:#f4f6fa;border:1px solid var(--bd2);border-radius:10px;padding:3px}
+  .radio-seg button{flex:1;font-size:12.5px;padding:7px 4px;border-radius:7px;color:var(--muted);font-weight:600}
+  .radio-seg button.act{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+  .consent{display:flex;gap:8px;font-size:11.5px;color:var(--faint);line-height:1.45;
+    padding:2px 2px}
+  .consent svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;color:#9aa1af}
+
+  /* send bar */
+  .sendbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);
+    border-top:1px solid var(--bd);padding:13px 22px;z-index:25;
+    box-shadow:0 -6px 24px rgba(20,20,50,.06)}
+  .sendbar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px}
+  .send-summary{font-size:13.5px;color:var(--muted)}
+  .send-summary b{color:var(--ink);font-weight:700}
+  .send-summary .cost{color:var(--primary)}
+  .send-summary .spacer{flex:1}
+  .btn-send{margin-left:auto;background:var(--primary);color:#fff;font-weight:700;font-size:14.5px;
+    padding:12px 30px;border-radius:var(--r-pill);display:flex;align-items:center;gap:9px;
+    box-shadow:0 6px 18px rgba(37,99,235,.32);transition:.15s}
+  .btn-send:hover{background:#1d4fd0}
+  .btn-send.sent{background:#16a34a;box-shadow:0 6px 18px rgba(22,163,74,.3)}
+  .btn-send svg{width:17px;height:17px}
+  .btn-send.sending{opacity:.85;cursor:default}
+
+  /* toast */
+  .toast{position:fixed;top:74px;left:50%;transform:translateX(-50%) translateY(-14px);
+    background:#0f172a;color:#fff;padding:11px 18px;border-radius:var(--r-pill);font-size:13px;
+    font-weight:500;box-shadow:var(--sh);opacity:0;pointer-events:none;transition:.28s;z-index:60;
+    display:flex;align-items:center;gap:8px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast svg{width:15px;height:15px;color:#4ade80}
+
+  /* checklist for recipients modal-ish inline */
+  .picker-list{display:flex;flex-direction:column;gap:5px;max-height:210px;overflow:auto;margin-top:4px}
+  .pick{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:13px;
+    border:1px solid transparent;cursor:pointer}
+  .pick:hover{background:#f7f9fc}
+  .pick.on{background:#f5f9ff;border-color:#dbe6fb}
+  .pick .box{width:17px;height:17px;border:1.5px solid #cbd2df;border-radius:5px;flex-shrink:0;
+    display:grid;place-items:center;color:#fff}
+  .pick.on .box{background:var(--primary);border-color:var(--primary)}
+  .pick .box svg{width:11px;height:11px;opacity:0}
+  .pick.on .box svg{opacity:1}
+  .pick .nm{font-weight:500}
+  .pick .ct{margin-left:auto;color:var(--faint);font-size:12px}
+  .pick .grp-lbl{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+    padding:6px 2px 2px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </span>ReadySMS</div>
+  <span class="title">/ New Blast</span>
+  <div class="spacer"></div>
+  <span class="chip"><span class="g"></span>1,240 contacts</span>
+</div>
+
+<div class="wrap">
+  <!-- ============ LEFT: COMPOSE ============ -->
+  <div class="compose">
+
+    <!-- Build with AI -->
+    <div class="card ai-card">
+      <div class="ai-head"><span class="sp">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>
+      </span>Build with AI</div>
+      <div class="ai-row">
+        <input id="aiPrompt" placeholder="Describe your blast — e.g. “open house Saturday, invite VIPs”">
+        <button class="btn-ai" id="aiGen">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>
+          Generate</button>
+      </div>
+      <div class="ai-sugg">
+        <button data-p="open house">Open house invite</button>
+        <button data-p="price drop">Price-drop alert</button>
+        <button data-p="just listed">Just listed</button>
+        <button data-p="follow up">Follow up with leads</button>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="card pad" style="position:relative">
+      <div class="lbl">Message</div>
+      <div class="tools">
+        <button class="tool" id="btnMerge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+          {··} Merge field
+        </button>
+        <button class="tool" id="btnTpl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+          Templates
+        </button>
+        <button class="tool" id="btnVariety">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 4L4 20M14 4h6v6"/></svg>
+          Add variety
+        </button>
+
+        <!-- popovers -->
+        <div class="pop" id="popMerge" style="top:44px;left:0">
+          <button data-m="{{first_name}}"><span class="mono">{{first_name}}</span><span class="sub">Sarah</span></button>
+          <button data-m="{{last_name}}"><span class="mono">{{last_name}}</span><span class="sub">Chen</span></button>
+        </div>
+        <div class="pop" id="popTpl" style="top:44px;left:120px">
+          <button data-t="Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.">Open house invite</button>
+          <button data-t="{{first_name}}, price just dropped on a home you'd love. Want the address? Reply YES.">Price-drop alert</button>
+          <button data-t="Just listed near you, {{first_name}}! 3bd/2ba, move-in ready. Reply INFO for photos.">Just listed</button>
+          <button data-t="Hi {{first_name}}, still looking? I've got 2 new matches this week. Reply YES to see them.">Follow-up nudge</button>
+        </div>
+      </div>
+
+      <textarea id="msg" placeholder="Write your message…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+
+      <div class="meta">
+        <span><b id="charCount">0</b> chars</span>
+        <span><b id="segCount">1</b> <span id="segWord">segment</span></span>
+        <span id="mergeNote" style="color:#15803d">✓ personalized</span>
+        <span class="seg-pill" id="segPill">160 / segment</span>
+      </div>
+    </div>
+
+    <!-- Phone preview -->
+    <div class="card pad">
+      <div class="lbl">Live preview <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint)">— as Sarah Chen sees it</span></div>
+      <div class="preview-wrap">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="hdr">ReadySMS • today</div>
+          <div id="pvA">
+            <div class="ab-tag" id="pvATag" style="display:none">VARIANT A</div>
+            <div class="bubble" id="pvBubbleA">…</div>
+            <div class="stamp">Delivered</div>
+          </div>
+          <div id="pvB" style="display:none">
+            <div class="ab-tag">VARIANT B</div>
+            <div class="bubble b2" id="pvBubbleB">…</div>
+            <div class="stamp">Delivered</div>
+          </div>
+          <div id="pvFollow" style="display:none">
+            <div class="ab-tag" style="color:#7c3aed;background:#f1eafe">FOLLOW-UP</div>
+            <div class="bubble" id="pvBubbleF" style="border-style:dashed">…</div>
+            <div class="stamp" id="pvFollowStamp">Sends 2 days later</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT: INSPECTOR RAIL ============ -->
+  <div class="rail">
+
+    <!-- AUDIENCE -->
+    <div class="grp">
+      <div class="grp-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Audience
+      </div>
+      <div class="grp-b">
+        <div class="audience-count">
+          <b id="audCount">1,240</b><span>recipients</span>
+        </div>
+        <div class="field">
+          <label>Send to</label>
+          <select class="mini" id="audMode">
+            <option value="all">Everyone · 1,240</option>
+            <option value="pick">Choose segments / lists…</option>
+          </select>
+        </div>
+        <div class="sub-panel" id="audPanel">
+          <div class="picker-list" id="pickerList">
+            <div class="pick grp-lbl">Segments</div>
+            <div class="pick" data-count="88" data-key="vip"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="nm">VIP</span><span class="ct">88</span></div>
+            <div class="pick" data-count="210" data-key="new"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="nm">New leads</span><span class="ct">210</span></div>
+            <div class="pick grp-lbl">Recent blasts</div>
+            <div class="pick" data-count="340" data-key="oct"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="nm">Oct Promo</span><span class="ct">340</span></div>
+            <div class="pick" data-count="88" data-key="exp"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span class="nm">Expired</span><span class="ct">88</span></div>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:2px">
+            <button class="tool" id="btnFilter" style="flex:1;justify-content:center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>Filter</button>
+            <button class="tool" id="btnCsv" style="flex:1;justify-content:center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Import CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY -->
+    <div class="grp">
+      <div class="grp-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        Delivery
+      </div>
+      <div class="grp-b">
+        <div class="field">
+          <label>When</label>
+          <div class="radio-seg" id="whenSeg">
+            <button class="act" data-when="now">Send now</button>
+            <button data-when="later">Schedule</button>
+          </div>
+        </div>
+        <div class="sub-panel" id="schedPanel">
+          <div class="ctrl">
+            <input type="date" class="mini" id="schedDate">
+            <input type="time" class="mini" id="schedTime" value="09:00">
+          </div>
+        </div>
+        <div class="tog" id="togSmart">
+          <span class="cap">Smart send <small>Best time per contact</small></span>
+          <span class="sw" id="swSmart"></span>
+        </div>
+        <div class="field">
+          <label>Sending speed</label>
+          <select class="mini" id="speedSel">
+            <option value="180">Carrier speed · ~180/min</option>
+            <option value="60">Steady · ~60/min</option>
+            <option value="20">Throttled · ~20/min</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXTRAS -->
+    <div class="grp">
+      <div class="grp-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z"/></svg>
+        Extras
+      </div>
+      <div class="grp-b">
+        <div class="tog" id="togAb">
+          <span class="cap">A/B test <small>Compare two messages</small></span>
+          <span class="sw" id="swAb"></span>
+        </div>
+        <div class="sub-panel" id="abPanel">
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600">Variant B</label>
+          <textarea id="msgB" placeholder="Write a second version…">{{first_name}}, want first look at Sat's open house? Reply YES and I'll hold you a slot.</textarea>
+        </div>
+
+        <div class="tog" id="togFollow">
+          <span class="cap">Follow-up <small>Auto-nudge non-repliers</small></span>
+          <span class="sw" id="swFollow"></span>
+        </div>
+        <div class="sub-panel" id="followPanel">
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600">Follow-up message</label>
+          <textarea id="msgF" placeholder="Follow-up message…">Hi {{first_name}}, just checking in — still want that private slot Saturday?</textarea>
+          <div class="field">
+            <label>Send after</label>
+            <select class="mini" id="followDelay">
+              <option value="1">1 day</option>
+              <option value="2" selected>2 days</option>
+              <option value="3">3 days</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tog" id="togSeq">
+          <span class="cap">Sequence <small>Multi-step drip</small></span>
+          <span class="sw" id="swSeq"></span>
+        </div>
+        <div class="sub-panel" id="seqPanel">
+          <div id="seqSteps" style="display:flex;flex-direction:column;gap:7px"></div>
+          <button class="tool" id="addStep" style="justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add step</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FROM -->
+    <div class="grp">
+      <div class="grp-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13 1 .37 1.96.72 2.88a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.2-1.29a2 2 0 0 1 2.11-.45c.92.35 1.88.59 2.88.72A2 2 0 0 1 22 16.92z"/></svg>
+        From
+      </div>
+      <div class="grp-b">
+        <div class="field">
+          <label>Send from</label>
+          <select class="mini" id="fromSel">
+            <option value="local">Local presence · match area code</option>
+            <option value="rotate">Rotate numbers · higher deliverability</option>
+          </select>
+        </div>
+        <div class="consent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Reply STOP auto-appended to first message. Quiet hours enforced.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SEND BAR -->
+<div class="sendbar">
+  <div class="sendbar-in">
+    <div class="send-summary">
+      Send to <b id="barCount">1,240</b> · <span class="cost">~$<b id="barCost" style="color:var(--primary)">24.80</b></span>
+      <span id="barExtra" style="color:var(--faint)"></span>
+    </div>
+    <button class="btn-send" id="btnSend">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      <span id="sendLabel">Send now</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span id="toastMsg">Done</span></div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const RATE = 0.02, TOTAL = 1240;
+
+  const state = {
+    audMode:'all', picks:new Set(), audCount:TOTAL,
+    when:'now', smart:false, speed:180,
+    ab:false, follow:false, seq:false, from:'local',
+    sent:false
+  };
+
+  function toast(m){ const t=$('#toast'); $('#toastMsg').textContent=m; t.classList.add('show');
+    clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1900); }
+
+  // ---- merge preview ----
+  function renderMerge(txt){
+    return txt.replace(/\{\{first_name\}\}/g,'Sarah').replace(/\{\{last_name\}\}/g,'Chen');
+  }
+
+  // ---- message counting + preview ----
+  function updateMsg(){
+    const t = $('#msg').value;
+    $('#charCount').textContent = t.length;
+    const seg = Math.max(1, Math.ceil(t.length/160));
+    $('#segCount').textContent = seg;
+    $('#segWord').textContent = seg===1 ? 'segment' : 'segments';
+    $('#mergeNote').style.display = /\{\{/.test(t) ? '' : 'none';
+    $('#pvBubbleA').textContent = renderMerge(t) || '…';
+    $('#pvBubbleB').textContent = renderMerge($('#msgB').value) || '…';
+    $('#pvBubbleF').textContent = renderMerge($('#msgF').value) || '…';
+    recalc();
+  }
+
+  // ---- audience ----
+  const KEY_COUNTS = {vip:88,new:210,oct:340,exp:88};
+  function recalcAud(){
+    if(state.audMode==='all'){ state.audCount = TOTAL; }
+    else {
+      let n=0; state.picks.forEach(k=> n+=KEY_COUNTS[k]||0);
+      state.audCount = n;
+    }
+    $('#audCount').textContent = state.audCount.toLocaleString();
+    recalc();
+  }
+
+  $('#audMode').addEventListener('change', e=>{
+    state.audMode = e.target.value;
+    $('#audPanel').classList.toggle('show', state.audMode==='pick');
+    recalcAud();
+  });
+  $$('#pickerList .pick[data-key]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const k = el.dataset.key;
+      if(state.picks.has(k)){ state.picks.delete(k); el.classList.remove('on'); }
+      else { state.picks.add(k); el.classList.add('on'); }
+      recalcAud();
+    });
+  });
+  $('#btnFilter').addEventListener('click',()=>toast('Filter builder — 1,240 contacts loaded'));
+  $('#btnCsv').addEventListener('click',()=>toast('CSV import — drop a file to add recipients'));
+
+  // ---- delivery ----
+  $$('#whenSeg button').forEach(b=> b.addEventListener('click',()=>{
+    $$('#whenSeg button').forEach(x=>x.classList.remove('act'));
+    b.classList.add('act'); state.when=b.dataset.when;
+    $('#schedPanel').classList.toggle('show', state.when==='later');
+    updateSendLabel(); recalc();
+  }));
+  const today=new Date(); today.setDate(today.getDate()+1);
+  $('#schedDate').value = today.toISOString().slice(0,10);
+
+  function toggle(swId, key, panelId, extra){
+    const sw=$(swId);
+    sw.parentElement.addEventListener('click',()=>{
+      state[key]=!state[key];
+      sw.classList.toggle('on', state[key]);
+      if(panelId) $(panelId).classList.toggle('show', state[key]);
+      if(extra) extra();
+      recalc();
+    });
+  }
+  toggle('#swSmart','smart',null);
+  toggle('#swAb','ab','#abPanel',()=>{
+    $('#pvB').style.display = state.ab?'':'none';
+    $('#pvATag').style.display = state.ab?'':'none';
+    updateMsg();
+  });
+  toggle('#swFollow','follow','#followPanel',()=>{
+    $('#pvFollow').style.display = state.follow?'':'none';
+    updateFollowStamp();
+  });
+  toggle('#swSeq','seq','#seqPanel',()=>{ if(state.seq && !$('#seqSteps').children.length) addSeqStep(); });
+
+  $('#speedSel').addEventListener('change',e=>{ state.speed=+e.target.value; });
+  $('#fromSel').addEventListener('change',e=>{ state.from=e.target.value; });
+  $('#followDelay').addEventListener('change', updateFollowStamp);
+  function updateFollowStamp(){
+    const d=$('#followDelay').value;
+    $('#pvFollowStamp').textContent = 'Sends '+d+' day'+(d==='1'?'':'s')+' later if no reply';
+  }
+
+  // ---- sequence steps ----
+  let stepN=0;
+  function addSeqStep(){
+    stepN++;
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;align-items:center';
+    row.innerHTML='<span style="font-size:11px;color:var(--faint);width:44px">Step '+(($('#seqSteps').children.length)+1)+'</span>'+
+      '<input class="mini" placeholder="Message…" style="flex:1">'+
+      '<select class="mini" style="width:74px"><option>+1d</option><option>+2d</option><option>+3d</option></select>'+
+      '<button class="rm" title="Remove" style="color:var(--faint);padding:4px">✕</button>';
+    row.querySelector('.rm').addEventListener('click',()=>{ row.remove(); renumber(); });
+    $('#seqSteps').appendChild(row);
+  }
+  function renumber(){ $$('#seqSteps > div').forEach((r,i)=> r.firstChild.textContent='Step '+(i+1)); }
+  $('#addStep').addEventListener('click', addSeqStep);
+
+  // ---- merge / template / variety popovers ----
+  function insertAtCursor(ta, text){
+    const s=ta.selectionStart, e=ta.selectionEnd, v=ta.value;
+    ta.value = v.slice(0,s)+text+v.slice(e);
+    ta.selectionStart = ta.selectionEnd = s+text.length;
+    ta.focus();
+  }
+  function wirePop(btnId, popId){
+    $(btnId).addEventListener('click', e=>{
+      e.stopPropagation();
+      const p=$(popId), open=p.classList.contains('show');
+      $$('.pop').forEach(x=>x.classList.remove('show'));
+      if(!open) p.classList.add('show');
+    });
+  }
+  wirePop('#btnMerge','#popMerge');
+  wirePop('#btnTpl','#popTpl');
+  document.addEventListener('click',()=>$$('.pop').forEach(x=>x.classList.remove('show')));
+  $$('#popMerge button').forEach(b=> b.addEventListener('click',()=>{
+    insertAtCursor($('#msg'), b.dataset.m); $('#popMerge').classList.remove('show'); updateMsg();
+  }));
+  $$('#popTpl button').forEach(b=> b.addEventListener('click',()=>{
+    $('#msg').value = b.dataset.t; $('#popTpl').classList.remove('show'); updateMsg();
+    toast('Template loaded');
+  }));
+  const VARIETY = [
+    "Hey {{first_name}}, open house this Sat 2pm — 1427 Birchwood. Reply YES for a private slot!",
+    "{{first_name}} — Saturday 2pm open house at 1427 Birchwood. Want a private walkthrough? Reply YES.",
+    "Open house Sat 2pm, {{first_name}}! 1427 Birchwood. Reply YES and I'll reserve you a slot."
+  ];
+  let vi=0;
+  $('#btnVariety').addEventListener('click',()=>{
+    $('#msg').value = VARIETY[vi++ % VARIETY.length]; updateMsg(); toast('Reworded — spins to avoid carrier filtering');
+  });
+
+  // ---- Build with AI ----
+  function genAI(prompt){
+    const btn=$('#aiGen'); btn.disabled=true; btn.textContent='Writing…';
+    const map={
+      'open house':"Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.",
+      'price drop':"{{first_name}}, big price drop on a home near you! Reply YES and I'll send the address + photos.",
+      'just listed':"Just listed, {{first_name}}! Gorgeous 3bd/2ba, won't last. Reply INFO for a private tour.",
+      'follow up':"Hi {{first_name}}, still house-hunting? I've got 2 fresh matches this week — reply YES to see them."
+    };
+    let out = "Hi {{first_name}}, "+ (prompt||'') +" — reply YES to learn more.";
+    for(const k in map){ if((prompt||'').toLowerCase().includes(k)){ out=map[k]; break; } }
+    setTimeout(()=>{
+      $('#msg').value = out; updateMsg();
+      btn.disabled=false; btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg> Generate';
+      toast('✨ Drafted with AI — edit freely');
+    }, 650);
+  }
+  $('#aiGen').addEventListener('click',()=>genAI($('#aiPrompt').value));
+  $('#aiPrompt').addEventListener('keydown',e=>{ if(e.key==='Enter') genAI($('#aiPrompt').value); });
+  $$('.ai-sugg button').forEach(b=> b.addEventListener('click',()=>{ $('#aiPrompt').value=b.textContent; genAI(b.dataset.p); }));
+
+  // ---- recalc totals + send label ----
+  function updateSendLabel(){
+    $('#sendLabel').textContent = state.when==='later' ? 'Schedule blast' : (state.smart?'Smart send':'Send now');
+  }
+  function recalc(){
+    const seg = Math.max(1, Math.ceil($('#msg').value.length/160));
+    const n = state.audCount;
+    let cost = n * seg * RATE;
+    if(state.ab) cost = cost; // same volume, split
+    if(state.follow) cost += n * seg * RATE * 0.5; // ~half reply-back estimate
+    $('#barCount').textContent = n.toLocaleString();
+    $('#barCost').textContent = cost.toFixed(2);
+    // extras summary
+    const ex=[];
+    if(state.ab) ex.push('A/B');
+    if(state.follow) ex.push('follow-up');
+    if(state.seq) ex.push('sequence');
+    if(state.smart) ex.push('smart-send');
+    $('#barExtra').textContent = ex.length ? ' · '+ex.join(' · ') : '';
+    updateSendLabel();
+  }
+
+  // ---- SEND ----
+  $('#btnSend').addEventListener('click', ()=>{
+    if(state.sent) return;
+    const btn=$('#btnSend');
+    if(state.audCount===0){ toast('Pick at least one recipient'); return; }
+    btn.classList.add('sending'); $('#sendLabel').textContent = state.when==='later'?'Scheduling…':'Sending…';
+    setTimeout(()=>{
+      state.sent=true;
+      btn.classList.remove('sending'); btn.classList.add('sent');
+      btn.querySelector('svg').outerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
+      $('#sendLabel').textContent = state.when==='later' ? 'Scheduled ✓' : 'Sent ✓';
+      toast((state.when==='later'?'Scheduled':'Sent')+' to '+state.audCount.toLocaleString()+' contacts');
+      // allow re-send after a moment (demo)
+      setTimeout(()=>{ state.sent=false; btn.classList.remove('sent'); updateSendLabel();
+        btn.querySelector('svg').outerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>';
+      }, 3200);
+    }, 900);
+  });
+
+  $('#msg').addEventListener('input', updateMsg);
+  $('#msgB').addEventListener('input', updateMsg);
+  $('#msgF').addEventListener('input', updateMsg);
+
+  // init
+  updateMsg(); recalcAud(); updateFollowStamp(); updateSendLabel();
+})();
+</script>
+</body>
+</html>

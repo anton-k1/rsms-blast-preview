@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Blast · ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --bd:#e5e7ef; --bd2:#eef0f4; --bg:#eef1f5; --card:#fff;
+    --r16:16px; --r11:11px; --r99:99px;
+    --sh:0 12px 40px rgba(20,20,50,.14);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;padding:24px}
+
+  .modal{width:100%;max-width:940px;height:min(88vh,780px);background:var(--card);
+    border-radius:var(--r16);box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+
+  /* header */
+  .mhead{display:flex;align-items:center;gap:12px;padding:18px 22px 0}
+  .mhead h1{font-size:17px;margin:0;font-weight:650;letter-spacing:-.01em}
+  .mhead .sub{color:var(--faint);font-size:12.5px;margin-top:2px}
+  .x{margin-left:auto;border:0;background:var(--bd2);width:30px;height:30px;border-radius:var(--r99);
+    cursor:pointer;color:var(--muted);display:grid;place-items:center}
+  .x:hover{background:#e2e6ee;color:var(--ink)}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;padding:14px 22px 0;border-bottom:1px solid var(--bd2)}
+  .tab{appearance:none;border:0;background:none;cursor:pointer;font-family:inherit;
+    font-size:13.5px;color:var(--muted);padding:9px 14px;border-radius:10px 10px 0 0;
+    display:flex;align-items:center;gap:8px;position:relative;font-weight:520;transition:.12s}
+  .tab .n{width:19px;height:19px;border-radius:var(--r99);background:var(--bd);color:var(--muted);
+    font-size:11px;font-weight:700;display:grid;place-items:center;transition:.12s}
+  .tab:hover{color:var(--ink);background:#f6f8fb}
+  .tab.on{color:var(--primary);font-weight:640}
+  .tab.on .n{background:var(--primary);color:#fff}
+  .tab.on::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:var(--primary);border-radius:2px}
+  .tab .dot{width:6px;height:6px;border-radius:var(--r99);background:#22c55e;display:none}
+  .tab.set .dot{display:block}
+
+  /* summary bar */
+  .sumbar{display:flex;align-items:center;gap:10px;padding:11px 22px;background:#f7f9fc;border-bottom:1px solid var(--bd2);font-size:13px;color:var(--muted)}
+  .sumbar b{color:var(--ink);font-weight:620}
+  .sumbar .pill{background:#fff;border:1px solid var(--bd);border-radius:var(--r99);padding:4px 11px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px}
+  .sumbar .pill svg{width:13px;height:13px;color:var(--faint)}
+  .sumbar .cost{margin-left:auto;color:var(--ink);font-weight:640}
+
+  /* panels */
+  .body{flex:1;overflow-y:auto;padding:20px 22px}
+  .panel{display:none}
+  .panel.on{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+  .grid2{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  label.fl{display:block;font-size:12px;font-weight:640;color:var(--muted);margin:0 0 7px;text-transform:uppercase;letter-spacing:.03em}
+  .card{border:1px solid var(--bd);border-radius:var(--r11);background:#fff}
+  .soft{background:#f7f9fc;border:1px solid var(--bd2);border-radius:var(--r11)}
+
+  /* AI build */
+  .aibox{border-radius:var(--r11);padding:1px;background:var(--ai);margin-bottom:18px}
+  .aibox .in{background:#fff;border-radius:10px;padding:13px 14px}
+  .aibox .row{display:flex;gap:9px;align-items:center}
+  .aibox .spark{width:26px;height:26px;border-radius:8px;background:var(--ai);display:grid;place-items:center;flex:none}
+  .aibox .spark svg{width:15px;height:15px;color:#fff}
+  .aibox input{flex:1;border:0;outline:none;font-family:inherit;font-size:13.5px;color:var(--ink);background:none}
+  .aibox input::placeholder{color:var(--faint)}
+  .aibtn{border:0;background:var(--ai);color:#fff;font-family:inherit;font-weight:600;font-size:13px;
+    padding:8px 14px;border-radius:9px;cursor:pointer;flex:none}
+  .aibtn:disabled{opacity:.55;cursor:default}
+  .aibox .hint{font-size:11.5px;color:var(--faint);margin-top:8px}
+  .aibox .chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .achip{border:1px solid var(--bd);background:#fff;border-radius:var(--r99);padding:4px 10px;font-size:12px;color:var(--muted);cursor:pointer}
+  .achip:hover{border-color:var(--primary);color:var(--primary)}
+
+  /* editor */
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .tbtn{border:1px solid var(--bd);background:#fff;border-radius:9px;padding:6px 11px;font-family:inherit;
+    font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;position:relative}
+  .tbtn:hover{background:#f6f8fb;border-color:#d7dbe6}
+  .tbtn svg{width:13px;height:13px;color:var(--muted)}
+  textarea.msg{width:100%;min-height:132px;border:1px solid var(--bd);border-radius:var(--r11);
+    padding:13px 14px;font-family:inherit;font-size:14px;line-height:1.5;color:var(--ink);resize:vertical;outline:none}
+  textarea.msg:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .metarow{display:flex;align-items:center;gap:14px;margin-top:9px;font-size:12px;color:var(--muted)}
+  .metarow .seg{margin-left:auto}
+  .metarow b{color:var(--ink);font-weight:620}
+
+  /* dropdown menu */
+  .menu{position:absolute;top:calc(100% + 5px);left:0;z-index:20;background:#fff;border:1px solid var(--bd);
+    border-radius:var(--r11);box-shadow:var(--sh);padding:6px;min-width:190px;display:none}
+  .menu.open{display:block}
+  .menu button{display:flex;width:100%;align-items:center;gap:9px;border:0;background:none;font-family:inherit;
+    font-size:13px;color:var(--ink);padding:8px 9px;border-radius:8px;cursor:pointer;text-align:left}
+  .menu button:hover{background:#f2f5fa}
+  .menu button .k{margin-left:auto;color:var(--faint);font-size:11.5px}
+  .menu .mh{font-size:11px;color:var(--faint);padding:6px 9px 4px;text-transform:uppercase;letter-spacing:.03em}
+
+  /* phone preview */
+  .phone{width:270px;margin:0 auto;background:#fff;border:9px solid #1f2430;border-radius:34px;overflow:hidden;box-shadow:0 8px 26px rgba(20,20,50,.18)}
+  .phone .not{height:24px;background:#1f2430;position:relative}
+  .phone .not::after{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:90px;height:16px;background:#1f2430;border-radius:0 0 12px 12px}
+  .phone .scr{background:#f2f4f8;padding:16px 12px 22px;min-height:250px}
+  .phone .from{text-align:center;font-size:11px;color:var(--faint);margin-bottom:12px}
+  .bubble{background:#fff;border-radius:16px 16px 16px 4px;padding:10px 13px;font-size:13.5px;line-height:1.45;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:90%}
+  .bubble .mv{color:var(--primary);font-weight:600}
+  .phone .tm{font-size:10.5px;color:var(--faint);margin-top:6px;padding-left:4px}
+  .pvtoggle{display:flex;justify-content:center;gap:6px;margin-top:12px}
+  .pvtoggle button{border:1px solid var(--bd);background:#fff;border-radius:var(--r99);font-family:inherit;font-size:11.5px;padding:4px 11px;cursor:pointer;color:var(--muted)}
+  .pvtoggle button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+  /* segmented send-mode */
+  .segmode{display:flex;gap:6px;background:#f2f5fa;padding:4px;border-radius:var(--r11);margin-bottom:16px}
+  .segmode button{flex:1;border:0;background:none;font-family:inherit;font-size:13px;font-weight:560;color:var(--muted);padding:9px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+  .segmode button svg{width:15px;height:15px}
+  .segmode button.on{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(20,20,50,.1)}
+
+  /* drip builder */
+  .drip{margin-top:6px}
+  .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .step .num{width:24px;height:24px;border-radius:var(--r99);background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:3px}
+  .step .cnt{flex:1}
+  .step textarea{width:100%;min-height:56px;border:1px solid var(--bd);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:13px;resize:vertical;outline:none}
+  .step .when{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-top:6px}
+  .step .when input{width:52px;border:1px solid var(--bd);border-radius:8px;padding:4px 7px;font-family:inherit;font-size:12px;text-align:center}
+  .step .del{border:0;background:none;color:var(--faint);cursor:pointer;padding:4px;margin-top:2px}
+  .step .del:hover{color:#ef4444}
+  .addstep{border:1px dashed var(--bd);background:#fbfcfe;border-radius:10px;padding:9px;width:100%;font-family:inherit;font-size:13px;color:var(--primary);cursor:pointer;font-weight:560}
+  .addstep:hover{background:#f4f7fc}
+
+  /* recipients */
+  .reclist{display:flex;flex-direction:column;gap:8px}
+  .rec{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:var(--r11);cursor:pointer;transition:.12s}
+  .rec:hover{border-color:#d0d6e4;background:#fbfcfe}
+  .rec.on{border-color:var(--primary);background:#f5f8ff}
+  .rec .rc{width:19px;height:19px;border-radius:var(--r99);border:2px solid var(--bd);flex:none;display:grid;place-items:center}
+  .rec.on .rc{border-color:var(--primary);background:var(--primary)}
+  .rec .rc svg{width:11px;height:11px;color:#fff;opacity:0}
+  .rec.on .rc svg{opacity:1}
+  .rec .ic{width:34px;height:34px;border-radius:9px;background:#f2f5fa;display:grid;place-items:center;flex:none}
+  .rec .ic svg{width:16px;height:16px;color:var(--muted)}
+  .rec.on .ic{background:#e6efff}.rec.on .ic svg{color:var(--primary)}
+  .rec .tt{flex:1}
+  .rec .tt .t{font-size:14px;font-weight:580}
+  .rec .tt .s{font-size:12px;color:var(--faint);margin-top:1px}
+  .rec .ct{font-size:13px;color:var(--muted);font-weight:560}
+  .recsub{margin:10px 0 4px;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em}
+
+  /* filter/csv inline */
+  .inlpanel{margin-top:8px;padding:13px;border:1px dashed var(--bd);border-radius:var(--r11);background:#fbfcfe;display:none}
+  .inlpanel.open{display:block}
+  .filtrow{display:flex;gap:8px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
+  .filtrow select,.filtrow input{border:1px solid var(--bd);border-radius:9px;padding:7px 10px;font-family:inherit;font-size:13px;outline:none}
+  .filtrow select{background:#fff}
+  .csvdrop{border:2px dashed var(--bd);border-radius:var(--r11);padding:22px;text-align:center;color:var(--muted);cursor:pointer;font-size:13px}
+  .csvdrop:hover{border-color:var(--primary);color:var(--primary)}
+  .csvdrop svg{width:22px;height:22px;display:block;margin:0 auto 6px;color:var(--faint)}
+
+  /* generic option rows (timing / options) */
+  .opt{border:1px solid var(--bd);border-radius:var(--r11);padding:15px;margin-bottom:14px}
+  .opt .oh{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+  .opt .oh .oic{width:30px;height:30px;border-radius:9px;background:#f2f5fa;display:grid;place-items:center;flex:none}
+  .opt .oh .oic svg{width:15px;height:15px;color:var(--muted)}
+  .opt .oh .ot{font-size:14px;font-weight:600}
+  .opt .oh .od{font-size:12px;color:var(--faint);margin-top:1px}
+  .opt .oh .sw{margin-left:auto}
+  .opt .obody{margin-top:13px;display:none}
+  .opt.open .obody{display:block}
+  .opt.open .oic{background:#e6efff}.opt.open .oic svg{color:var(--primary)}
+
+  /* switch */
+  .sw{position:relative;width:40px;height:23px;flex:none}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw .track{position:absolute;inset:0;background:#d5dae6;border-radius:var(--r99);transition:.16s;cursor:pointer}
+  .sw .track::before{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;background:#fff;border-radius:var(--r99);transition:.16s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .sw input:checked + .track{background:var(--primary)}
+  .sw input:checked + .track::before{transform:translateX(17px)}
+
+  /* radios / choice */
+  .choices{display:flex;gap:8px;flex-wrap:wrap}
+  .choice{border:1px solid var(--bd);border-radius:10px;padding:9px 13px;font-size:13px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .choice.on{border-color:var(--primary);background:#f5f8ff;color:var(--primary);font-weight:560}
+  .choice .rd{width:15px;height:15px;border-radius:var(--r99);border:2px solid var(--bd);flex:none}
+  .choice.on .rd{border-color:var(--primary);border-width:4px}
+
+  .fieldrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .fieldrow .fg{flex:1;min-width:130px}
+  .fieldrow label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;font-weight:560}
+  .fieldrow input,.fieldrow select{width:100%;border:1px solid var(--bd);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:13px;outline:none}
+  .fieldrow input:focus,.fieldrow select:focus{border-color:var(--primary)}
+
+  .slider{width:100%;margin:10px 0 4px}
+  input[type=range]{width:100%;accent-color:var(--primary)}
+  .sliderval{font-size:13px;color:var(--ink);font-weight:600}
+
+  /* variant B */
+  .variantb{margin-top:12px;padding:13px;border:1px solid var(--bd);border-radius:var(--r11);background:#fbfcfe;display:none}
+  .variantb.open{display:block}
+  .variantb textarea{width:100%;min-height:70px;border:1px solid var(--bd);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:13px;resize:vertical;outline:none}
+  .splitrow{display:flex;align-items:center;gap:12px;margin-top:11px;font-size:12.5px;color:var(--muted)}
+
+  /* consent */
+  .consent{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--faint);line-height:1.5;padding:12px 14px;background:#f7f9fc;border-radius:var(--r11);margin-top:6px}
+  .consent svg{width:15px;height:15px;color:#22c55e;flex:none;margin-top:1px}
+
+  /* footer */
+  .foot{display:flex;align-items:center;gap:14px;padding:15px 22px;border-top:1px solid var(--bd2);background:#fff}
+  .foot .fsum{font-size:13px;color:var(--muted)}
+  .foot .fsum b{color:var(--ink);font-weight:640}
+  .ghost{margin-left:auto;border:1px solid var(--bd);background:#fff;border-radius:10px;padding:10px 16px;font-family:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;font-weight:540}
+  .ghost:hover{background:#f6f8fb}
+  .send{border:0;background:var(--primary);color:#fff;border-radius:10px;padding:10px 22px;font-family:inherit;font-size:13.5px;font-weight:640;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .send:hover{background:#1d5bd6}
+  .send svg{width:15px;height:15px}
+  .send:disabled{opacity:.6;cursor:default}
+
+  /* sent overlay */
+  .sent{position:absolute;inset:0;background:rgba(255,255,255,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:40;border-radius:var(--r16)}
+  .sent.on{display:flex;animation:fade .2s}
+  .sent .ck{width:66px;height:66px;border-radius:var(--r99);background:#22c55e;display:grid;place-items:center;box-shadow:0 8px 24px rgba(34,197,94,.35)}
+  .sent .ck svg{width:34px;height:34px;color:#fff}
+  .sent h2{margin:0;font-size:20px}
+  .sent p{margin:0;color:var(--muted);font-size:13.5px}
+  .sent .again{margin-top:6px;border:1px solid var(--bd);background:#fff;border-radius:10px;padding:9px 18px;font-family:inherit;font-size:13px;cursor:pointer}
+  .modal{position:relative}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="modal" id="modal">
+  <!-- header -->
+  <div class="mhead">
+    <div>
+      <h1>New blast</h1>
+      <div class="sub">Compose, choose who, then send.</div>
+    </div>
+    <button class="x" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- tabs -->
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-tab="msg"><span class="n">1</span>Message<span class="dot"></span></button>
+    <button class="tab" data-tab="aud"><span class="n">2</span>Audience<span class="dot"></span></button>
+    <button class="tab" data-tab="time"><span class="n">3</span>Timing<span class="dot"></span></button>
+    <button class="tab" data-tab="opt"><span class="n">4</span>Options<span class="dot"></span></button>
+  </div>
+
+  <!-- summary bar -->
+  <div class="sumbar">
+    <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><b id="sumCount">1,240</b>&nbsp;people</span>
+    <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span id="sumTiming">sends now</span></span>
+    <span class="pill" id="sumExtra" style="display:none"></span>
+    <span class="cost">~$<span id="sumCost">24.80</span></span>
+  </div>
+
+  <!-- body -->
+  <div class="body">
+
+    <!-- ===== TAB 1: MESSAGE ===== -->
+    <div class="panel on" data-panel="msg">
+      <!-- send mode -->
+      <div class="segmode" id="segmode">
+        <button class="on" data-mode="once">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Send once</button>
+        <button data-mode="seq">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M4 6h16M4 18h10"/></svg>Sequence (drip)</button>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <!-- AI build -->
+          <div class="aibox">
+            <div class="in">
+              <div class="row">
+                <span class="spark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span>
+                <input id="aiInput" placeholder="Describe your message — e.g. open house Saturday, invite VIPs">
+                <button class="aibtn" id="aiBtn">Write it</button>
+              </div>
+              <div class="chips">
+                <span class="achip" data-ai="Invite my list to an open house this Saturday at 2pm, offer a private early slot.">Open house invite</span>
+                <span class="achip" data-ai="Let expired listings know I can get their home sold, ask if they're still looking.">Expired listing</span>
+                <span class="achip" data-ai="Quick check-in with past clients, ask if they know anyone thinking of selling.">Past-client check-in</span>
+              </div>
+              <div class="hint">AI drafts, you edit. Nothing sends without your review.</div>
+            </div>
+          </div>
+
+          <!-- editor -->
+          <label class="fl">Message</label>
+          <div class="toolbar">
+            <button class="tbtn" id="mergeBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m10 0h3a2 2 0 0 0 2-2v-3"/></svg>
+              Merge&nbsp;{··}
+              <div class="menu" id="mergeMenu">
+                <div class="mh">Insert contact field</div>
+                <button data-merge="{{first_name}}">First name <span class="k">Sarah</span></button>
+                <button data-merge="{{last_name}}">Last name <span class="k">Chen</span></button>
+              </div>
+            </button>
+            <button class="tbtn" id="tplBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Templates
+              <div class="menu" id="tplMenu">
+                <div class="mh">Start from a template</div>
+                <button data-tpl="Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.">Open house</button>
+                <button data-tpl="Hi {{first_name}}, saw your listing expired. I have buyers in your area — still open to selling? Reply YES.">Expired listing</button>
+                <button data-tpl="Hi {{first_name}}, just checking in! Know anyone thinking of buying or selling this year? Reply and let me know.">Past-client check-in</button>
+                <button data-tpl="Hi {{first_name}}, prices in your neighborhood are up. Want a free home value report? Reply YES.">Price update</button>
+              </div>
+            </button>
+            <button class="tbtn" id="varBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              Add variety
+              <div class="menu" id="varMenu">
+                <div class="mh">Spin one line, avoid spam filters</div>
+                <button data-var="greet">Rotate greeting</button>
+                <button data-var="cta">Rotate call-to-action</button>
+                <button data-var="emoji">Add a friendly emoji</button>
+              </div>
+            </button>
+          </div>
+          <textarea class="msg" id="msg">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+          <div class="metarow">
+            <span><b id="charCount">0</b> chars</span>
+            <span><b id="segCount">1</b> segment · <span id="segWho">160/segment</span></span>
+            <span class="seg">Est. <b id="msgCost">$0.02</b>/recipient</span>
+          </div>
+
+          <!-- drip builder (sequence mode) -->
+          <div class="drip hide" id="dripBuilder">
+            <label class="fl" style="margin-top:18px">Follow-up steps</label>
+            <div id="dripSteps"></div>
+            <button class="addstep" id="addStep">+ Add a step</button>
+          </div>
+        </div>
+
+        <!-- phone preview -->
+        <div>
+          <label class="fl">Preview</label>
+          <div class="phone">
+            <div class="not"></div>
+            <div class="scr">
+              <div class="from" id="pvFrom">From your local number</div>
+              <div class="bubble" id="pvBubble"></div>
+              <div class="tm">Delivered · now</div>
+            </div>
+          </div>
+          <div class="pvtoggle">
+            <button class="on" data-pv="Sarah|Chen">Sarah</button>
+            <button data-pv="Marcus|Reyes">Marcus</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 2: AUDIENCE ===== -->
+    <div class="panel" data-panel="aud">
+      <label class="fl">Send to</label>
+      <div class="reclist" id="reclist">
+        <div class="rec on" data-rec="everyone" data-count="1240">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+          <span class="tt"><div class="t">Everyone</div><div class="s">All contacts in your account</div></span>
+          <span class="ct">1,240</span>
+        </div>
+
+        <div class="recsub">Segments</div>
+        <div class="rec" data-rec="vip" data-count="88">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 15 8l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></span>
+          <span class="tt"><div class="t">VIP</div><div class="s">Your best repeat clients</div></span>
+          <span class="ct">88</span>
+        </div>
+        <div class="rec" data-rec="new" data-count="210">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="tt"><div class="t">New leads</div><div class="s">Added in the last 30 days</div></span>
+          <span class="ct">210</span>
+        </div>
+
+        <div class="recsub">Re-send to a recent blast</div>
+        <div class="rec" data-rec="oct" data-count="340">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg></span>
+          <span class="tt"><div class="t">Oct Promo</div><div class="s">Sent Oct 3 · everyone who got it</div></span>
+          <span class="ct">340</span>
+        </div>
+        <div class="rec" data-rec="exp" data-count="88">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/></svg></span>
+          <span class="tt"><div class="t">Expired</div><div class="s">Sent Sep 28 · expired-listing blast</div></span>
+          <span class="ct">88</span>
+        </div>
+
+        <div class="recsub">Build it yourself</div>
+        <div class="rec" data-rec="filter" data-count="0">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg></span>
+          <span class="tt"><div class="t">Filter contacts</div><div class="s">Tag, city, source…</div></span>
+          <span class="ct" id="filterCt">—</span>
+        </div>
+        <div class="inlpanel" id="filterPanel">
+          <div class="filtrow">
+            <select id="fField"><option>Tag</option><option>City</option><option>Source</option><option>Last contacted</option></select>
+            <select id="fOp"><option>is</option><option>is not</option><option>contains</option></select>
+            <input id="fVal" placeholder="e.g. Buyer" style="flex:1">
+          </div>
+          <button class="aibtn" id="fApply" style="background:var(--primary)">Apply filter</button>
+        </div>
+
+        <div class="rec" data-rec="csv" data-count="0">
+          <span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+          <span class="tt"><div class="t">Upload a CSV</div><div class="s">One-time list of numbers</div></span>
+          <span class="ct" id="csvCt">—</span>
+        </div>
+        <div class="inlpanel" id="csvPanel">
+          <div class="csvdrop" id="csvDrop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            Click to choose a CSV (or drop it here)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 3: TIMING ===== -->
+    <div class="panel" data-panel="time">
+      <label class="fl">When to send</label>
+      <div class="choices" id="whenChoices" style="margin-bottom:16px">
+        <div class="choice on" data-when="now"><span class="rd"></span>Send now</div>
+        <div class="choice" data-when="sched"><span class="rd"></span>Schedule for later</div>
+      </div>
+      <div class="soft" id="schedFields" style="padding:14px;display:none;margin-bottom:16px">
+        <div class="fieldrow">
+          <div class="fg"><label>Date</label><input type="date" id="schedDate"></div>
+          <div class="fg"><label>Time</label><input type="time" id="schedTime" value="09:00"></div>
+          <div class="fg"><label>Time zone</label><select id="schedTz"><option>Recipient's local time</option><option>Pacific (PT)</option><option>Eastern (ET)</option></select></div>
+        </div>
+      </div>
+
+      <div class="opt" id="smartOpt">
+        <div class="oh">
+          <span class="oic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.9 2.9M16.2 16.2l2.9 2.9M2 12h4M18 12h4M4.9 19.1l2.9-2.9M16.2 7.8l2.9-2.9"/></svg></span>
+          <div><div class="ot">Smart send</div><div class="od">Spread delivery to each contact's best hour</div></div>
+          <label class="sw"><input type="checkbox" id="smartSw"><span class="track"></span></label>
+        </div>
+      </div>
+
+      <label class="fl" style="margin-top:6px">Sending speed</label>
+      <div class="opt open" style="margin-top:7px">
+        <div class="oh">
+          <span class="oic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span>
+          <div><div class="ot">Carrier speed</div><div class="od">Fastest safe rate for your numbers</div></div>
+          <span class="sliderval" style="margin-left:auto"><span id="speedVal">180</span>/min</span>
+        </div>
+        <div class="obody" style="display:block">
+          <input type="range" class="slider" id="speedRange" min="30" max="300" step="10" value="180">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)"><span>Gentle · 30/min</span><span>Carrier speed · 300/min</span></div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:13px;border-top:1px solid var(--bd2)">
+            <label class="sw"><input type="checkbox" id="throttleSw"><span class="track"></span></label>
+            <div><div style="font-size:13px;font-weight:560">Throttle for large blasts</div><div style="font-size:12px;color:var(--faint)">Auto-slow if replies spike, protects your deliverability</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 4: OPTIONS ===== -->
+    <div class="panel" data-panel="opt">
+      <!-- A/B -->
+      <div class="opt" id="abOpt">
+        <div class="oh">
+          <span class="oic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v16H4zM13 4h7v16h-7z"/></svg></span>
+          <div><div class="ot">A/B test</div><div class="od">Try two messages, keep the winner</div></div>
+          <label class="sw"><input type="checkbox" id="abSw"><span class="track"></span></label>
+        </div>
+        <div class="obody">
+          <label class="fl">Variant B</label>
+          <textarea class="msg" id="variantB" style="min-height:80px" placeholder="Write a second version…">Hi {{first_name}}, private showing Sat 2pm — 1427 Birchwood. Want in? Reply YES.</textarea>
+          <div class="splitrow">
+            <span>Split</span>
+            <input type="range" id="abSplit" min="10" max="90" step="10" value="50" style="flex:1;accent-color:var(--primary)">
+            <span><b id="abA">50%</b> A · <b id="abB">50%</b> B</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Follow-up -->
+      <div class="opt" id="fuOpt">
+        <div class="oh">
+          <span class="oic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5"/></svg></span>
+          <div><div class="ot">Follow-up</div><div class="od">Nudge people who don't reply</div></div>
+          <label class="sw"><input type="checkbox" id="fuSw"><span class="track"></span></label>
+        </div>
+        <div class="obody">
+          <label class="fl">Follow-up message</label>
+          <textarea class="msg" id="fuMsg" style="min-height:70px">Hi {{first_name}}, just following up — that private slot is still open. Reply YES if you'd like it!</textarea>
+          <div class="fieldrow" style="align-items:center">
+            <div class="fg"><label>Send if no reply after</label>
+              <select id="fuDelay"><option>1 day</option><option selected>2 days</option><option>3 days</option><option>1 week</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send from -->
+      <label class="fl" style="margin-top:6px">Send from</label>
+      <div class="choices" id="fromChoices" style="margin-bottom:16px">
+        <div class="choice on" data-from="local"><span class="rd"></span>Local presence</div>
+        <div class="choice" data-from="rotate"><span class="rd"></span>Rotate numbers</div>
+      </div>
+      <div style="font-size:12px;color:var(--faint);margin:-10px 0 18px;padding-left:2px" id="fromNote">Each contact sees a number with their own area code — higher answer rates.</div>
+
+      <!-- consent -->
+      <div class="consent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
+        <span>We'll auto-append <b>Reply STOP to opt out</b> and skip anyone who's unsubscribed. You confirm these contacts agreed to hear from you.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- footer -->
+  <div class="foot">
+    <div class="fsum">Send to <b id="footCount">1,240</b> · ~$<b id="footCost">24.80</b></div>
+    <button class="ghost" id="backBtn">Back</button>
+    <button class="send" id="sendBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      <span id="sendLabel">Review &amp; send</span>
+    </button>
+  </div>
+
+  <!-- sent overlay -->
+  <div class="sent" id="sentOverlay">
+    <div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h2>Sent ✓</h2>
+    <p id="sentDesc">Your blast is on its way to 1,240 people.</p>
+    <button class="again" id="againBtn">Compose another</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var RATE=0.02; // $/segment
+
+  var state={
+    tab:'msg', mode:'once',
+    rec:'everyone', count:1240,
+    when:'now', smart:false, speed:180, throttle:false,
+    ab:false, fu:false, from:'local',
+    pv:['Sarah','Chen']
+  };
+
+  /* ---------- helpers ---------- */
+  function fmt(n){return n.toLocaleString('en-US')}
+  function money(n){return n.toFixed(2)}
+  function segments(text){ // count SMS segments for the base message
+    var len=(text||'').replace(/\{\{first_name\}\}/g,'Sarah').replace(/\{\{last_name\}\}/g,'Chen').length;
+    return Math.max(1,Math.ceil(len/160));
+  }
+  function perRecipient(){
+    var s=segments($('#msg').value);
+    if(state.mode==='seq') s+= dripSegTotal();
+    if(state.fu) s+= segments($('#fuMsg').value);
+    return s;
+  }
+  function totalCost(){ return state.count*perRecipient()*RATE; }
+
+  function timingLabel(){
+    if(state.when==='sched'){
+      var d=$('#schedDate').value, t=$('#schedTime').value;
+      if(d) return 'scheduled '+d+(t?' '+t:'');
+      return 'scheduled';
+    }
+    return state.smart?'smart send':'sends now';
+  }
+
+  /* ---------- render everything ---------- */
+  function render(){
+    var per=perRecipient(), cost=totalCost();
+    // summary bar
+    $('#sumCount').textContent=fmt(state.count);
+    $('#sumTiming').textContent=timingLabel();
+    $('#sumCost').textContent=money(cost);
+    // extra pill (mode / ab)
+    var ex=$('#sumExtra'), bits=[];
+    if(state.mode==='seq') bits.push('drip');
+    if(state.ab) bits.push('A/B');
+    if(state.fu) bits.push('+follow-up');
+    if(bits.length){ex.style.display='';ex.textContent=bits.join(' · ');} else ex.style.display='none';
+    // footer
+    $('#footCount').textContent=fmt(state.count);
+    $('#footCost').textContent=money(cost);
+    // message meta
+    var raw=$('#msg').value;
+    var previewLen=raw.replace(/\{\{first_name\}\}/g,'Sarah').replace(/\{\{last_name\}\}/g,'Chen').length;
+    $('#charCount').textContent=previewLen;
+    $('#segCount').textContent=segments(raw);
+    $('#msgCost').textContent='$'+money(segments(raw)*RATE);
+    renderPreview();
+    // tab completion dots
+    setDot('aud', state.count>0);
+    setDot('time', true);
+    setDot('opt', state.ab||state.fu);
+    setDot('msg', raw.trim().length>0);
+    // send label
+    $('#sendLabel').textContent = state.when==='sched' ? 'Schedule blast' : 'Send blast';
+  }
+  function setDot(tab,on){ var t=$('.tab[data-tab="'+tab+'"]'); if(t)t.classList.toggle('set',!!on); }
+
+  function renderPreview(){
+    var raw=$('#msg').value;
+    var html=raw
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/\{\{first_name\}\}/g,'<span class="mv">'+state.pv[0]+'</span>')
+      .replace(/\{\{last_name\}\}/g,'<span class="mv">'+state.pv[1]+'</span>');
+    $('#pvBubble').innerHTML=html || '<span style="color:#9aa1af">Your message preview…</span>';
+    $('#pvFrom').textContent = state.from==='rotate' ? 'From a rotating number' : 'From your local number ('+(state.pv[0]==='Sarah'?'415':'312')+')';
+  }
+
+  /* ---------- tabs ---------- */
+  $$('.tab').forEach(function(t){
+    t.onclick=function(){ go(t.dataset.tab); };
+  });
+  function go(tab){
+    state.tab=tab;
+    $$('.tab').forEach(function(x){x.classList.toggle('on',x.dataset.tab===tab)});
+    $$('.panel').forEach(function(x){x.classList.toggle('on',x.dataset.panel===tab)});
+    // footer nav buttons
+    var order=['msg','aud','time','opt'], i=order.indexOf(tab);
+    $('#backBtn').style.visibility = i===0?'hidden':'visible';
+  }
+
+  /* footer Back = previous tab */
+  $('#backBtn').onclick=function(){
+    var order=['msg','aud','time','opt'], i=order.indexOf(state.tab);
+    if(i>0) go(order[i-1]);
+  };
+
+  /* ---------- MESSAGE tab ---------- */
+  // send mode
+  $$('#segmode button').forEach(function(b){
+    b.onclick=function(){
+      $$('#segmode button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); state.mode=b.dataset.mode;
+      $('#dripBuilder').classList.toggle('hide',state.mode!=='once'?false:true);
+      if(state.mode==='seq' && !$('#dripSteps').children.length) addStep();
+      render();
+    };
+  });
+
+  // AI build
+  function aiWrite(prompt){
+    var b=$('#aiBtn'); b.disabled=true; b.textContent='Writing…';
+    setTimeout(function(){
+      var out=draftFrom(prompt);
+      $('#msg').value=out;
+      b.disabled=false; b.textContent='Write it';
+      render();
+    },650);
+  }
+  function draftFrom(p){
+    p=(p||'').toLowerCase();
+    if(p.indexOf('expired')>-1) return 'Hi {{first_name}}, saw your listing expired. I have buyers in your area — still open to selling? Reply YES.';
+    if(p.indexOf('past')>-1||p.indexOf('check-in')>-1||p.indexOf('check in')>-1) return 'Hi {{first_name}}, just checking in! Know anyone thinking of buying or selling this year? Reply and let me know.';
+    if(p.indexOf('open house')>-1||p.indexOf('showing')>-1) return 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    return 'Hi {{first_name}}, quick note from your agent — '+ (p||'let\'s connect') +'. Reply YES and I\'ll follow up!';
+  }
+  $('#aiBtn').onclick=function(){ aiWrite($('#aiInput').value); };
+  $('#aiInput').addEventListener('keydown',function(e){ if(e.key==='Enter') aiWrite(this.value); });
+  $$('.achip').forEach(function(c){ c.onclick=function(){ $('#aiInput').value=c.dataset.ai; aiWrite(c.dataset.ai); }; });
+
+  // dropdown menus (merge/templates/variety) — shared toggle
+  function wireMenu(btnId,menuId){
+    var btn=$('#'+btnId), menu=$('#'+menuId);
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var open=menu.classList.contains('open');
+      $$('.menu').forEach(function(m){m.classList.remove('open')});
+      if(!open) menu.classList.add('open');
+    });
+  }
+  document.addEventListener('click',function(){$$('.menu').forEach(function(m){m.classList.remove('open')})});
+  wireMenu('mergeBtn','mergeMenu'); wireMenu('tplBtn','tplMenu'); wireMenu('varBtn','varMenu');
+
+  function insertAtCursor(ta,text){
+    var s=ta.selectionStart, e=ta.selectionEnd, v=ta.value;
+    ta.value=v.slice(0,s)+text+v.slice(e);
+    ta.selectionStart=ta.selectionEnd=s+text.length; ta.focus();
+  }
+  $$('#mergeMenu button').forEach(function(b){ b.onclick=function(){ insertAtCursor($('#msg'),b.dataset.merge); render(); }; });
+  $$('#tplMenu button').forEach(function(b){ b.onclick=function(){ $('#msg').value=b.dataset.tpl; render(); }; });
+  $$('#varMenu button').forEach(function(b){
+    b.onclick=function(){
+      var ta=$('#msg'), v=ta.value, k=b.dataset.var;
+      if(k==='greet') ta.value=v.replace(/^Hi\b/,'Hey');
+      else if(k==='cta') ta.value=v.replace(/reply YES/i,'text me YES');
+      else if(k==='emoji' && v.indexOf('🏡')<0) ta.value=v.replace(/$/,' 🏡');
+      render();
+    };
+  });
+
+  // preview identity toggle
+  $$('.pvtoggle button').forEach(function(b){
+    b.onclick=function(){
+      $$('.pvtoggle button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); state.pv=b.dataset.pv.split('|'); render();
+    };
+  });
+
+  // drip builder
+  var dripDefaults=[
+    {msg:"Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.",days:0},
+    {msg:"Hi {{first_name}}, still have a couple of private slots left for Saturday — want one?",days:2},
+    {msg:"Hi {{first_name}}, last call! Reply YES and I'll lock in your time.",days:5}
+  ];
+  var stepIdx=0;
+  function addStep(preset){
+    var d=preset||dripDefaults[Math.min($('#dripSteps').children.length,dripDefaults.length-1)];
+    var n=$('#dripSteps').children.length+1;
+    var el=document.createElement('div'); el.className='step';
+    el.innerHTML='<span class="num">'+n+'</span>'+
+      '<div class="cnt"><textarea>'+d.msg+'</textarea>'+
+      '<div class="when">'+(n===1?'<span>Sends immediately</span>':'<span>Wait</span><input type="number" min="1" value="'+(d.days||2)+'"><span>days, then send</span>')+'</div></div>'+
+      (n===1?'':'<button class="del" title="Remove">✕</button>');
+    $('#dripSteps').appendChild(el);
+    var ta=el.querySelector('textarea'); ta.addEventListener('input',render);
+    var di=el.querySelector('input'); if(di) di.addEventListener('input',render);
+    var del=el.querySelector('.del'); if(del) del.onclick=function(){ el.remove(); renumber(); render(); };
+    render();
+  }
+  function renumber(){ $$('#dripSteps .step').forEach(function(s,i){ s.querySelector('.num').textContent=i+1; }); }
+  function dripSegTotal(){
+    var t=0; $$('#dripSteps textarea').forEach(function(ta){ t+=segments(ta.value); }); return t;
+  }
+  $('#addStep').onclick=function(){ addStep(); };
+
+  $('#msg').addEventListener('input',render);
+
+  /* ---------- AUDIENCE tab ---------- */
+  $$('#reclist .rec').forEach(function(r){
+    r.onclick=function(e){
+      if(e.target.closest('.inlpanel')) return;
+      $$('#reclist .rec').forEach(function(x){x.classList.remove('on')});
+      r.classList.add('on');
+      state.rec=r.dataset.rec;
+      // toggle inline panels
+      $('#filterPanel').classList.toggle('open',state.rec==='filter');
+      $('#csvPanel').classList.toggle('open',state.rec==='csv');
+      var c=parseInt(r.dataset.count,10)||0;
+      if(state.rec!=='filter'&&state.rec!=='csv'){ state.count=c; }
+      else { state.count=c; } // 0 until applied/uploaded
+      render();
+    };
+  });
+  // filter apply → deterministic pseudo count
+  $('#fApply').onclick=function(e){
+    e.stopPropagation();
+    var v=($('#fVal').value||'').trim();
+    var n = v? (120 + (v.length*37)%600) : 120; // ponytail: fake but stable demo count
+    state.count=n; $('#filterCt').textContent=fmt(n);
+    render();
+  };
+  // csv upload (fake file pick)
+  var csvInput=document.createElement('input'); csvInput.type='file'; csvInput.accept='.csv';
+  csvInput.onchange=function(){
+    var n = 50 + Math.floor(Math.random()*400);
+    state.count=n; $('#csvCt').textContent=fmt(n)+' rows';
+    $('#csvDrop').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="width:22px;height:22px;display:block;margin:0 auto 6px"><path d="M20 6 9 17l-5-5"/></svg>Loaded '+fmt(n)+' numbers'+(csvInput.files[0]?' from '+csvInput.files[0].name:'');
+    render();
+  };
+  $('#csvDrop').onclick=function(){ csvInput.click(); };
+
+  /* ---------- TIMING tab ---------- */
+  $$('#whenChoices .choice').forEach(function(c){
+    c.onclick=function(){
+      $$('#whenChoices .choice').forEach(function(x){x.classList.remove('on')});
+      c.classList.add('on'); state.when=c.dataset.when;
+      $('#schedFields').style.display = state.when==='sched'?'block':'none';
+      render();
+    };
+  });
+  $('#schedDate').addEventListener('change',render);
+  $('#schedTime').addEventListener('change',render);
+  $('#smartSw').addEventListener('change',function(){ state.smart=this.checked; render(); });
+  $('#speedRange').addEventListener('input',function(){ state.speed=+this.value; $('#speedVal').textContent=this.value; });
+  $('#throttleSw').addEventListener('change',function(){ state.throttle=this.checked; });
+  // default schedule date = tomorrow
+  (function(){ var d=new Date(Date.now()+864e5); $('#schedDate').value=d.toISOString().slice(0,10); })();
+
+  /* ---------- OPTIONS tab ---------- */
+  // A/B
+  $('#abSw').addEventListener('change',function(){
+    state.ab=this.checked; $('#abOpt').classList.toggle('open',this.checked); render();
+  });
+  $('#abSplit').addEventListener('input',function(){
+    var a=+this.value; $('#abA').textContent=a+'%'; $('#abB').textContent=(100-a)+'%';
+  });
+  $('#variantB').addEventListener('input',render);
+  // Follow-up
+  $('#fuSw').addEventListener('change',function(){
+    state.fu=this.checked; $('#fuOpt').classList.toggle('open',this.checked); render();
+  });
+  $('#fuMsg').addEventListener('input',render);
+  $('#fuDelay').addEventListener('change',render);
+  // Send from
+  $$('#fromChoices .choice').forEach(function(c){
+    c.onclick=function(){
+      $$('#fromChoices .choice').forEach(function(x){x.classList.remove('on')});
+      c.classList.add('on'); state.from=c.dataset.from;
+      $('#fromNote').textContent = state.from==='rotate'
+        ? 'Sends spread across all your numbers — best for very large blasts.'
+        : "Each contact sees a number with their own area code — higher answer rates.";
+      render();
+    };
+  });
+
+  /* ---------- SEND ---------- */
+  $('#sendBtn').onclick=function(){
+    if(state.count<=0){ go('aud'); return; }
+    var b=$('#sendBtn'); b.disabled=true; $('#sendLabel').textContent='Sending…';
+    setTimeout(function(){
+      var verb = state.when==='sched' ? 'scheduled for '+timingLabel().replace('scheduled ','') : 'on its way to';
+      $('#sentDesc').textContent = state.when==='sched'
+        ? 'Your blast to '+fmt(state.count)+' people is '+timingLabel()+'.'
+        : 'Your blast is on its way to '+fmt(state.count)+' people.';
+      $('#sentOverlay').classList.add('on');
+    },700);
+  };
+  $('#againBtn').onclick=function(){ $('#sentOverlay').classList.remove('on'); $('#sendBtn').disabled=false; render(); go('msg'); };
+  $('.x').onclick=function(){ $('#sentOverlay').classList.remove('on'); };
+
+  /* ---------- init ---------- */
+  render();
+
+  /* self-check (ponytail): fails loudly if cost math breaks */
+  (function demo(){
+    console.assert(segments('a')===1,'1 seg');
+    console.assert(segments(new Array(170).join('x'))===2,'2 seg @169 chars');
+    console.assert(Math.abs(1240*1*RATE-24.8)<1e-9,'1240×1seg = $24.80');
+  })();
+})();
+</script>
+</body>
+</html>
