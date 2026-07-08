@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create SMS Blast · ReadySMS</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-h:#1d4ed8;
+    --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --ink:#0f172a; --text:#111; --muted:#6b7280; --faint:#9aa1af;
+    --bd:#e5e7ef; --bd2:#eef0f4; --page:#eef1f5; --card:#fff;
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--text);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:32px 20px 140px}
+  h1{font-size:26px; font-weight:700; color:var(--ink); margin:0 0 22px; letter-spacing:-.02em}
+
+  .card{background:var(--card); border:1px solid var(--bd); border-radius:16px; box-shadow:var(--shadow); padding:20px; margin-bottom:16px}
+  .card + .card{margin-top:0}
+  label.fld{display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin:0 0 7px; text-transform:uppercase; letter-spacing:.04em}
+
+  /* AI box */
+  .ai-box{border-radius:16px; padding:2px; background:var(--ai); margin-bottom:16px}
+  .ai-inner{background:var(--card); border-radius:14px; padding:18px 18px 16px}
+  .ai-head{display:flex; align-items:center; gap:9px; margin-bottom:4px}
+  .ai-head .spark{width:20px;height:20px}
+  .ai-title{font-weight:700; color:var(--ink); font-size:15.5px}
+  .ai-help{font-size:13px; color:var(--muted); margin:0 0 12px}
+  .ai-row{display:flex; gap:9px}
+  .ai-row input{flex:1; border:1px solid var(--bd); border-radius:11px; padding:11px 13px; font-size:14px; font-family:inherit; outline:none; transition:border-color .15s}
+  .ai-row input:focus{border-color:var(--primary)}
+  .ai-btn{border:none; border-radius:11px; padding:0 18px; font-size:14px; font-weight:600; color:#fff; background:var(--ai); cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px}
+  .ai-btn:active{transform:translateY(1px)}
+  .ai-btn.thinking{opacity:.75; pointer-events:none}
+  .ai-chips{display:flex; gap:7px; flex-wrap:wrap; margin-top:11px}
+  .ai-chip{font-size:12px; color:var(--muted); border:1px solid var(--bd); background:#fafbfd; border-radius:99px; padding:5px 11px; cursor:pointer; transition:.15s}
+  .ai-chip:hover{border-color:var(--primary); color:var(--primary)}
+
+  .divider{display:flex; align-items:center; gap:14px; margin:20px 2px; color:var(--faint); font-size:12.5px; text-transform:uppercase; letter-spacing:.08em}
+  .divider::before,.divider::after{content:""; flex:1; height:1px; background:var(--bd)}
+
+  /* tabs */
+  .tabs{display:inline-flex; background:#f1f3f8; border-radius:99px; padding:4px; margin-bottom:16px}
+  .tab{border:none; background:none; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--muted); padding:7px 18px; border-radius:99px; cursor:pointer; transition:.15s}
+  .tab.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(20,20,50,.12)}
+
+  /* message area */
+  .msg-tools{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:10px}
+  .tool{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; color:var(--text); border:1px solid var(--bd); background:#fff; border-radius:99px; padding:6px 12px; cursor:pointer; transition:.15s; position:relative}
+  .tool:hover{border-color:#cfd6e4; background:#fafbfd}
+  .tool svg{width:14px;height:14px; color:var(--muted)}
+  textarea.msg{width:100%; min-height:110px; border:1px solid var(--bd); border-radius:11px; padding:13px; font-size:14.5px; font-family:inherit; line-height:1.5; resize:vertical; outline:none; transition:border-color .15s}
+  textarea.msg:focus{border-color:var(--primary)}
+  .counter{display:flex; justify-content:space-between; font-size:12px; color:var(--faint); margin-top:7px}
+  .counter b{color:var(--muted); font-weight:600}
+
+  /* preview bubble */
+  .preview{margin-top:14px}
+  .phone{background:#f6f8fb; border:1px solid var(--bd2); border-radius:14px; padding:16px 14px}
+  .phone-label{font-size:11px; color:var(--faint); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; display:flex; align-items:center; gap:6px}
+  .bubble{background:#fff; border:1px solid var(--bd); border-radius:4px 16px 16px 16px; padding:11px 14px; font-size:14px; max-width:82%; box-shadow:0 1px 2px rgba(20,20,50,.05); white-space:pre-wrap}
+  .bubble .stop{display:block; color:var(--faint); font-size:12px; margin-top:6px}
+
+  /* popover picker */
+  .pop{position:absolute; top:calc(100% + 8px); left:0; z-index:40; background:#fff; border:1px solid var(--bd); border-radius:12px; box-shadow:var(--shadow); padding:6px; min-width:220px; display:none}
+  .pop.on{display:block}
+  .pop-item{display:flex; flex-direction:column; gap:2px; padding:9px 11px; border-radius:8px; cursor:pointer; transition:.12s}
+  .pop-item:hover{background:#f4f6fb}
+  .pop-item .t{font-size:13.5px; font-weight:600; color:var(--ink)}
+  .pop-item .s{font-size:12px; color:var(--muted); white-space:normal}
+
+  /* recipients */
+  .rcp-btn{width:100%; text-align:left; background:#fff; border:1px solid var(--bd); border-radius:11px; padding:14px 15px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:.15s; font-family:inherit}
+  .rcp-btn:hover{border-color:#cfd6e4}
+  .rcp-btn.open{border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .rcp-main{display:flex; align-items:center; gap:12px}
+  .rcp-ico{width:38px;height:38px;border-radius:10px;background:#eef4ff;color:var(--primary);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .rcp-ico svg{width:19px;height:19px}
+  .rcp-txt .t{font-size:14.5px; font-weight:600; color:var(--ink)}
+  .rcp-txt .s{font-size:12.5px; color:var(--muted)}
+  .chev{width:18px;height:18px;color:var(--faint); transition:transform .18s}
+  .rcp-btn.open .chev{transform:rotate(180deg)}
+  .rcp-list{margin-top:8px; border:1px solid var(--bd); border-radius:12px; overflow:hidden; display:none}
+  .rcp-list.on{display:block}
+  .rcp-grp-h{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); padding:11px 15px 5px; background:#fafbfd}
+  .rcp-opt{display:flex; align-items:center; justify-content:space-between; padding:11px 15px; cursor:pointer; border-top:1px solid var(--bd2); transition:.12s}
+  .rcp-opt:hover{background:#f4f6fb}
+  .rcp-opt .l{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text)}
+  .rcp-opt .l svg{width:16px;height:16px;color:var(--muted)}
+  .rcp-opt .cnt{font-size:12.5px; color:var(--muted); font-weight:600}
+  .rcp-opt.sel{background:#eef4ff}
+  .rcp-opt.sel .l{color:var(--primary); font-weight:600}
+
+  /* drip / sequence */
+  .step{border:1px solid var(--bd); border-radius:12px; padding:14px; margin-bottom:12px; position:relative}
+  .step-h{display:flex; align-items:center; justify-content:space-between; margin-bottom:9px}
+  .step-badge{font-size:12px; font-weight:700; color:#fff; background:var(--primary); border-radius:99px; padding:3px 11px}
+  .step-del{border:none; background:none; color:var(--faint); cursor:pointer; font-size:12px; display:flex;align-items:center;gap:4px}
+  .step-del:hover{color:#dc2626}
+  .step-del svg{width:13px;height:13px}
+  .wait{display:flex;align-items:center;gap:8px; font-size:12.5px; color:var(--muted); margin:2px 0 12px}
+  .wait svg{width:15px;height:15px;color:var(--faint)}
+  .wait input{width:52px; border:1px solid var(--bd); border-radius:8px; padding:5px 8px; font-family:inherit; font-size:13px; text-align:center}
+  .wait select{border:1px solid var(--bd); border-radius:8px; padding:5px 8px; font-family:inherit; font-size:13px; background:#fff}
+  textarea.step-msg{width:100%; min-height:72px; border:1px solid var(--bd); border-radius:9px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none}
+  textarea.step-msg:focus{border-color:var(--primary)}
+  .add-step{width:100%; border:1.5px dashed var(--bd); background:#fafbfd; color:var(--primary); border-radius:11px; padding:11px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; display:flex;align-items:center;justify-content:center;gap:7px; transition:.15s}
+  .add-step:hover{border-color:var(--primary); background:#f4f8ff}
+  .add-step svg{width:15px;height:15px}
+
+  /* more options */
+  .more{background:#fff; border:1px solid var(--bd); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px}
+  .more-btn{width:100%; background:none; border:none; font-family:inherit; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; text-align:left}
+  .more-btn:hover{background:#fafbfd}
+  .more-btn .lt{display:flex;flex-direction:column;gap:2px}
+  .more-btn .lt .a{font-size:14.5px; font-weight:600; color:var(--ink)}
+  .more-btn .lt .b{font-size:12.5px; color:var(--muted)}
+  .more-btn .chev{width:20px;height:20px}
+  .more-body{padding:4px 20px 8px; border-top:1px solid var(--bd2); display:none}
+  .more.on .more-body{display:block}
+  .opt-row{padding:15px 0; border-bottom:1px solid var(--bd2)}
+  .opt-row:last-child{border-bottom:none}
+  .opt-top{display:flex; align-items:center; justify-content:space-between}
+  .opt-name{font-size:14px; font-weight:600; color:var(--ink)}
+  .opt-sub{font-size:12.5px; color:var(--muted); margin-top:2px}
+  .opt-extra{margin-top:12px; display:none}
+  .opt-extra.on{display:block}
+
+  /* toggle */
+  .sw{position:relative; width:42px; height:24px; flex:0 0 auto; cursor:pointer}
+  .sw input{opacity:0; width:0; height:0; position:absolute}
+  .sw .track{position:absolute; inset:0; background:#d5dae6; border-radius:99px; transition:.2s}
+  .sw .knob{position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw input:checked + .track{background:var(--primary)}
+  .sw input:checked + .track + .knob{transform:translateX(18px)}
+
+  input.txt, select.txt{border:1px solid var(--bd); border-radius:9px; padding:9px 11px; font-size:14px; font-family:inherit; background:#fff; outline:none}
+  input.txt:focus, select.txt:focus{border-color:var(--primary)}
+  textarea.ab{width:100%; min-height:70px; border:1px solid var(--bd); border-radius:9px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; outline:none}
+  textarea.ab:focus{border-color:var(--primary)}
+  .radio-set{display:flex; gap:8px; margin-top:10px}
+  .rad{flex:1; border:1px solid var(--bd); border-radius:10px; padding:11px 12px; cursor:pointer; transition:.15s}
+  .rad.on{border-color:var(--primary); background:#eef4ff}
+  .rad .rt{font-size:13.5px; font-weight:600; color:var(--ink)}
+  .rad .rs{font-size:12px; color:var(--muted); margin-top:2px}
+  .inline-fields{display:flex; gap:10px; margin-top:11px; flex-wrap:wrap}
+
+  /* footer */
+  .footer{position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); border-top:1px solid var(--bd); z-index:60}
+  .footer-in{max-width:760px; margin:0 auto; padding:14px 20px}
+  .consent{font-size:11.5px; color:var(--faint); text-align:center; margin:0 0 10px}
+  .consent a{color:var(--muted); text-decoration:underline}
+  .footer-row{display:flex; align-items:center; gap:10px}
+  .send-btn{flex:1; border:none; border-radius:12px; background:var(--primary); color:#fff; font-family:inherit; font-size:15.5px; font-weight:700; padding:14px; cursor:pointer; transition:.15s; display:flex;align-items:center;justify-content:center;gap:9px}
+  .send-btn:hover{background:var(--primary-h)}
+  .send-btn:active{transform:translateY(1px)}
+  .send-btn:disabled{opacity:.55; cursor:default; transform:none}
+  .ghost{border:1px solid var(--bd); background:#fff; color:var(--text); font-family:inherit; font-size:14px; font-weight:600; padding:14px 16px; border-radius:12px; cursor:pointer}
+  .ghost:hover{background:#f6f8fb}
+  .link-btn{background:none; border:none; color:var(--muted); font-family:inherit; font-size:13.5px; cursor:pointer; padding:14px 6px}
+  .link-btn:hover{color:var(--ink)}
+
+  /* toast + sent overlay */
+  .overlay{position:fixed; inset:0; background:rgba(15,23,42,.35); backdrop-filter:blur(3px); z-index:100; display:none; align-items:center; justify-content:center}
+  .overlay.on{display:flex}
+  .sent-card{background:#fff; border-radius:20px; padding:38px 40px; text-align:center; box-shadow:var(--shadow); max-width:360px; animation:pop .32s cubic-bezier(.2,.8,.3,1.2)}
+  @keyframes pop{from{transform:scale(.9); opacity:0} to{transform:scale(1); opacity:1}}
+  .check{width:66px;height:66px;border-radius:50%; background:#dcfce7; display:flex;align-items:center;justify-content:center; margin:0 auto 18px}
+  .check svg{width:34px;height:34px;color:#16a34a; stroke-dasharray:48; stroke-dashoffset:48; animation:draw .5s .15s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .sent-card h2{margin:0 0 6px; font-size:21px; color:var(--ink)}
+  .sent-card p{margin:0 0 22px; color:var(--muted); font-size:14px}
+  .toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; font-size:13.5px; padding:11px 18px; border-radius:99px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:.25s; z-index:120}
+  .toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  .hint{font-size:11.5px; color:var(--faint); margin-top:3px}
+  .grow-in{animation:grow .2s ease}
+  @keyframes grow{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Create SMS Blast</h1>
+
+  <!-- AI BUILDER -->
+  <div class="ai-box">
+    <div class="ai-inner">
+      <div class="ai-head">
+        <svg class="spark" viewBox="0 0 24 24" fill="none"><path d="M12 2l1.9 5.6L19.5 9.5 13.9 11.4 12 17l-1.9-5.6L4.5 9.5 10.1 7.6 12 2z" fill="url(#g)"/><defs><linearGradient id="g" x1="4" y1="2" x2="20" y2="17"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#0ea5e9"/></linearGradient></defs></svg>
+        <span class="ai-title">Build with AI</span>
+      </div>
+      <p class="ai-help">Describe your blast and we'll write the message and pick the audience.</p>
+      <div class="ai-row">
+        <input id="aiPrompt" placeholder="e.g. Invite VIP customers to Saturday's open house">
+        <button class="ai-btn" id="aiBtn">
+          <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Build it
+        </button>
+      </div>
+      <div class="ai-chips">
+        <span class="ai-chip" data-p="Invite VIP customers to Saturday's open house at 1427 Birchwood">Open house invite</span>
+        <span class="ai-chip" data-p="Follow up with new leads this week about their home search">New-lead follow-up</span>
+        <span class="ai-chip" data-p="Announce a price drop to everyone">Price-drop announcement</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">or write it yourself</div>
+
+  <!-- SEND MODE TABS -->
+  <div class="tabs" role="tablist">
+    <button class="tab on" id="tabOnce" role="tab">Send once</button>
+    <button class="tab" id="tabSeq" role="tab">Sequence</button>
+  </div>
+
+  <!-- MESSAGE CARD (single) -->
+  <div class="card" id="onceCard">
+    <label class="fld">Message</label>
+    <div class="msg-tools">
+      <button class="tool" id="mfBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 4H7a3 3 0 00-3 3v3a2 2 0 01-2 2 2 2 0 012 2v3a3 3 0 003 3h2M15 4h2a3 3 0 013 3v3a2 2 0 002 2 2 2 0 00-2 2v3a3 3 0 01-3 3h-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        {··}
+        <div class="pop" id="mfPop">
+          <div class="pop-item" data-mf="{{first_name}}"><span class="t">{{first_name}}</span><span class="s">e.g. Sarah</span></div>
+          <div class="pop-item" data-mf="{{last_name}}"><span class="t">{{last_name}}</span><span class="s">e.g. Chen</span></div>
+        </div>
+      </button>
+      <button class="tool" id="tplBtn">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 9h16M9 9v11" stroke="currentColor" stroke-width="1.7"/></svg>
+        Templates
+        <div class="pop" id="tplPop"></div>
+      </button>
+      <button class="tool" id="varBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h6l4 10h6M14 7h6M4 17h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Add variety
+        <div class="pop" id="varPop" style="min-width:260px; padding:12px">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:9px">Wrap alternatives in <b>{a|b}</b> and each contact gets a random pick — carriers see fewer identical texts.</div>
+          <button class="tool" id="varInsert" style="margin-bottom:8px">Insert {Hi|Hey|Hello} example</button>
+          <div id="varStat" style="font-size:12.5px; color:var(--primary); font-weight:600"></div>
+        </div>
+      </button>
+    </div>
+    <textarea class="msg" id="msg" placeholder="Write your text…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+    <div class="counter"><span id="charCount"></span><span id="segCount"></span></div>
+
+    <div class="preview">
+      <div class="phone">
+        <div class="phone-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none"><rect x="7" y="2" width="10" height="20" rx="2.5" stroke="#9aa1af" stroke-width="1.6"/></svg> Preview · Sarah Chen</div>
+        <div class="bubble" id="bubble"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEQUENCE CARD -->
+  <div class="card" id="seqCard" style="display:none">
+    <label class="fld">Drip sequence</label>
+    <p class="hint" style="margin:-4px 0 14px">Each step goes out after its wait. Contacts move through the steps automatically.</p>
+    <div id="steps"></div>
+    <button class="add-step" id="addStep">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Add step
+    </button>
+  </div>
+
+  <!-- RECIPIENTS -->
+  <div class="card">
+    <label class="fld">Who gets it</label>
+    <button class="rcp-btn" id="rcpBtn">
+      <span class="rcp-main">
+        <span class="rcp-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M10 10a3.5 3.5 0 100-7 3.5 3.5 0 000 7M20.5 20v-2a4 4 0 00-3-3.87M15.5 3.13A4 4 0 0116.5 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <span class="rcp-txt"><span class="t" id="rcpName">Everyone</span><span class="s" id="rcpSub">1,240 contacts</span></span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="rcp-list" id="rcpList">
+      <div class="rcp-opt sel" data-name="Everyone" data-sub="1,240 contacts" data-n="1240">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg> Everyone</span>
+        <span class="cnt">1,240</span>
+      </div>
+      <div class="rcp-grp-h">Saved segments</div>
+      <div class="rcp-opt" data-name="VIP customers" data-sub="88 contacts" data-n="88">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.9 6.3L22 9l-5 4.7L18.2 21 12 17.5 5.8 21 7 13.7 2 9l7.1-.7L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> VIP customers</span>
+        <span class="cnt">88</span>
+      </div>
+      <div class="rcp-opt" data-name="New leads this week" data-sub="210 contacts" data-n="210">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v6m0 0l3-3m-3 3L9 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> New leads this week</span>
+        <span class="cnt">210</span>
+      </div>
+      <div class="rcp-grp-h">Send again to a recent blast</div>
+      <div class="rcp-opt" data-name="Oct Promo" data-sub="340 recipients" data-n="340">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9m0 0H1m2 0l3 3m-3-3l3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Oct Promo</span>
+        <span class="cnt">340</span>
+      </div>
+      <div class="rcp-opt" data-name="Expired listings" data-sub="88 recipients" data-n="88">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9 9 0 00-9 9m0 0H1m2 0l3 3m-3-3l3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Expired listings</span>
+        <span class="cnt">88</span>
+      </div>
+      <div class="rcp-grp-h">Or build a list</div>
+      <div class="rcp-opt" data-name="Filtered contacts" data-sub="612 contacts (city, tag, status)" data-n="612">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg> Filter contacts…</span>
+        <span class="cnt"></span>
+      </div>
+      <div class="rcp-opt" data-name="Uploaded CSV" data-sub="new_list.csv · 512 numbers" data-n="512">
+        <span class="l"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 16v3a1 1 0 001 1h12a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Upload a CSV…</span>
+        <span class="cnt"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MORE OPTIONS -->
+  <div class="more" id="more">
+    <button class="more-btn" id="moreBtn">
+      <span class="lt">
+        <span class="a">More options</span>
+        <span class="b" id="moreSummary">sends now · full carrier speed · local-presence numbers · no follow-up or A/B</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="more-body">
+      <!-- A/B -->
+      <div class="opt-row">
+        <div class="opt-top">
+          <div><div class="opt-name">A/B test</div><div class="opt-sub">Split the audience between two messages, keep the winner.</div></div>
+          <label class="sw"><input type="checkbox" id="abTog"><span class="track"></span><span class="knob"></span></label>
+        </div>
+        <div class="opt-extra" id="abExtra">
+          <label class="fld" style="margin-top:6px">Variant B</label>
+          <textarea class="ab" id="abMsg" placeholder="Alternate message…">Hi {{first_name}}, quick one — we've got a private slot Sat at the 1427 Birchwood open house. Want it? Reply YES.</textarea>
+          <div class="hint">Audience is split 50/50. Send-once only.</div>
+        </div>
+      </div>
+      <!-- when -->
+      <div class="opt-row">
+        <div class="opt-top">
+          <div><div class="opt-name">When to send</div><div class="opt-sub" id="whenSub">Send now</div></div>
+        </div>
+        <div class="radio-set">
+          <div class="rad on" data-when="now"><div class="rt">Send now</div><div class="rs">Starts immediately</div></div>
+          <div class="rad" data-when="sched"><div class="rt">Schedule</div><div class="rs">Pick a date & time</div></div>
+        </div>
+        <div class="opt-extra" id="schedExtra">
+          <div class="inline-fields">
+            <input class="txt" type="date" id="schedDate">
+            <input class="txt" type="time" id="schedTime" value="09:00">
+          </div>
+          <div class="opt-top" style="margin-top:14px">
+            <div><div class="opt-name" style="font-size:13.5px">Smart send</div><div class="opt-sub">Deliver at each contact's best time in their local timezone.</div></div>
+            <label class="sw"><input type="checkbox" id="smartTog"><span class="track"></span><span class="knob"></span></label>
+          </div>
+        </div>
+      </div>
+      <!-- speed -->
+      <div class="opt-row">
+        <div class="opt-top">
+          <div><div class="opt-name">Sending speed</div><div class="opt-sub" id="speedSub">Carrier cap ~180 msg/min · finishes in ~<span id="finTime">3</span> min</div></div>
+          <label class="sw"><input type="checkbox" id="thrTog"><span class="track"></span><span class="knob"></span></label>
+        </div>
+        <div class="opt-extra" id="thrExtra">
+          <label class="fld" style="margin-top:6px">Throttle to</label>
+          <div class="inline-fields" style="align-items:center">
+            <input class="txt" type="number" id="thrRate" value="60" style="width:80px"> <span style="font-size:13.5px;color:var(--muted)">msg/min</span>
+          </div>
+          <div class="hint">Slower drip looks more human and eases carrier filtering.</div>
+        </div>
+      </div>
+      <!-- follow-up -->
+      <div class="opt-row">
+        <div class="opt-top">
+          <div><div class="opt-name">Add a follow-up</div><div class="opt-sub">Auto-text anyone who doesn't reply.</div></div>
+          <label class="sw"><input type="checkbox" id="fuTog"><span class="track"></span><span class="knob"></span></label>
+        </div>
+        <div class="opt-extra" id="fuExtra">
+          <label class="fld" style="margin-top:6px">Follow-up message</label>
+          <textarea class="ab" id="fuMsg" placeholder="Follow-up text…">Hi {{first_name}}, just circling back on Saturday's open house — still want a private slot?</textarea>
+          <div class="inline-fields" style="align-items:center; margin-top:11px">
+            <span style="font-size:13.5px;color:var(--muted)">Send after</span>
+            <input class="txt" type="number" id="fuDelay" value="2" style="width:64px">
+            <select class="txt" id="fuUnit"><option>hours</option><option selected>days</option><option>weeks</option></select>
+            <span style="font-size:13.5px;color:var(--muted)">if no reply</span>
+          </div>
+        </div>
+      </div>
+      <!-- send from -->
+      <div class="opt-row">
+        <div class="opt-top">
+          <div><div class="opt-name">Send from</div><div class="opt-sub" id="fromSub">Local presence — match each contact's area code</div></div>
+        </div>
+        <div class="radio-set">
+          <div class="rad on" data-from="local"><div class="rt">Local presence</div><div class="rs">Match contact area code</div></div>
+          <div class="rad" data-from="pool"><div class="rt">Rotate number pool</div><div class="rs">Spread across your numbers</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint" style="text-align:center; margin:18px 0 0">Only contacts who opted in are messaged · STOP is honored automatically.</p>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-in">
+    <p class="consent">By sending you confirm these contacts agreed to receive texts. <a href="#" onclick="return false">Compliance</a></p>
+    <div class="footer-row">
+      <button class="link-btn" onclick="return false">Cancel</button>
+      <button class="ghost" id="draftBtn">Save as draft</button>
+      <button class="send-btn" id="sendBtn"><span id="sendLabel">Send to 1,240 people · ~$24.80</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- SENT OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="sent-card">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h2>Sent ✓</h2>
+    <p id="sentDetail">1,240 texts queued</p>
+    <button class="send-btn" id="againBtn" style="flex:none; width:100%">Create another</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  // ---- state ----
+  const state = {
+    mode:'once', n:1240, audName:'Everyone',
+    when:'now', smart:false, throttle:false, thrRate:60,
+    ab:false, followup:false, from:'local'
+  };
+  const RATE = 0.02;        // $/segment
+  const SPEED = 180;        // msg/min carrier cap
+
+  // ---- templates ----
+  const TEMPLATES = [
+    {t:'Open house invite', s:'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.'},
+    {t:'New-listing alert', s:'Hi {{first_name}}, a new home just hit the market that fits your search. Want the details? Reply YES.'},
+    {t:'Price-drop nudge', s:'Hi {{first_name}}, price just dropped on a home you looked at. Reply YES for the new number.'},
+    {t:'Check-in', s:'Hi {{first_name}}, still house-hunting? Happy to send fresh listings — just reply YES.'}
+  ];
+
+  // ---- segment / char math ----
+  function segInfo(text){
+    // strip merge tokens to approximate real length (Sarah/Chen ≈ token)
+    const rendered = text.replace(/\{\{first_name\}\}/g,'Sarah').replace(/\{\{last_name\}\}/g,'Chen')
+                         .replace(/\{([^{}|]*\|[^{}]*)\}/g, (m,g)=>g.split('|')[0]); // spintax → first
+    const chars = rendered.length;
+    const segs = Math.max(1, Math.ceil(chars/160));
+    return {chars, segs, rendered};
+  }
+
+  // ---- live message / preview / counters ----
+  const msg = $('#msg'), bubble = $('#bubble');
+  function refreshMsg(){
+    const {chars, segs, rendered} = segInfo(msg.value);
+    $('#charCount').innerHTML = '<b>'+chars+'</b> chars';
+    $('#segCount').innerHTML = '<b>'+segs+'</b> segment'+(segs>1?'s':'')+' · ~$'+(segs*RATE).toFixed(2)+' each';
+    bubble.innerHTML = escapeHtml(rendered) + '<span class="stop">Reply STOP to opt out</span>';
+    // variety detector
+    const variants = countVariants(msg.value);
+    $('#varStat').textContent = variants>1 ? '✓ '+variants+' unique variants will rotate' : '';
+    updateFooter();
+  }
+  function escapeHtml(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+  function countVariants(text){
+    const groups = text.match(/\{[^{}]*\|[^{}]*\}/g);
+    if(!groups) return 1;
+    return groups.reduce((a,g)=>a*(g.slice(1,-1).split('|').length),1);
+  }
+  msg.addEventListener('input', refreshMsg);
+
+  // ---- footer / cost / summary ----
+  function estFinish(){
+    const rate = state.throttle ? Math.max(1,state.thrRate) : SPEED;
+    return Math.max(1, Math.ceil(state.n/rate));
+  }
+  function updateFooter(){
+    const {segs} = segInfo(state.mode==='seq' ? firstStepText() : msg.value);
+    let mult = 1;
+    if(state.ab) mult += 0; // A/B still one msg per person (split), cost same
+    if(state.followup) mult += 0.4; // ~40% no-reply follow-up
+    const cost = state.n * segs * RATE * (state.followup?1.4:1);
+    const label = state.when==='sched' ? 'Schedule for '+state.n.toLocaleString()+' people · ~$'+cost.toFixed(2)
+                                       : 'Send to '+state.n.toLocaleString()+' people · ~$'+cost.toFixed(2);
+    $('#sendLabel').textContent = label;
+    // more-options summary in plain english
+    const parts = [];
+    parts.push(state.when==='sched' ? (state.smart?'smart-timed send':'scheduled') : 'sends now');
+    parts.push(state.throttle ? ('throttled '+state.thrRate+' msg/min') : 'full carrier speed');
+    parts.push(state.from==='pool' ? 'rotating number pool' : 'local-presence numbers');
+    const extras=[]; if(state.followup) extras.push('follow-up on'); if(state.ab) extras.push('A/B on');
+    parts.push(extras.length ? extras.join(' & ') : 'no follow-up or A/B');
+    $('#moreSummary').textContent = parts.join(' · ');
+    $('#finTime').textContent = estFinish();
+  }
+
+  // ---- AI builder ----
+  const aiBtn = $('#aiBtn'), aiPrompt = $('#aiPrompt');
+  $$('.ai-chip').forEach(c=>c.addEventListener('click',()=>{aiPrompt.value=c.dataset.p; aiBtn.click();}));
+  aiBtn.addEventListener('click', ()=>{
+    const p = (aiPrompt.value||'').toLowerCase();
+    aiBtn.classList.add('thinking'); aiBtn.textContent='Building…';
+    setTimeout(()=>{
+      aiBtn.classList.remove('thinking');
+      aiBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Build it';
+      // pick message + audience by keyword
+      let text, aud;
+      if(p.includes('vip')||p.includes('open house')){
+        text='Hi {{first_name}}, we\'re hosting a private open house Sat 2pm at 1427 Birchwood, just for our VIPs. Want a slot? Reply YES.';
+        aud=$$('.rcp-opt').find(o=>o.dataset.name==='VIP customers');
+      } else if(p.includes('new lead')||p.includes('follow')||p.includes('search')){
+        text='Hi {{first_name}}, thanks for reaching out about your home search! Want me to send a few listings that fit? Reply YES.';
+        aud=$$('.rcp-opt').find(o=>o.dataset.name==='New leads this week');
+      } else if(p.includes('price')){
+        text='Hi {{first_name}}, prices just dropped on homes in your area — reply YES and I\'ll send the updated numbers.';
+        aud=$$('.rcp-opt').find(o=>o.dataset.name==='Everyone');
+      } else {
+        text='Hi {{first_name}}, '+ (aiPrompt.value||'quick update') +' — reply YES to learn more.';
+        aud=$$('.rcp-opt').find(o=>o.dataset.name==='Everyone');
+      }
+      if(state.mode==='seq'){ switchMode('once'); }
+      msg.value=text; refreshMsg();
+      if(aud) selectAud(aud);
+      msg.classList.add('grow-in'); setTimeout(()=>msg.classList.remove('grow-in'),250);
+      toast('AI filled your message and audience');
+    }, 750);
+  });
+
+  // ---- popovers (merge / templates / variety) ----
+  function wirePop(btnId, popId){
+    const btn=$(btnId), pop=$(popId);
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const open = pop.classList.contains('on');
+      closeAllPops();
+      if(!open) pop.classList.add('on');
+    });
+    pop.addEventListener('click', e=>e.stopPropagation());
+  }
+  function closeAllPops(){ $$('.pop').forEach(p=>p.classList.remove('on')); }
+  document.addEventListener('click', closeAllPops);
+
+  // merge fields
+  wirePop('#mfBtn','#mfPop');
+  $$('#mfPop .pop-item').forEach(it=>it.addEventListener('click',()=>{insertAtCursor(msg, it.dataset.mf); closeAllPops();}));
+  // templates
+  const tplPop=$('#tplPop');
+  TEMPLATES.forEach(t=>{
+    const el=document.createElement('div'); el.className='pop-item';
+    el.innerHTML='<span class="t">'+t.t+'</span><span class="s">'+escapeHtml(t.s.slice(0,46))+'…</span>';
+    el.addEventListener('click',()=>{msg.value=t.s; refreshMsg(); closeAllPops(); toast('Template applied');});
+    tplPop.appendChild(el);
+  });
+  wirePop('#tplBtn','#tplPop');
+  // variety
+  wirePop('#varBtn','#varPop');
+  $('#varInsert').addEventListener('click',e=>{
+    e.stopPropagation();
+    const cur=msg.value;
+    if(/\{Hi\|Hey\|Hello\}/.test(cur)){ toast('Variety already added'); return; }
+    msg.value = cur.replace(/^Hi /,'{Hi|Hey|Hello} ');
+    if(!/\{Hi\|Hey\|Hello\}/.test(msg.value)) msg.value='{Hi|Hey|Hello} '+cur;
+    refreshMsg();
+  });
+
+  function insertAtCursor(ta, txt){
+    const s=ta.selectionStart, e=ta.selectionEnd;
+    ta.value = ta.value.slice(0,s)+txt+ta.value.slice(e);
+    ta.focus(); ta.selectionStart=ta.selectionEnd=s+txt.length;
+    refreshMsg();
+  }
+
+  // ---- send-mode tabs ----
+  function switchMode(m){
+    state.mode=m;
+    $('#tabOnce').classList.toggle('on', m==='once');
+    $('#tabSeq').classList.toggle('on', m==='seq');
+    $('#onceCard').style.display = m==='once'?'':'none';
+    $('#seqCard').style.display  = m==='seq'?'':'none';
+    // A/B is send-once only
+    if(m==='seq' && state.ab){ $('#abTog').checked=false; state.ab=false; $('#abExtra').classList.remove('on'); }
+    updateFooter();
+  }
+  $('#tabOnce').addEventListener('click',()=>switchMode('once'));
+  $('#tabSeq').addEventListener('click',()=>switchMode('seq'));
+
+  // ---- drip sequence builder ----
+  const stepsEl=$('#steps'); let stepId=0;
+  function firstStepText(){ const t=stepsEl.querySelector('.step-msg'); return t?t.value:msg.value; }
+  function addStep(defaultMsg, wait){
+    stepId++; const idx = stepsEl.children.length+1;
+    const el=document.createElement('div'); el.className='step grow-in';
+    el.innerHTML =
+      '<div class="step-h"><span class="step-badge">Step '+idx+'</span>'+
+        (idx>1?'<button class="step-del"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Remove</button>':'')+
+      '</div>'+
+      (idx>1?'<div class="wait"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Wait <input type="number" value="'+(wait||2)+'" min="1"> <select><option>hours</option><option selected>days</option><option>weeks</option></select> then send</div>':'')+
+      '<textarea class="step-msg" placeholder="Message for this step…">'+(defaultMsg||'')+'</textarea>';
+    stepsEl.appendChild(el);
+    const del=el.querySelector('.step-del');
+    if(del) del.addEventListener('click',()=>{el.remove(); renumber();});
+    el.querySelector('.step-msg').addEventListener('input', updateFooter);
+    setTimeout(()=>el.classList.remove('grow-in'),250);
+  }
+  function renumber(){ $$('#steps .step .step-badge').forEach((b,i)=>b.textContent='Step '+(i+1)); }
+  $('#addStep').addEventListener('click',()=>addStep('',2));
+  addStep('Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.');
+  addStep('Hi {{first_name}}, just circling back — a couple private slots are still open Saturday. Want one?',2);
+
+  // ---- recipients ----
+  const rcpBtn=$('#rcpBtn'), rcpList=$('#rcpList');
+  rcpBtn.addEventListener('click',()=>{
+    const open=rcpList.classList.toggle('on');
+    rcpBtn.classList.toggle('open', open);
+  });
+  function selectAud(opt){
+    $$('.rcp-opt').forEach(o=>o.classList.remove('sel'));
+    opt.classList.add('sel');
+    state.n = parseInt(opt.dataset.n,10);
+    state.audName = opt.dataset.name;
+    $('#rcpName').textContent = opt.dataset.name;
+    $('#rcpSub').textContent = opt.dataset.sub;
+    rcpList.classList.remove('on'); rcpBtn.classList.remove('open');
+    updateFooter();
+  }
+  $$('.rcp-opt').forEach(o=>o.addEventListener('click',()=>selectAud(o)));
+
+  // ---- more options ----
+  $('#moreBtn').addEventListener('click',()=>$('#more').classList.toggle('on'));
+  function bindTog(togId, extraId, key){
+    $(togId).addEventListener('change',e=>{
+      state[key]=e.target.checked;
+      $(extraId).classList.toggle('on', e.target.checked);
+      updateFooter();
+    });
+  }
+  bindTog('#abTog','#abExtra','ab');
+  bindTog('#thrTog','#thrExtra','throttle');
+  bindTog('#fuTog','#fuExtra','followup');
+  $('#smartTog').addEventListener('change',e=>{state.smart=e.target.checked; updateFooter();});
+  $('#thrRate').addEventListener('input',e=>{state.thrRate=parseInt(e.target.value||'1',10); updateFooter();});
+
+  // A/B guard: if sequence, disallow — reflected in switchMode
+  $('#abTog').addEventListener('change',e=>{
+    if(e.target.checked && state.mode==='seq'){
+      e.target.checked=false; state.ab=false; $('#abExtra').classList.remove('on');
+      toast('A/B is for single sends — switch to Send once');
+    }
+  });
+
+  // when radios
+  $$('.rad[data-when]').forEach(r=>r.addEventListener('click',()=>{
+    $$('.rad[data-when]').forEach(x=>x.classList.remove('on')); r.classList.add('on');
+    state.when=r.dataset.when;
+    $('#schedExtra').classList.toggle('on', state.when==='sched');
+    $('#whenSub').textContent = state.when==='sched' ? 'Scheduled' : 'Send now';
+    updateFooter();
+  }));
+  // from radios
+  $$('.rad[data-from]').forEach(r=>r.addEventListener('click',()=>{
+    $$('.rad[data-from]').forEach(x=>x.classList.remove('on')); r.classList.add('on');
+    state.from=r.dataset.from;
+    $('#fromSub').textContent = state.from==='pool' ? 'Rotate number pool' : 'Local presence — match each contact\'s area code';
+    updateFooter();
+  }));
+
+  // default schedule date = tomorrow
+  (function(){ const d=new Date(Date.now()+864e5); $('#schedDate').value=d.toISOString().slice(0,10); })();
+
+  // ---- send / draft ----
+  $('#draftBtn').addEventListener('click',()=>toast('Draft saved'));
+  $('#sendBtn').addEventListener('click',()=>{
+    const {segs} = segInfo(state.mode==='seq'?firstStepText():msg.value);
+    const cost = (state.n*segs*RATE*(state.followup?1.4:1)).toFixed(2);
+    let detail;
+    if(state.mode==='seq'){
+      const nSteps=stepsEl.children.length;
+      detail = state.n.toLocaleString()+' contacts entered a '+nSteps+'-step sequence';
+    } else if(state.when==='sched'){
+      detail = state.n.toLocaleString()+' texts scheduled · ~$'+cost;
+    } else {
+      detail = state.n.toLocaleString()+' texts queued · ~$'+cost+(state.ab?' · A/B split':'');
+    }
+    $('#sentDetail').textContent = detail;
+    $('#overlay').classList.add('on');
+  });
+  $('#againBtn').addEventListener('click',()=>{
+    $('#overlay').classList.remove('on');
+    // reset to defaults
+    msg.value='Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    aiPrompt.value='';
+    switchMode('once');
+    ['abTog','thrTog','fuTog','smartTog'].forEach(id=>{$('#'+id).checked=false;});
+    ['abExtra','thrExtra','fuExtra','schedExtra'].forEach(id=>$('#'+id).classList.remove('on'));
+    state.ab=state.throttle=state.followup=state.smart=false; state.when='now'; state.from='local';
+    $$('.rad[data-when]').forEach(x=>x.classList.toggle('on',x.dataset.when==='now'));
+    $$('.rad[data-from]').forEach(x=>x.classList.toggle('on',x.dataset.from==='local'));
+    $('#whenSub').textContent='Send now'; $('#fromSub').textContent='Local presence — match each contact\'s area code';
+    $('#more').classList.remove('on');
+    selectAud($$('.rcp-opt').find(o=>o.dataset.name==='Everyone'));
+    refreshMsg();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  // ---- toast ----
+  let toastT;
+  function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),2200); }
+
+  // ---- init ----
+  refreshMsg();
+  updateFooter();
+})();
+</script>
+</body>
+</html>
