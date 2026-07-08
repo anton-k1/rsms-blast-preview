@@ -322,9 +322,9 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       Build with AI
       <span class="ch-spacer"></span>
     </div>
-    <div style="padding:0 14px 10px;font-size:12px;color:var(--muted);line-height:1.5">Describe your campaign — Ralph writes the copy, picks the right recipients, and suggests the best time to send. You can tweak everything below.</div>
+    <div style="padding:0 14px 10px;font-size:12px;color:var(--muted);line-height:1.5">Describe your campaign and Ralph writes the copy, picks the right recipients, and suggests the best time to send. You can tweak everything below.</div>
     <div class="bm-ai-body">
-      <textarea class="bm-ai-prompt" id="aiPrompt" placeholder="Describe your campaign — e.g. &ldquo;invite my new leads to an open house Saturday 2pm and ask them to reply YES for a private slot.&rdquo;"></textarea>
+      <textarea class="bm-ai-prompt" id="aiPrompt" placeholder="Describe your campaign, e.g. &ldquo;invite my new leads to an open house Saturday 2pm and ask them to reply YES for a private slot.&rdquo;"></textarea>
       <div class="bm-ai-genrow">
         <button class="bm-ai-gen" id="aiGen" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>
@@ -353,12 +353,12 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
           <button class="blast-tool" type="button" id="tTpl" title="Templates">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Templates
           </button>
-          <button class="blast-tool blast-tool-ai" type="button" id="tVariety" title="Add variety — AI rewrites your message into {a|b|c} variants so every send differs (better deliverability)">
+          <button class="blast-tool blast-tool-ai" type="button" id="tVariety" title="Add variety. AI rewrites your message into {a|b|c} variants so every send differs, improving deliverability">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M4 10a8 8 0 0 1 14-3M20 14a8 8 0 0 1-14 3"/></svg>Add variety
           </button>
         </div>
       </div>
-      <textarea class="blast-textarea" id="msg" spellcheck="false" placeholder="Write your text message here… tap {··} to add merge fields like the recipient's first name.">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+      <textarea class="blast-textarea" id="msg" spellcheck="false" placeholder="Write your text message here… tap {··} to add merge fields like the recipient's first name.">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
       <div class="blast-counter">
         <span><b id="charCount">0</b> characters</span>
         <span><b id="segCount">1</b> segment · 160 chars/segment</span>
@@ -374,7 +374,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
             <span class="fc-drip-badge">1</span>
             <span class="fc-drip-delay">Sends immediately</span>
           </div>
-          <textarea class="blast-textarea" style="min-height:64px" placeholder="First message…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+          <textarea class="blast-textarea" style="min-height:64px" placeholder="First message…">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
         </div>
       </div>
       <button type="button" class="fc-drip-add" id="dripAdd" style="margin-top:10px">＋ Add step</button>
@@ -402,7 +402,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     </div>
     <div class="seg bm-rtabs" id="recipSeg" role="tablist" aria-label="Recipient source">
       <button type="button" class="on" data-rp="everyone">Everyone · 1,240</button>
-      <button type="button" data-rp="segments">Segments</button>
+      <button type="button" data-rp="folders">Folders</button>
       <button type="button" data-rp="recent">Recent blasts</button>
       <button type="button" data-rp="filter">Filter</button>
       <button type="button" data-rp="csv">CSV</button>
@@ -411,11 +411,14 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="bm-rpane" data-rpane="everyone">
         <div class="bm-hint">Sends to all <b>1,240</b> contacts who haven't opted out.</div>
       </div>
-      <div class="bm-rpane" data-rpane="segments" hidden>
-        <div class="bm-pick-list" id="segList">
-          <label class="bm-pick-row"><input type="checkbox" data-seg="88"><span class="bm-pick-name">VIP customers</span><span class="bm-pick-meta"><b>88</b> contacts</span></label>
-          <label class="bm-pick-row"><input type="checkbox" data-seg="210"><span class="bm-pick-name">New leads this week</span><span class="bm-pick-meta"><b>210</b> contacts</span></label>
+      <div class="bm-rpane" data-rpane="folders" hidden>
+        <div class="bm-pick-list" id="folderList">
+          <label class="bm-pick-row"><input type="checkbox" data-folder="210"><span class="bm-pick-name">Buyers</span><span class="bm-pick-meta"><b>210</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="164"><span class="bm-pick-name">Sellers</span><span class="bm-pick-meta"><b>164</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="145"><span class="bm-pick-name">Past clients</span><span class="bm-pick-meta"><b>145</b> contacts</span></label>
+          <label class="bm-pick-row"><input type="checkbox" data-folder="88"><span class="bm-pick-name">VIP customers</span><span class="bm-pick-meta"><b>88</b> contacts</span></label>
         </div>
+        <div class="bm-hint">Pick one folder or several. <b>Everyone</b> sends to all contacts.</div>
       </div>
       <div class="bm-rpane" data-rpane="recent" hidden>
         <div class="bm-pick-list" id="recentList">
@@ -428,7 +431,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
         <!-- AI filter builder -->
         <div class="fb-ai">
           <svg class="fb-ai-spark" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8 5.8 1.9-5.8 1.9L12 18.4l-1.9-5.8L4.3 10.7l5.8-1.9L12 3Z"/></svg>
-          <input type="text" id="fbAiInput" placeholder="Describe who to reach — e.g. buyers in Austin who replied in the last 30 days">
+          <input type="text" id="fbAiInput" placeholder="Describe who to reach, e.g. buyers in Austin who replied in the last 30 days">
           <button type="button" class="fb-ai-go" id="fbAiGo">Build</button>
         </div>
         <div class="fb-divider">or build it manually</div>
@@ -445,7 +448,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="bm-rpane" data-rpane="csv" hidden>
         <label class="bm-csv">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>
-          <span><b style="color:var(--ink-2)">Upload a CSV</b><br>Drop a file or click to choose — we map phone + merge columns.</span>
+          <span><b style="color:var(--ink-2)">Upload a CSV</b><br>Drop a file or click to choose. We map phone and merge columns.</span>
         </label>
       </div>
     </div>
@@ -464,7 +467,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
         <label class="fc-radio"><input type="radio" name="when" value="sched">Schedule</label>
       </div>
       <div id="schedWrap" hidden style="margin-top:10px">
-        <input class="bm-input" id="schedAt" placeholder="e.g. Sat 2:00 PM — Nov 9" style="max-width:260px">
+        <input class="bm-input" id="schedAt" placeholder="e.g. Sat 2:00 PM, Nov 9" style="max-width:260px">
       </div>
     </div>
 
@@ -510,11 +513,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
             <div id="abVariants">
               <div class="bm-ab-var" data-v="a" style="margin-bottom:10px">
                 <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-a">A</span> Variant A</div>
-                <textarea class="bm-ab-tx" id="abA">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+                <textarea class="bm-ab-tx" id="abA">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.</textarea>
               </div>
               <div class="bm-ab-var" data-v="b" style="margin-bottom:10px">
                 <div class="bm-ab-vhead"><span class="bm-ab-badge bm-ab-b">B</span> Variant B <button type="button" class="bm-ab-del" title="Remove variant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
-                <textarea class="bm-ab-tx" id="abB" placeholder="Second version…">{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm — reply YES and I'll hold a slot.</textarea>
+                <textarea class="bm-ab-tx" id="abB" placeholder="Second version…">{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm. Reply YES and I'll hold a slot.</textarea>
               </div>
             </div>
             <button type="button" class="fb-add" id="abAdd">＋ Add variant</button>
@@ -528,7 +531,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
             </div>
             <label class="fc-row" style="gap:9px;cursor:pointer">
               <span class="set-toggle"><input type="checkbox" id="abAuto" checked aria-label="Auto-optimize"><span class="set-track"></span></span>
-              <span style="font-size:12.5px;color:var(--ink-2)">Auto-optimize — keep sending the winner and retire losers automatically</span>
+              <span style="font-size:12.5px;color:var(--ink-2)">Auto-optimize by keeping the winner and retiring losers automatically</span>
             </label>
           </div>
         </div>
@@ -546,7 +549,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
               <input class="bm-input bm-input-inline" id="fuNum" type="number" min="1" value="2" style="width:64px;text-align:center">
               <div class="csel" id="fuUnit" data-default="days" data-options="hours|days|weeks" style="min-width:104px"></div>
             </div>
-            <textarea class="bm-ab-tx" placeholder="Follow-up message…">Just circling back {{first_name}} — still happy to hold a private slot Saturday if you're interested. Reply YES.</textarea>
+            <textarea class="bm-ab-tx" placeholder="Follow-up message…">Just circling back {{first_name}}, still happy to hold a private slot Saturday if you're interested. Reply YES.</textarea>
           </div>
         </div>
         <span class="set-toggle"><input type="checkbox" class="advToggle" data-adv="fu" aria-label="Follow-up"><span class="set-track"></span></span>
@@ -577,7 +580,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
             </div>
             <label class="fc-row" style="gap:9px;cursor:pointer;padding-top:2px">
               <span class="set-toggle"><input type="checkbox" id="sendEvenly" checked aria-label="Send evenly"><span class="set-track"></span></span>
-              <span style="font-size:12.5px;color:var(--ink-2)">Send evenly — spread the batch across the window so replies don't spike all at once</span>
+              <span style="font-size:12.5px;color:var(--ink-2)">Send evenly, spreading the batch across the window so replies don't spike all at once</span>
             </label>
           </div>
         </div>
@@ -600,7 +603,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="fc-trow">
         <div class="fc-trow-main">
           <div class="fc-trow-title">Auto-stop</div>
-          <div class="fc-trow-sub">Halt the blast if any of these conditions is met — protects your sender reputation.</div>
+          <div class="fc-trow-sub">Halt the blast if any of these conditions is met, protecting your sender reputation.</div>
           <div class="fc-trow-body" data-adv="stop" hidden>
             <div id="stopConds"></div>
             <button type="button" class="fb-add" id="stopAdd">＋ Add stop condition</button>
@@ -619,7 +622,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="blast-select-wrap">
         <select class="blast-select" id="sendFrom">
           <optgroup label="Smart">
-            <option value="local">Local presence — match area code</option>
+            <option value="local">Local presence (matches area code)</option>
             <option value="rotate">Rotate pool</option>
           </optgroup>
           <optgroup label="Your numbers">
@@ -630,7 +633,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
         </select>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </div>
-      <div class="bm-hint" style="margin-top:6px" id="sendFromHint">Auto-matches each contact's area code from your pool — local numbers get ~3× more replies.</div>
+      <div class="bm-hint" style="margin-top:6px" id="sendFromHint">Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.</div>
     </div>
     <div class="blast-compliance" style="margin-top:4px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -780,24 +783,24 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   }
   $('tMerge').addEventListener('click', function(){ insertAtCursor('{{first_name}}'); });
   $('tTpl').addEventListener('click', function(){
-    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.';
     renderCount();
   });
   $('tVariety').addEventListener('click', function(){
     if(!msg.value.trim()) return;
-    msg.value = '{Hi|Hey|Hello} {{first_name}}, {open house|private showing} Sat 2pm at 1427 Birchwood — reply YES {for a private slot|to reserve a time}.';
+    msg.value = '{Hi|Hey|Hello} {{first_name}}, {open house|private showing} Sat 2pm at 1427 Birchwood. Reply YES {for a private slot|to reserve a time}.';
     renderCount();
   });
 
   /* ---------- AI build (does more than draft) ---------- */
   $('aiGen').addEventListener('click', function(){
-    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.';
+    msg.value = 'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.';
     renderCount();
-    // AI also picks recipients + timing (demo): switch to Segments, check "New leads this week"
-    var segBtn = document.querySelector('#recipSeg button[data-rp="segments"]');
-    if(segBtn) segBtn.click();
-    var newLeads = document.querySelector('#segList input[data-seg="210"]');
-    if(newLeads && !newLeads.checked){ newLeads.checked = true; recompute(); }
+    // AI also picks recipients and timing (demo): switch to Folders, check "Buyers"
+    var folderBtn = document.querySelector('#recipSeg button[data-rp="folders"]');
+    if(folderBtn) folderBtn.click();
+    var buyers = document.querySelector('#folderList input[data-folder="210"]');
+    if(buyers && !buyers.checked){ buyers.checked = true; recompute(); }
     $('msgSect').scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
@@ -831,14 +834,14 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   });
   function recompute(){
     var active = document.querySelector('#recipSeg button.on').dataset.rp, total = 0;
-    if(active === 'segments'){
-      [].forEach.call(document.querySelectorAll('#segList input:checked'), function(i){ total += +i.dataset.seg; });
+    if(active === 'folders'){
+      [].forEach.call(document.querySelectorAll('#folderList input:checked'), function(i){ total += +i.dataset.folder; });
     } else if(active === 'recent'){
       [].forEach.call(document.querySelectorAll('#recentList input:checked'), function(i){ total += +i.dataset.rc; });
     }
     setRecip(total);
   }
-  $('segList').addEventListener('change', recompute);
+  $('folderList').addEventListener('change', recompute);
   $('recentList').addEventListener('change', recompute);
 
   /* ---------- filter builder (CRM-parity) ---------- */
@@ -921,9 +924,9 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   });
   $('abAiWrite').addEventListener('click', function(){
     var samples = [
-      'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.',
-      "{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm — reply YES and I'll hold a slot.",
-      'Quick one {{first_name}} — 1427 Birchwood is open Sat 2pm. Reply YES and I\'ll save you a time before it books up.',
+      'Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood. Reply YES for a private slot.',
+      "{{first_name}}, want a private tour of 1427 Birchwood? Open house is Sat 2pm. Reply YES and I'll hold a slot.",
+      'Quick one {{first_name}}, 1427 Birchwood is open Sat 2pm. Reply YES and I\'ll save you a time before it books up.',
       'Open house this Sat, {{first_name}}! 1427 Birchwood, 2pm. Reply YES for first pick of private slots.'
     ];
     [].forEach.call($('abVariants').querySelectorAll('.bm-ab-tx'), function(tx, i){ tx.value = samples[i] || samples[0]; });
@@ -953,7 +956,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   /* ---------- send from hint ---------- */
   $('sendFrom').addEventListener('change', function(){
     var hints = {
-      local: "Auto-matches each contact's area code from your pool — local numbers get ~3× more replies.",
+      local: "Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.",
       rotate: "Cycles through every number in your pool to spread volume and protect reputation."
     };
     $('sendFromHint').textContent = hints[this.value] || 'All messages send from this single number.';
