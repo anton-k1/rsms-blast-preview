@@ -236,7 +236,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 .hb-preview{border-left:1px solid var(--hairline);background:var(--bg-soft);padding:22px 20px}
 .hb-preview-inner{position:sticky;top:0}
 .hb-preview-lbl{font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--faint);text-transform:uppercase;text-align:center;margin-bottom:12px}
-.hb-preview-note{font-size:11px;color:var(--faint);text-align:center;margin-top:12px;line-height:1.5}
+.hb-preview-note{font-size:11px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.5}
+.hb-sum{margin-top:16px;border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--card);overflow:hidden}
+.hb-sum-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;font-size:12.5px;color:var(--muted)}
+.hb-sum-row + .hb-sum-row{border-top:1px solid var(--hairline)}
+.hb-sum-row b{color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
 @media(max-width:840px){.hb-body{grid-template-columns:1fr}.hb-preview{border-left:0;border-top:1px solid var(--hairline)}.hb-preview-inner{position:static}}
 .hb-ai{border:1.5px solid var(--accent);background:linear-gradient(180deg,var(--accent-tint),#fff 72%);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:10px}
 .hb-ai-desc{font-size:12.5px;color:var(--ink-2);line-height:1.5}
@@ -586,6 +590,12 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
           </div>
         </div>
         <div class="hb-preview-note">This is what a recipient sees. Merge fields fill in per contact.</div>
+        <div class="hb-sum">
+          <div class="hb-sum-row"><span>To</span><b id="sumTo">1,240 contacts</b></div>
+          <div class="hb-sum-row"><span>When</span><b id="sumWhen">Send now</b></div>
+          <div class="hb-sum-row"><span>From</span><b id="sumFrom">Local presence</b></div>
+          <div class="hb-sum-row"><span>Length</span><b id="sumLen">1 segment</b></div>
+        </div>
       </div>
     </div>
   </div><!-- /hb-body -->
@@ -638,9 +648,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     var raw = msg.value || '';
     var filled = raw.replace(/\{\{\s*first_name\s*\}\}/gi, SAMPLE_FIRST).replace(/\{\{\s*last_name\s*\}\}/gi, 'Chen');
     $('charCount').textContent = filled.length;
-    $('segCount').textContent = segs(filled.length);
+    var sg = segs(filled.length);
+    $('segCount').textContent = sg;
     var html = esc(raw).replace(/\{\{\s*first_name\s*\}\}/gi, '<span class="blast-mf">' + SAMPLE_FIRST + '</span>').replace(/\{\{\s*last_name\s*\}\}/gi, '<span class="blast-mf">Chen</span>');
     var pv = $('pvBody'); if(pv) pv.innerHTML = html || '<span style="opacity:.55">Your message preview…</span>';
+    if($('sumLen')) $('sumLen').textContent = sg + (sg === 1 ? ' segment' : ' segments');
   }
   msg.addEventListener('input', renderCount);
   renderCount();
@@ -676,7 +688,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 
   /* ---------- recipients ---------- */
   var recipCount = 1240;
-  function setRecip(n){ recipCount = n; $('recipCount').textContent = fmt(n); $('footCount').textContent = fmt(n); }
+  function setRecip(n){ recipCount = n; $('recipCount').textContent = fmt(n); $('footCount').textContent = fmt(n); if($('sumTo')) $('sumTo').textContent = fmt(n) + ' contacts'; }
   setRecip(1240);
   $('recipSeg').addEventListener('click', function(e){
     var b = e.target.closest('button'); if(!b) return;
@@ -766,7 +778,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   $('fbAiGo').addEventListener('click', function(){ cfbConds = [ { field:'status', op:'is any of', value:['New'] }, { field:'lastactivity', op:'less than', value:'30' } ]; cfbMatch = 'and'; cfbRender(); });
 
   /* ---------- calendar ---------- */
-  $('schedAt').addEventListener('click', function(){ openCalendar(this, true); });
+  $('schedAt').addEventListener('click', function(){ openCalendar(this, true, function(v){ $('sumWhen').textContent = v; }); });
   function openCalendar(input, withTime, onPick){
     var ex = document.querySelector('.cal-pop'); if(ex) ex.remove();
     var MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -792,7 +804,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   }
 
   /* ---------- when radios ---------- */
-  $('whenRadios').addEventListener('change', function(e){ [].forEach.call(this.querySelectorAll('.fc-radio'), function(l){ l.classList.remove('on'); }); e.target.closest('.fc-radio').classList.add('on'); $('schedWrap').hidden = e.target.value !== 'sched'; });
+  $('whenRadios').addEventListener('change', function(e){ [].forEach.call(this.querySelectorAll('.fc-radio'), function(l){ l.classList.remove('on'); }); e.target.closest('.fc-radio').classList.add('on'); var sched = e.target.value === 'sched'; $('schedWrap').hidden = !sched; $('sumWhen').textContent = sched ? ($('schedAt').value || 'Scheduled') : 'Send now'; });
 
   /* ---------- speed slider ---------- */
   $('speed').addEventListener('input', function(){ $('speedVal').textContent = this.value; });
@@ -833,7 +845,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   if(abAutoT) abAutoT.addEventListener('change', function(){ abRevalRow.hidden = !this.checked; });
 
   /* ---------- send from hint ---------- */
-  $('sendFrom').addEventListener('change', function(){ var hints = { local: "Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.", rotate: "Cycles through every number in your pool to spread volume and protect reputation." }; $('sendFromHint').textContent = hints[this.value] || 'All messages send from this single number.'; });
+  $('sendFrom').addEventListener('change', function(){ var hints = { local: "Auto-matches each contact's area code from your pool. Local numbers get about 3× more replies.", rotate: "Cycles through every number in your pool to spread volume and protect reputation." }; $('sendFromHint').textContent = hints[this.value] || 'All messages send from this single number.'; var lbl = this.value === 'local' ? 'Local presence' : (this.value === 'rotate' ? 'Rotate pool' : this.options[this.selectedIndex].text.split(' · ')[0]); $('sumFrom').textContent = lbl; });
 
   /* ---------- footer ---------- */
   $('draftBtn').addEventListener('click', function(){ var old = this.textContent; this.textContent = 'Saved ✓'; var self = this; setTimeout(function(){ self.textContent = old; }, 1400); });
