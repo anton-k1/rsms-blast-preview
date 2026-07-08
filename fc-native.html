@@ -244,7 +244,13 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 .fc-drip-add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:var(--card);border:1px dashed var(--hairline-strong);border-radius:var(--r-sm);cursor:pointer}
 .fc-drip-add:hover{border-color:var(--accent);background:var(--accent-tint)}
 
-/* opt-out surfacing (preview removed) */
+/* compact live preview (single bubble, no phone frame) */
+.fc-preview{display:flex;flex-direction:column;align-items:flex-end;margin-top:12px}
+.blast-bubble{max-width:82%;background:var(--accent);border-radius:16px;border-bottom-right-radius:5px;padding:9px 12px;font-size:13px;line-height:1.5;color:#fff;box-shadow:var(--shadow-sm);white-space:pre-wrap;word-break:break-word}
+.blast-bubble .blast-mf{background:rgba(255,255,255,.24);color:#fff;font-weight:600;border-radius:4px;padding:0 3px}
+.blast-bubble .blast-stop{display:block;margin-top:6px;color:rgba(255,255,255,.72);font-size:11.5px}
+
+/* opt-out surfacing */
 .fc-optout{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
 .fc-optout-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);background:var(--bg-soft);border:1px dashed var(--hairline-strong);border-radius:6px;padding:4px 9px;font-weight:600}
 .fc-optout-chip svg{width:12px;height:12px;stroke:var(--green)}
@@ -362,6 +368,9 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
       <div class="blast-counter">
         <span><b id="charCount">0</b> characters</span>
         <span><b id="segCount">1</b> segment · 160 chars/segment</span>
+      </div>
+      <div class="fc-preview">
+        <div class="blast-bubble"><span id="pvBody"></span><span class="blast-stop" id="pvStop">Reply STOP to opt out</span></div>
       </div>
     </div>
 
@@ -733,11 +742,16 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 
   /* ---------- live message: char/segment count ---------- */
   function segs(len){ if(len <= 160) return 1; return Math.ceil(len / 153); }
+  function esc(s){ return s.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
   function renderCount(){
     var raw = msg.value || '';
     var filled = raw.replace(/\{\{\s*first_name\s*\}\}/gi, SAMPLE_FIRST).replace(/\{\{\s*last_name\s*\}\}/gi, 'Chen');
     $('charCount').textContent = filled.length;
     $('segCount').textContent = segs(filled.length);
+    var html = esc(raw)
+      .replace(/\{\{\s*first_name\s*\}\}/gi, '<span class="blast-mf">' + SAMPLE_FIRST + '</span>')
+      .replace(/\{\{\s*last_name\s*\}\}/gi, '<span class="blast-mf">Chen</span>');
+    $('pvBody').innerHTML = html || '<span style="opacity:.6">Your message preview…</span>';
   }
   msg.addEventListener('input', renderCount);
   renderCount();
@@ -809,7 +823,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     e.preventDefault();
     var cur = $('optoutText').textContent;
     var next = prompt('Opt-out text appended to every message (set in Settings):', cur);
-    if(next && next.trim()) $('optoutText').textContent = next.trim();
+    if(next && next.trim()){ $('optoutText').textContent = next.trim(); $('pvStop').textContent = next.trim(); }
   });
 
   /* ---------- recipients ---------- */
