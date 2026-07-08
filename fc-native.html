@@ -327,6 +327,11 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
 .cal-time .bm-input{height:32px;width:104px}
 .cal-done{margin-left:auto;height:30px;padding:0 14px;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px}
 
+/* one-box: single card, sections divided by hairlines */
+.ob-card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:6px}
+.ob-card > *{border:0!important;border-radius:0!important;box-shadow:none!important;margin-bottom:0!important}
+.ob-card .bm-ai{overflow:visible}
+
 /* sticky footer */
 .fc-foot{position:sticky;bottom:0;left:0;right:0;z-index:20;margin-top:6px;background:rgba(252,252,253,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--hairline);padding:12px 16px}
 .fc-foot-inner{max-width:672px;margin:0 auto;display:flex;align-items:center;gap:10px}
@@ -351,6 +356,8 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
   <div class="fc-head">
     <div class="fc-title">New SMS Blast</div>
   </div>
+
+  <div class="ob-card">
 
   <!-- 1. Build with AI (does the whole blast, not just the copy) -->
   <div class="card bm-ai" style="margin-bottom:14px">
@@ -678,6 +685,7 @@ textarea.bm-ab-tx:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0
     </div>
   </div>
 
+  </div>
 </div>
 
 <!-- 7. Sticky footer -->
