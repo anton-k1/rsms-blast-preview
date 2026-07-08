@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadySMS · Blast Composer</title>
+<style>
+  :root{
+    --primary:#2563eb; --primary-h:#1d4ed8;
+    --ink:#0f172a; --muted:#6b7280; --faint:#9aa1af;
+    --bd:#e5e7ef; --bd2:#eef0f4;
+    --page:#eef1f5; --card:#fff;
+    --ai:linear-gradient(135deg,#2563eb,#0ea5e9);
+    --shadow:0 12px 40px rgba(20,20,50,.14);
+    --r-card:16px; --r-in:11px; --r-pill:99px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--page); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+    padding-bottom:88px;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+  svg{display:block}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    background:var(--card); border-bottom:1px solid var(--bd);
+    padding:14px 20px; display:flex; align-items:center; gap:12px;
+    position:sticky; top:0; z-index:20;
+  }
+  .logo{width:30px;height:30px;border-radius:9px;background:var(--ai);
+    display:grid;place-items:center;color:#fff;flex:0 0 auto}
+  .topbar h1{font-size:16px;font-weight:700;letter-spacing:-.2px}
+  .topbar .sub{font-size:12px;color:var(--muted);font-weight:400}
+  .topbar .spacer{flex:1}
+  .chip{font-size:12px;color:var(--muted);background:var(--bd2);
+    border:1px solid var(--bd);padding:5px 11px;border-radius:var(--r-pill);
+    display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .chip b{color:var(--ink);font-weight:600}
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    max-width:1180px; margin:0 auto; padding:20px;
+    display:grid; grid-template-columns:minmax(0,1fr) 372px; gap:20px;
+    align-items:start;
+  }
+  @media(max-width:900px){
+    .shell{grid-template-columns:minmax(0,1fr);}
+  }
+  .col{min-width:0} /* prevents grid blowout */
+
+  .card{background:var(--card);border:1px solid var(--bd);
+    border-radius:var(--r-card);box-shadow:var(--shadow);}
+  .pad{padding:18px}
+  .stack>*+*{margin-top:16px}
+
+  .sec-label{font-size:11px;font-weight:700;letter-spacing:.6px;
+    text-transform:uppercase;color:var(--faint);margin-bottom:10px;display:block}
+
+  /* ---------- Build with AI ---------- */
+  .ai-box{border:1px solid var(--bd);border-radius:var(--r-card);
+    background:linear-gradient(180deg,#f5f9ff,#fff);overflow:hidden}
+  .ai-head{display:flex;align-items:center;gap:9px;padding:14px 16px 4px}
+  .ai-badge{width:26px;height:26px;border-radius:8px;background:var(--ai);
+    display:grid;place-items:center;color:#fff;flex:0 0 auto}
+  .ai-head b{font-size:14px}
+  .ai-head span{font-size:12px;color:var(--muted)}
+  .ai-body{padding:6px 16px 16px}
+  .ai-row{display:flex;gap:8px;flex-wrap:wrap}
+  .ai-input{flex:1;min-width:180px;border:1px solid var(--bd);border-radius:var(--r-in);
+    padding:11px 12px;font-size:14px;background:#fff}
+  .ai-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .btn-ai{background:var(--ai);color:#fff;padding:0 16px;border-radius:var(--r-in);
+    font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;
+    white-space:nowrap;min-height:44px}
+  .btn-ai:active{transform:translateY(1px)}
+  .ai-sugg{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .ai-sugg button{font-size:12px;color:var(--primary);background:#eaf1ff;
+    border:1px solid #d6e4ff;padding:6px 11px;border-radius:var(--r-pill)}
+  .ai-sugg button:hover{background:#dfeaff}
+
+  /* ---------- mode toggle (Send once / Sequence) ---------- */
+  .segmented{display:inline-flex;background:var(--bd2);border:1px solid var(--bd);
+    border-radius:var(--r-pill);padding:3px;gap:2px}
+  .segmented button{padding:7px 15px;border-radius:var(--r-pill);font-size:13px;
+    font-weight:600;color:var(--muted)}
+  .segmented button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+  /* ---------- message editor ---------- */
+  .editor-head{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .tools{display:flex;gap:6px;flex-wrap:wrap}
+  .tbtn{font-size:12.5px;font-weight:600;color:var(--ink);background:#fff;
+    border:1px solid var(--bd);padding:6px 10px;border-radius:9px;
+    display:flex;align-items:center;gap:5px}
+  .tbtn:hover{background:var(--bd2)}
+  .tbtn svg{color:var(--muted)}
+  textarea.msg{width:100%;min-height:118px;border:1px solid var(--bd);
+    border-radius:var(--r-in);padding:13px;font-size:15px;line-height:1.5;
+    resize:vertical;background:#fff}
+  textarea.msg:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    font-size:12px;color:var(--muted);margin-top:9px}
+  .meta b{color:var(--ink)}
+  .variety-note{font-size:12px;color:#0369a1;background:#e0f2fe;
+    border:1px solid #bae6fd;padding:7px 11px;border-radius:9px;margin-top:9px;display:none}
+  .variety-note.show{display:block}
+
+  /* variant B */
+  .variantB{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--bd)}
+  .variantB.show{display:block}
+  .variantB .sec-label{color:var(--primary)}
+
+  /* ---------- merge / template picker popover ---------- */
+  .pop{position:absolute;z-index:40;background:#fff;border:1px solid var(--bd);
+    border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:200px;display:none}
+  .pop.show{display:block}
+  .pop button{display:block;width:100%;text-align:left;padding:9px 11px;
+    border-radius:8px;font-size:13px}
+  .pop button:hover{background:var(--bd2)}
+  .pop button small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+  .pop-wrap{position:relative;display:inline-block}
+
+  /* ---------- phone preview ---------- */
+  .preview-wrap{display:flex;justify-content:center;padding-top:4px}
+  .phone{width:236px;background:#0f172a;border-radius:30px;padding:9px;
+    box-shadow:0 16px 40px rgba(15,23,42,.28)}
+  .phone-screen{background:#eef2f7;border-radius:23px;overflow:hidden}
+  .phone-top{background:#fff;padding:11px 14px;border-bottom:1px solid #e6eaf0;
+    display:flex;align-items:center;gap:9px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--ai);
+    display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .phone-top .nm{font-size:13px;font-weight:600}
+  .phone-top .st{font-size:10.5px;color:var(--muted)}
+  .phone-body{padding:14px 12px;min-height:190px}
+  .bubble{background:#fff;border:1px solid #e6eaf0;border-radius:16px 16px 16px 4px;
+    padding:9px 12px;font-size:13px;line-height:1.5;color:var(--ink);
+    max-width:90%;box-shadow:0 1px 2px rgba(0,0,0,.04);word-wrap:break-word}
+  .bubble.stop{margin-top:8px;color:var(--muted);font-size:11.5px}
+  .phone-time{font-size:10px;color:var(--faint);text-align:center;margin-bottom:8px}
+
+  /* ---------- SEQUENCE builder ---------- */
+  .seq{display:none;margin-top:14px}
+  .seq.show{display:block}
+  .step{border:1px solid var(--bd);border-radius:var(--r-in);padding:12px;
+    background:#fbfcfe;margin-top:10px;position:relative}
+  .step-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .step-head .lbl{font-size:12px;font-weight:700;color:var(--primary)}
+  .step textarea{width:100%;min-height:56px;border:1px solid var(--bd);
+    border-radius:9px;padding:9px;font-size:13px;resize:vertical}
+  .step-wait{display:flex;align-items:center;gap:7px;font-size:12px;
+    color:var(--muted);margin-top:8px;flex-wrap:wrap}
+  .wait-in{width:64px;border:1px solid var(--bd);border-radius:8px;padding:5px 7px;font-size:13px}
+  .mini{border:1px solid var(--bd);border-radius:8px;padding:5px 7px;font-size:13px;background:#fff}
+  .x-btn{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+    color:var(--muted);border:1px solid var(--bd);background:#fff;flex:0 0 auto}
+  .x-btn:hover{color:#dc2626;border-color:#fecaca;background:#fef2f2}
+  .add-step{margin-top:10px;font-size:13px;font-weight:600;color:var(--primary);
+    border:1px dashed #b9cffb;border-radius:var(--r-in);padding:10px;width:100%;
+    display:flex;align-items:center;justify-content:center;gap:7px;background:#f5f9ff}
+  .add-step:hover{background:#eaf1ff}
+
+  /* ================= RIGHT RAIL / grouped settings ================= */
+  .rail.stack>*+*{margin-top:14px}
+  .group{background:var(--card);border:1px solid var(--bd);
+    border-radius:var(--r-card);box-shadow:var(--shadow);overflow:hidden}
+  .grp-head{padding:13px 16px;display:flex;align-items:flex-start;gap:11px}
+  .grp-ic{width:30px;height:30px;border-radius:9px;background:#eef4ff;color:var(--primary);
+    display:grid;place-items:center;flex:0 0 auto}
+  .grp-txt{flex:1;min-width:0}
+  .grp-txt .t{font-size:13.5px;font-weight:700}
+  .grp-txt .s{font-size:12px;color:var(--muted);margin-top:1px;
+    overflow:hidden;text-overflow:ellipsis}
+  .grp-body{padding:2px 16px 14px}
+
+  /* toggle-row */
+  .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--bd2)}
+  .row:first-child{border-top:none}
+  .row .rt{flex:1;min-width:0}
+  .row .rt .r-t{font-size:13px;font-weight:600}
+  .row .rt .r-s{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .row.clickable{cursor:pointer}
+  .row.clickable:hover .r-t{color:var(--primary)}
+
+  /* switch */
+  .sw{width:40px;height:23px;border-radius:99px;background:#cfd6e2;position:relative;
+    flex:0 0 auto;transition:background .18s}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .18s}
+  .sw.on{background:var(--primary)}
+  .sw.on::after{left:19px}
+
+  /* expandable body under a row */
+  .expand{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .expand.open{max-height:900px}
+  .expand-in{padding:4px 0 6px}
+
+  select.field,input.field{width:100%;border:1px solid var(--bd);border-radius:9px;
+    padding:9px 10px;font-size:13px;background:#fff}
+  select.field:focus,input.field:focus{outline:none;border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .field-lbl{font-size:11px;font-weight:600;color:var(--muted);margin:8px 0 4px;display:block}
+
+  /* radio cards */
+  .opts{display:flex;flex-direction:column;gap:7px}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--bd);
+    border-radius:10px;padding:9px 11px;cursor:pointer}
+  .opt:hover{border-color:#c7d5f5}
+  .opt.sel{border-color:var(--primary);background:#f5f9ff}
+  .radio{width:17px;height:17px;border-radius:50%;border:2px solid #cbd3e0;
+    flex:0 0 auto;margin-top:2px;position:relative}
+  .opt.sel .radio{border-color:var(--primary)}
+  .opt.sel .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--primary)}
+  .opt .o-t{font-size:13px;font-weight:600}
+  .opt .o-s{font-size:11.5px;color:var(--muted);margin-top:1px}
+
+  /* day pills */
+  .days{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+  .day{width:34px;height:32px;border-radius:8px;border:1px solid var(--bd);
+    font-size:12px;font-weight:600;color:var(--muted);background:#fff;
+    display:grid;place-items:center}
+  .day.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+  .nest{border:1px solid var(--bd2);border-radius:10px;padding:11px;background:#fbfcfe;margin-top:8px}
+  .nest .field-lbl:first-child{margin-top:0}
+
+  /* speed bar */
+  .speed{margin-top:6px}
+  .speed .val{font-size:12px;color:var(--muted)}
+  input[type=range]{width:100%;accent-color:var(--primary)}
+
+  .compliance{font-size:11.5px;color:var(--faint);line-height:1.5;
+    display:flex;gap:8px;align-items:flex-start;padding:2px}
+  .compliance svg{flex:0 0 auto;margin-top:1px;color:#94a3b8}
+
+  /* ---------- sticky send bar ---------- */
+  .sendbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;
+    border-top:1px solid var(--bd);box-shadow:0 -6px 24px rgba(20,20,50,.08);
+    padding:12px 20px}
+  .sendbar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;
+    gap:14px;flex-wrap:wrap}
+  .sb-info{flex:1;min-width:150px}
+  .sb-info .big{font-size:15px;font-weight:700}
+  .sb-info .sub{font-size:12px;color:var(--muted)}
+  .btn-send{background:var(--primary);color:#fff;padding:13px 26px;border-radius:12px;
+    font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px;
+    white-space:nowrap;min-height:48px;transition:background .15s}
+  .btn-send:hover{background:var(--primary-h)}
+  .btn-send:disabled{opacity:.7;cursor:default}
+  .btn-ghost{padding:13px 18px;border-radius:12px;font-size:14px;font-weight:600;
+    color:var(--ink);border:1px solid var(--bd);background:#fff}
+  .btn-ghost:hover{background:var(--bd2)}
+  @media(max-width:520px){
+    .btn-ghost{display:none}
+    .sendbar{padding:10px 14px}
+    .shell{padding:14px}
+  }
+
+  /* ---------- sent overlay ---------- */
+  .overlay{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.55);
+    display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  .sent-card{background:#fff;border-radius:20px;padding:34px 30px;text-align:center;
+    max-width:340px;width:100%;box-shadow:var(--shadow);animation:pop .3s ease}
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .check{width:64px;height:64px;border-radius:50%;background:#dcfce7;color:#16a34a;
+    display:grid;place-items:center;margin:0 auto 16px;animation:ring .5s ease}
+  @keyframes ring{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .sent-card h2{font-size:20px;margin-bottom:6px}
+  .sent-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px}
+  .sent-card .qbar{height:7px;border-radius:99px;background:#e5e7ef;overflow:hidden;margin-bottom:18px}
+  .sent-card .qbar i{display:block;height:100%;width:0;background:var(--ai);border-radius:99px;
+    animation:fill 1.4s ease forwards}
+  @keyframes fill{to{width:100%}}
+  .sent-card button{background:var(--primary);color:#fff;padding:11px 22px;
+    border-radius:11px;font-weight:600;font-size:14px}
+
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </div>
+  <div>
+    <h1>New SMS Blast</h1>
+    <div class="sub">Compose · target · schedule</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><b>1,240</b> contacts</div>
+</div>
+
+<div class="shell">
+  <!-- ================= LEFT: COMPOSE ================= -->
+  <div class="col">
+    <div class="card pad stack">
+
+      <!-- Build with AI -->
+      <div class="ai-box">
+        <div class="ai-head">
+          <div class="ai-badge">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.9L19 10l-5.1 2.1L12 17l-1.9-4.9L5 10l5.1-2.1z"/></svg>
+          </div>
+          <b>Build with AI</b><span>— describe your blast, we'll draft it</span>
+        </div>
+        <div class="ai-body">
+          <div class="ai-row">
+            <input class="ai-input" id="aiPrompt" placeholder="e.g. Invite VIP customers to Saturday's open house at Birchwood">
+            <button class="btn-ai" id="aiGo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              Generate
+            </button>
+          </div>
+          <div class="ai-sugg">
+            <button data-ai="Open house Saturday 2pm">Open house invite</button>
+            <button data-ai="Price drop on expired listings">Price-drop alert</button>
+            <button data-ai="New listing just hit the market">New listing</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- mode -->
+      <div class="editor-head">
+        <div class="segmented" id="modeSeg">
+          <button class="on" data-mode="once">Send once</button>
+          <button data-mode="seq">Sequence</button>
+        </div>
+        <div class="tools">
+          <div class="pop-wrap">
+            <button class="tbtn" id="mergeBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg>{··} Merge</button>
+            <div class="pop" id="mergePop">
+              <button data-tok="{{first_name}}">{{first_name}}<small>Sarah</small></button>
+              <button data-tok="{{last_name}}">{{last_name}}<small>Chen</small></button>
+            </div>
+          </div>
+          <div class="pop-wrap">
+            <button class="tbtn" id="tplBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16"/></svg>Templates</button>
+            <div class="pop" id="tplPop" style="min-width:260px">
+              <button data-tpl="Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.">Open house<small>Sat 2pm invite</small></button>
+              <button data-tpl="Hi {{first_name}}, the price on 1427 Birchwood just dropped. Want the new number? Reply YES.">Price drop<small>Re-engage buyers</small></button>
+              <button data-tpl="{{first_name}}, a new listing just hit that matches what you're after. Reply TOUR to see it first.">New listing<small>Match alert</small></button>
+            </div>
+          </div>
+          <button class="tbtn" id="varietyBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20l16-16M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Add variety</button>
+        </div>
+      </div>
+
+      <!-- once message -->
+      <div id="onceWrap">
+        <textarea class="msg" id="msg">Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.</textarea>
+        <div class="variety-note" id="varietyNote"></div>
+        <div class="meta">
+          <span><b id="charCount">0</b> chars</span>
+          <span><b id="segCount">1</b> segment</span>
+          <span>~<b id="segPerMsg">$0.02</b>/recipient</span>
+          <span style="color:var(--faint)">160 chars = 1 segment</span>
+        </div>
+
+        <!-- Variant B (A/B) -->
+        <div class="variantB" id="variantB">
+          <span class="sec-label">Variant B</span>
+          <textarea class="msg" id="msgB" style="min-height:80px" placeholder="Write an alternate message to test…">Hi {{first_name}}, want first dibs on 1427 Birchwood? Open house Sat 2pm — reply YES.</textarea>
+        </div>
+      </div>
+
+      <!-- sequence builder -->
+      <div class="seq" id="seqWrap">
+        <span class="sec-label">Drip steps</span>
+        <div id="steps"></div>
+        <button class="add-step" id="addStep">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add step
+        </button>
+      </div>
+
+      <!-- preview -->
+      <div>
+        <span class="sec-label">Live preview · Sarah Chen</span>
+        <div class="preview-wrap">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-top">
+                <div class="avatar">SC</div>
+                <div><div class="nm">Sarah Chen</div><div class="st">Text message · now</div></div>
+              </div>
+              <div class="phone-body">
+                <div class="phone-time">Today</div>
+                <div class="bubble" id="pvBubble"></div>
+                <div class="bubble stop">Reply STOP to opt out</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: SETTINGS RAIL ================= -->
+  <div class="col">
+    <div class="rail stack">
+
+      <!-- AUDIENCE -->
+      <div class="group">
+        <div class="grp-head">
+          <div class="grp-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="grp-txt">
+            <div class="t">Audience</div>
+            <div class="s" id="audSub">Everyone · 1,240 contacts</div>
+          </div>
+        </div>
+        <div class="grp-body">
+          <span class="field-lbl">Send to</span>
+          <select class="field" id="audSel">
+            <optgroup label="All">
+              <option value="all" data-n="1240">Everyone · 1,240</option>
+            </optgroup>
+            <optgroup label="Saved segments">
+              <option value="vip" data-n="88">VIP customers · 88</option>
+              <option value="new" data-n="210">New leads this week · 210</option>
+            </optgroup>
+            <optgroup label="Recent blasts">
+              <option value="oct" data-n="340">Oct Promo · 340</option>
+              <option value="exp" data-n="88">Expired listings · 88</option>
+            </optgroup>
+            <optgroup label="Build a list">
+              <option value="filter">Filter contacts…</option>
+              <option value="csv">Upload CSV…</option>
+            </optgroup>
+          </select>
+          <div class="nest" id="filterNest" style="display:none">
+            <span class="field-lbl" style="margin-top:0">Filter by</span>
+            <div class="field-grid">
+              <select class="field" id="filtField">
+                <option>Tag</option><option>City</option><option>Last contact</option>
+              </select>
+              <select class="field" id="filtVal">
+                <option>Buyer</option><option>Seller</option><option>Investor</option>
+              </select>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">Matches <b id="filtN">176</b> contacts</div>
+          </div>
+          <div class="nest" id="csvNest" style="display:none">
+            <span class="field-lbl" style="margin-top:0">CSV upload</span>
+            <input type="file" class="field" id="csvFile" accept=".csv" style="padding:7px">
+            <div style="font-size:12px;color:var(--muted);margin-top:8px" id="csvMsg">No file chosen — one phone per row.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div class="group">
+        <div class="grp-head">
+          <div class="grp-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="grp-txt">
+            <div class="t">Delivery</div>
+            <div class="s" id="delSub">Sends now · full speed ~180/min</div>
+          </div>
+        </div>
+        <div class="grp-body">
+          <!-- When -->
+          <span class="field-lbl" style="margin-top:0">When to send</span>
+          <div class="opts">
+            <label class="opt sel" data-when="now">
+              <span class="radio"></span>
+              <span><span class="o-t">Send now</span><span class="o-s">Starts immediately</span></span>
+            </label>
+            <label class="opt" data-when="sched">
+              <span class="radio"></span>
+              <span><span class="o-t">Schedule</span><span class="o-s">Pick a date & time</span></span>
+            </label>
+          </div>
+
+          <div class="nest" id="schedNest" style="display:none">
+            <div class="field-grid">
+              <div><span class="field-lbl" style="margin-top:0">Date</span><input type="date" class="field" id="schDate"></div>
+              <div><span class="field-lbl" style="margin-top:0">Time</span><input type="time" class="field" id="schTime" value="09:00"></div>
+            </div>
+            <span class="field-lbl">Timezone</span>
+            <select class="field" id="schTz">
+              <option>Contact's local timezone</option>
+              <option>Pacific (PT)</option><option>Mountain (MT)</option>
+              <option>Central (CT)</option><option>Eastern (ET)</option>
+            </select>
+          </div>
+
+          <!-- Smart / even -->
+          <div class="row clickable" data-toggle="smart">
+            <div class="rt"><div class="r-t">Smart Scheduling</div><div class="r-s">Send when each contact is most likely to reply</div></div>
+            <div class="sw" id="swSmart"></div>
+          </div>
+          <div class="row clickable" data-toggle="even">
+            <div class="rt"><div class="r-t">Send evenly across window</div><div class="r-s">Spread the batch instead of one burst</div></div>
+            <div class="sw" id="swEven"></div>
+          </div>
+
+          <!-- Advanced scheduling -->
+          <div class="row clickable" id="advToggle">
+            <div class="rt"><div class="r-t">Advanced scheduling</div><div class="r-s" id="advSub">Window · repeat · auto-stop</div></div>
+            <svg id="advChev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);transition:transform .2s"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="expand" id="advExpand"><div class="expand-in">
+
+            <!-- Delivery window -->
+            <div class="row clickable" data-toggle="win" style="border-top:none">
+              <div class="rt"><div class="r-t">Delivery window</div><div class="r-s">Only send during set hours & days</div></div>
+              <div class="sw" id="swWin"></div>
+            </div>
+            <div class="nest" id="winNest" style="display:none">
+              <span class="field-lbl" style="margin-top:0">Send only between</span>
+              <div class="field-grid">
+                <input type="time" class="field" id="winStart" value="09:00">
+                <input type="time" class="field" id="winEnd" value="18:00">
+              </div>
+              <span class="field-lbl">On days</span>
+              <div class="days" id="winDays">
+                <div class="day on" data-d="M">M</div><div class="day on" data-d="T">T</div>
+                <div class="day on" data-d="W">W</div><div class="day on" data-d="Th">T</div>
+                <div class="day on" data-d="F">F</div><div class="day" data-d="Sa">S</div>
+                <div class="day" data-d="Su">S</div>
+              </div>
+            </div>
+
+            <!-- Repeat -->
+            <div class="row clickable" data-toggle="rep">
+              <div class="rt"><div class="r-t">Repeat</div><div class="r-s">Auto-resend on a cadence</div></div>
+              <div class="sw" id="swRep"></div>
+            </div>
+            <div class="nest" id="repNest" style="display:none">
+              <span class="field-lbl" style="margin-top:0">Resend every</span>
+              <select class="field" id="repEvery">
+                <option>Day</option><option selected>Week</option><option>2 weeks</option><option>Month</option>
+              </select>
+            </div>
+
+            <!-- Auto-stop -->
+            <div class="row clickable" data-toggle="stop">
+              <div class="rt"><div class="r-t">Auto-stop</div><div class="r-s">End the campaign after a date</div></div>
+              <div class="sw" id="swStop"></div>
+            </div>
+            <div class="nest" id="stopNest" style="display:none">
+              <span class="field-lbl" style="margin-top:0">End after</span>
+              <input type="date" class="field" id="stopDate">
+            </div>
+
+          </div></div>
+
+          <!-- Sending speed -->
+          <div class="row" style="align-items:flex-start">
+            <div class="rt" style="width:100%">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="r-t">Sending speed</div>
+                <div class="r-s" id="speedVal">Full · ~180/min</div>
+              </div>
+              <div class="speed">
+                <input type="range" id="speedRange" min="30" max="180" value="180" step="10">
+                <div class="val">Carrier cap ~180/min</div>
+              </div>
+              <div class="row clickable" data-toggle="throttle" style="padding-bottom:0">
+                <div class="rt"><div class="r-t" style="font-size:12.5px">Throttle</div><div class="r-s">Cap the rate to protect deliverability</div></div>
+                <div class="sw" id="swThrottle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRAS -->
+      <div class="group">
+        <div class="grp-head">
+          <div class="grp-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
+          <div class="grp-txt">
+            <div class="t">Extras</div>
+            <div class="s" id="extSub">No A/B test · no follow-up</div>
+          </div>
+        </div>
+        <div class="grp-body">
+          <div class="row clickable" data-toggle="ab">
+            <div class="rt"><div class="r-t">A/B test</div><div class="r-s">Send two versions, keep the winner</div></div>
+            <div class="sw" id="swAb"></div>
+          </div>
+          <div class="nest" id="abNest" style="display:none">
+            <span class="field-lbl" style="margin-top:0">Split</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <input type="range" id="abSplit" min="10" max="90" value="50" step="10" style="flex:1">
+              <div style="font-size:12px;color:var(--muted);white-space:nowrap"><b id="abA">50%</b> A · <b id="abB">50%</b> B</div>
+            </div>
+            <span class="field-lbl">Pick winner by</span>
+            <select class="field" id="abWinner">
+              <option value="replies">Most replies</option>
+              <option value="clicks">Most link clicks</option>
+            </select>
+          </div>
+
+          <div class="row clickable" data-toggle="follow">
+            <div class="rt"><div class="r-t">Follow-up</div><div class="r-s">Auto-nudge non-responders</div></div>
+            <div class="sw" id="swFollow"></div>
+          </div>
+          <div class="nest" id="followNest" style="display:none">
+            <span class="field-lbl" style="margin-top:0">Follow-up message</span>
+            <textarea class="field" id="followMsg" style="min-height:56px;resize:vertical">Just following up, {{first_name}} — still want that private slot? Reply YES.</textarea>
+            <span class="field-lbl">Send after</span>
+            <div style="display:flex;gap:7px;align-items:center">
+              <input type="number" class="field" id="followDelay" value="2" min="1" style="width:80px">
+              <select class="field" id="followUnit" style="flex:1"><option>hours</option><option selected>days</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENDING NUMBERS -->
+      <div class="group">
+        <div class="grp-head">
+          <div class="grp-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></div>
+          <div class="grp-txt">
+            <div class="t">Sending numbers</div>
+            <div class="s" id="numSub">Local presence</div>
+          </div>
+        </div>
+        <div class="grp-body">
+          <span class="field-lbl" style="margin-top:0">Send from</span>
+          <div class="opts">
+            <label class="opt sel" data-num="local">
+              <span class="radio"></span>
+              <span><span class="o-t">Local presence</span><span class="o-s">Match an area code near each contact</span></span>
+            </label>
+            <label class="opt" data-num="pool">
+              <span class="radio"></span>
+              <span><span class="o-t">Rotate pool</span><span class="o-s">Spread volume across your numbers</span></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- compliance -->
+      <div class="compliance">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Every message auto-appends opt-out and sends within quiet-hours rules. You're responsible for having consent to text these contacts.</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= STICKY SEND BAR ================= -->
+<div class="sendbar">
+  <div class="sendbar-in">
+    <div class="sb-info">
+      <div class="big">Send to <span id="sbN">1,240</span> · ~<span id="sbCost">$24.80</span></div>
+      <div class="sub" id="sbSub">Sends now · full speed</div>
+    </div>
+    <button class="btn-ghost" id="testBtn">Send test</button>
+    <button class="btn-send" id="sendBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      Send blast
+    </button>
+  </div>
+</div>
+
+<!-- ================= SENT OVERLAY ================= -->
+<div class="overlay" id="overlay">
+  <div class="sent-card">
+    <div class="check">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Sent ✓</h2>
+    <p id="sentMsg">1,240 messages queued</p>
+    <div class="qbar"><i></i></div>
+    <button id="doneBtn">Done</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  // ---------- state ----------
+  var st={
+    audN:1240, audLabel:'Everyone · 1,240 contacts',
+    when:'now', num:'local',
+    smart:false, even:false, throttle:false,
+    win:false, rep:false, stop:false,
+    ab:false, follow:false,
+    speed:180, mode:'once'
+  };
+
+  var SAMPLE="Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.";
+
+  // ---------- helpers ----------
+  function segCount(text){ return Math.max(1, Math.ceil(text.length/160)); }
+  function fmt(n){ return n.toLocaleString('en-US'); }
+  function money(n){ return '$'+n.toFixed(2); }
+
+  function renderPreview(){
+    var t=$('#msg').value || '';
+    var shown=t.replace(/\{\{\s*first_name\s*\}\}/g,'Sarah').replace(/\{\{\s*last_name\s*\}\}/g,'Chen');
+    $('#pvBubble').textContent = shown || 'Your message preview…';
+  }
+
+  function updateCounts(){
+    var t=$('#msg').value||'';
+    var segs=segCount(t);
+    $('#charCount').textContent=t.length;
+    var segSpan=$('#segCount').parentNode;
+    segSpan.innerHTML='<b id="segCount">'+segs+'</b> '+(segs===1?'segment':'segments');
+    $('#segPerMsg').textContent=money(segs*0.02);
+    renderPreview();
+    recalc();
+  }
+
+  function recalc(){
+    // audience count
+    var n=st.audN;
+    // seq: cost is per step
+    var segs=segCount($('#msg').value||'');
+    var steps=1;
+    if(st.mode==='seq'){ steps=$$('#steps .step').length||1; }
+    var perMsg=segs*0.02;
+    if(st.mode==='seq'){
+      perMsg=0;
+      $$('#steps .step textarea').forEach(function(ta){ perMsg+=segCount(ta.value)*0.02; });
+      if(perMsg===0) perMsg=0.02;
+    }
+    var follow = st.follow ? segCount($('#followMsg').value||'')*0.02 : 0;
+    var total=n*(perMsg+follow);
+
+    $('#sbN').textContent=fmt(n);
+    $('#sbCost').textContent=money(total);
+    $('#audSub').textContent=st.audLabel;
+
+    // subtitles
+    var del = st.when==='now' ? 'Sends now' : 'Scheduled';
+    del += ' · '+(st.throttle?('throttled ~'+st.speed+'/min'):('full speed ~'+st.speed+'/min'));
+    if(st.win) del+=' · windowed';
+    $('#delSub').textContent=del;
+    $('#speedVal').textContent=(st.throttle?'Throttled':'Full')+' · ~'+st.speed+'/min';
+
+    var ext=[];
+    ext.push(st.ab?'A/B test on':'No A/B test');
+    ext.push(st.follow?'follow-up on':'no follow-up');
+    $('#extSub').textContent=ext.join(' · ');
+
+    $('#numSub').textContent = st.num==='local'?'Local presence':'Rotate pool';
+
+    // send bar sub
+    var sub = (st.when==='now'?'Sends now':'Scheduled');
+    if(st.mode==='seq') sub='Sequence · '+(($$('#steps .step').length)||1)+' steps';
+    if(st.ab) sub+=' · A/B';
+    $('#sbSub').textContent=sub;
+  }
+
+  // ---------- Build with AI ----------
+  function runAI(prompt){
+    var p=(prompt||'').toLowerCase();
+    var draft, aud='all';
+    if(/price|drop|expired/.test(p)){
+      draft="Hi {{first_name}}, the price on 1427 Birchwood just dropped. Want the new number? Reply YES.";
+      aud='exp';
+    } else if(/new listing|just hit|market/.test(p)){
+      draft="{{first_name}}, a new listing just hit that matches what you're after. Reply TOUR to see it first.";
+      aud='new';
+    } else if(/vip|customer/.test(p)){
+      draft="Hi {{first_name}}, as a VIP you get first look — open house Sat 2pm at 1427 Birchwood. Reply YES.";
+      aud='vip';
+    } else {
+      draft="Hi {{first_name}}, open house Sat 2pm at 1427 Birchwood — reply YES for a private slot.";
+      aud='all';
+    }
+    $('#msg').value=draft;
+    $('#audSel').value=aud;
+    applyAudience();
+    updateCounts();
+    // flash
+    var msg=$('#msg'); msg.style.transition='background .3s'; msg.style.background='#eaf1ff';
+    setTimeout(function(){msg.style.background='#fff'},450);
+  }
+  $('#aiGo').addEventListener('click',function(){ runAI($('#aiPrompt').value); });
+  $('#aiPrompt').addEventListener('keydown',function(e){ if(e.key==='Enter') runAI(this.value); });
+  $$('.ai-sugg button').forEach(function(b){
+    b.addEventListener('click',function(){ $('#aiPrompt').value=b.dataset.ai; runAI(b.dataset.ai); });
+  });
+
+  // ---------- mode toggle ----------
+  $$('#modeSeg button').forEach(function(b){
+    b.addEventListener('click',function(){
+      $$('#modeSeg button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+      st.mode=b.dataset.mode;
+      var seq=st.mode==='seq';
+      $('#seqWrap').classList.toggle('show',seq);
+      $('#onceWrap').classList.toggle('hidden',seq);
+      if(seq && !$$('#steps .step').length){ addStep(); addStep(); }
+      recalc();
+    });
+  });
+
+  // ---------- sequence steps ----------
+  function addStep(){
+    var box=$('#steps');
+    var i=box.children.length;
+    var div=document.createElement('div');
+    div.className='step';
+    div.innerHTML=
+      '<div class="step-head"><span class="lbl">Step '+(i+1)+'</span>'+
+      (i>0?'<button class="x-btn" title="Remove"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>':'<span></span>')+'</div>'+
+      '<textarea placeholder="Message for this step…">'+(i===0?SAMPLE:"{{first_name}}, just checking in — the slot's still open. Reply YES.")+'</textarea>'+
+      (i>0?'<div class="step-wait">Wait <input class="wait-in" type="number" value="2" min="1"> <select class="mini"><option>hours</option><option selected>days</option></select> after previous</div>':'<div class="step-wait" style="color:var(--faint)">Sends first</div>');
+    box.appendChild(div);
+    var x=div.querySelector('.x-btn');
+    if(x) x.addEventListener('click',function(){ div.remove(); relabel(); recalc(); });
+    div.querySelector('textarea').addEventListener('input',recalc);
+    relabel();
+  }
+  function relabel(){
+    $$('#steps .step').forEach(function(s,i){ s.querySelector('.lbl').textContent='Step '+(i+1); });
+  }
+  $('#addStep').addEventListener('click',function(){ addStep(); recalc(); });
+
+  // ---------- merge / template popovers ----------
+  function togglePop(pop){
+    var open=pop.classList.contains('show');
+    $$('.pop').forEach(function(p){p.classList.remove('show')});
+    if(!open) pop.classList.add('show');
+  }
+  $('#mergeBtn').addEventListener('click',function(e){ e.stopPropagation(); togglePop($('#mergePop')); });
+  $('#tplBtn').addEventListener('click',function(e){ e.stopPropagation(); togglePop($('#tplPop')); });
+  document.addEventListener('click',function(){ $$('.pop').forEach(function(p){p.classList.remove('show')}); });
+
+  $$('#mergePop button').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      var ta=$('#msg'), tok=b.dataset.tok;
+      var s=ta.selectionStart||ta.value.length;
+      ta.value=ta.value.slice(0,s)+tok+ta.value.slice(ta.selectionEnd||s);
+      $('#mergePop').classList.remove('show');
+      ta.focus(); updateCounts();
+    });
+  });
+  $$('#tplPop button').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      $('#msg').value=b.dataset.tpl;
+      $('#tplPop').classList.remove('show');
+      updateCounts();
+    });
+  });
+
+  // ---------- add variety (spintax) ----------
+  var varietyOn=false;
+  $('#varietyBtn').addEventListener('click',function(){
+    varietyOn=!varietyOn;
+    var note=$('#varietyNote');
+    if(varietyOn){
+      // build a light spintax + count variants
+      var t=$('#msg').value;
+      t=t.replace(/^Hi /,'{Hi|Hey|Hello} ').replace(/reply YES/i,'{reply YES|text YES back|just reply YES}');
+      $('#msg').value=t;
+      var groups=(t.match(/\{[^{}]*\|[^{}]*\}/g)||[]);
+      var variants=groups.reduce(function(a,g){ return a*(g.split('|').length); },1);
+      note.textContent='✨ Variety on — '+variants+' unique variations will rotate to avoid carrier filtering.';
+      note.classList.add('show');
+      this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';
+    } else {
+      note.classList.remove('show');
+      $('#msg').value=$('#msg').value.replace(/\{Hi\|Hey\|Hello\}/,'Hi').replace(/\{reply YES\|text YES back\|just reply YES\}/,'reply YES');
+      this.style.borderColor=''; this.style.color='';
+    }
+    updateCounts();
+  });
+
+  // ---------- audience ----------
+  function applyAudience(){
+    var sel=$('#audSel'), opt=sel.options[sel.selectedIndex];
+    $('#filterNest').style.display = sel.value==='filter'?'block':'none';
+    $('#csvNest').style.display = sel.value==='csv'?'block':'none';
+    if(sel.value==='filter'){ st.audN=parseInt($('#filtN').textContent,10)||176; st.audLabel='Filtered · '+fmt(st.audN)+' contacts'; }
+    else if(sel.value==='csv'){ st.audN=st.csvN||0; st.audLabel = st.csvN? ('CSV · '+fmt(st.csvN)+' contacts'):'CSV · upload a file'; }
+    else { st.audN=parseInt(opt.dataset.n,10); st.audLabel=opt.textContent.trim().replace(' · ',' · ')+' contacts'; if(opt.value==='all') st.audLabel='Everyone · 1,240 contacts'; }
+    recalc();
+  }
+  $('#audSel').addEventListener('change',applyAudience);
+  $('#filtField').addEventListener('change',function(){
+    var vals={Tag:176,City:412,'Last contact':603};
+    var n=vals[this.value]||176; $('#filtN').textContent=fmt(n); applyAudience();
+  });
+  $('#filtVal').addEventListener('change',applyAudience);
+  $('#csvFile').addEventListener('change',function(){
+    if(this.files&&this.files[0]){
+      st.csvN=Math.floor(Math.random()*300)+120; // demo count
+      $('#csvMsg').innerHTML='<b>'+this.files[0].name+'</b> — '+fmt(st.csvN)+' phone numbers found.';
+      applyAudience();
+    }
+  });
+
+  // ---------- when (radio) ----------
+  $$('.opt[data-when]').forEach(function(o){
+    o.addEventListener('click',function(){
+      $$('.opt[data-when]').forEach(function(x){x.classList.remove('sel')});
+      o.classList.add('sel');
+      st.when=o.dataset.when;
+      $('#schedNest').style.display = st.when==='sched'?'block':'none';
+      recalc();
+    });
+  });
+  // sending numbers radio
+  $$('.opt[data-num]').forEach(function(o){
+    o.addEventListener('click',function(){
+      $$('.opt[data-num]').forEach(function(x){x.classList.remove('sel')});
+      o.classList.add('sel'); st.num=o.dataset.num; recalc();
+    });
+  });
+
+  // ---------- generic toggles ----------
+  var nestMap={ smart:null, even:null, throttle:null,
+    win:'#winNest', rep:'#repNest', stop:'#stopNest', ab:'#abNest', follow:'#followNest' };
+  var swMap={ smart:'#swSmart', even:'#swEven', throttle:'#swThrottle',
+    win:'#swWin', rep:'#swRep', stop:'#swStop', ab:'#swAb', follow:'#swFollow' };
+
+  $$('.row.clickable[data-toggle]').forEach(function(row){
+    row.addEventListener('click',function(e){
+      if(e.target.closest('input,select,textarea,.days')) return;
+      var key=row.dataset.toggle;
+      st[key]=!st[key];
+      $(swMap[key]).classList.toggle('on',st[key]);
+      if(nestMap[key]) $(nestMap[key]).style.display = st[key]?'block':'none';
+      if(key==='throttle' && st.throttle && st.speed>120){ st.speed=120; $('#speedRange').value=120; }
+      recalc();
+    });
+  });
+
+  // advanced scheduling expand
+  $('#advToggle').addEventListener('click',function(e){
+    if(e.target.closest('input,select')) return;
+    var ex=$('#advExpand'); ex.classList.toggle('open');
+    $('#advChev').style.transform = ex.classList.contains('open')?'rotate(180deg)':'';
+  });
+
+  // day pills
+  $$('#winDays .day').forEach(function(d){
+    d.addEventListener('click',function(){ d.classList.toggle('on'); });
+  });
+
+  // speed range
+  $('#speedRange').addEventListener('input',function(){
+    st.speed=parseInt(this.value,10);
+    if(st.speed<180 && !st.throttle){ st.throttle=true; $('#swThrottle').classList.add('on'); }
+    if(st.speed>=180 && st.throttle){ st.throttle=false; $('#swThrottle').classList.remove('on'); }
+    recalc();
+  });
+
+  // A/B extras
+  $('#swAb'); // toggled above; also show variant B
+  var abObserver=function(){ $('#variantB').classList.toggle('show',st.ab); };
+  $$('.row.clickable[data-toggle="ab"]').forEach(function(r){ r.addEventListener('click',abObserver); });
+  $('#abSplit').addEventListener('input',function(){
+    var a=parseInt(this.value,10); $('#abA').textContent=a+'%'; $('#abB').textContent=(100-a)+'%';
+  });
+  $('#followMsg').addEventListener('input',recalc);
+
+  // message input
+  $('#msg').addEventListener('input',updateCounts);
+
+  // ---------- send ----------
+  function doSend(){
+    var n=st.audN;
+    var noun = st.mode==='seq' ? (n+' contacts enrolled') : (fmt(n)+' messages queued');
+    if(st.ab) noun+=' · split A/B';
+    if(st.when==='sched') noun = fmt(n)+(st.mode==='seq'?' contacts scheduled':' messages scheduled');
+    $('#sentMsg').textContent=noun;
+    $('#overlay').classList.add('show');
+    // restart bar animation
+    var bar=$('.qbar i'); bar.style.animation='none'; void bar.offsetWidth; bar.style.animation='';
+  }
+  $('#sendBtn').addEventListener('click',function(){
+    if(st.audN<1){ alert('Pick an audience first — upload a CSV or choose a segment.'); return; }
+    var b=this; b.disabled=true; b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9" stroke-opacity=".3"/><path d="M12 3a9 9 0 0 1 9 9" style="animation:spin .7s linear infinite;transform-origin:center"/></svg> Sending…';
+    setTimeout(function(){
+      doSend();
+      b.disabled=false;
+      b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Send blast';
+    },700);
+  });
+  $('#doneBtn').addEventListener('click',function(){ $('#overlay').classList.remove('show'); });
+  $('#overlay').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+  $('#testBtn').addEventListener('click',function(){
+    var t=this; var o=t.textContent; t.textContent='Test sent ✓';
+    setTimeout(function(){ t.textContent=o; },1400);
+  });
+
+  // spin keyframe (added dynamically to avoid extra CSS clutter)
+  var sty=document.createElement('style');
+  sty.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(sty);
+
+  // init
+  updateCounts();
+})();
+</script>
+</body>
+</html>
