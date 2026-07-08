@@ -359,7 +359,6 @@
         <div class="meta">
           <span><b id="charCount">0</b> chars</span>
           <span><b id="segCount">1</b> segment</span>
-          <span>~<b id="segPerMsg">$0.02</b>/recipient</span>
           <span style="color:var(--faint)">160 chars = 1 segment</span>
         </div>
 
@@ -577,7 +576,7 @@
         <div class="grp-head">
           <div class="grp-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
           <div class="grp-txt">
-            <div class="t">Extras</div>
+            <div class="t">Advanced</div>
             <div class="s" id="extSub">No A/B test · no follow-up</div>
           </div>
         </div>
@@ -711,7 +710,6 @@
     $('#charCount').textContent=t.length;
     var segSpan=$('#segCount').parentNode;
     segSpan.innerHTML='<b id="segCount">'+segs+'</b> '+(segs===1?'segment':'segments');
-    $('#segPerMsg').textContent=money(segs*0.02);
     renderPreview();
     recalc();
   }
